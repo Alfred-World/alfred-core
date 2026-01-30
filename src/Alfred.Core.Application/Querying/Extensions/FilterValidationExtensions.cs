@@ -1,5 +1,6 @@
-using Alfred.Core.Application.Querying.Parsing;
-using Alfred.Core.Application.Querying.Validation;
+using Alfred.Core.Application.Querying.Fields;
+using Alfred.Core.Application.Querying.Filtering;
+using Alfred.Core.Application.Querying.Filtering.Parsing;
 
 namespace Alfred.Core.Application.Querying.Extensions;
 

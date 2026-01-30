@@ -1,4 +1,4 @@
-using Alfred.Core.Domain.Common.Base;
+using Alfred.Core.Domain.Common.Events;
 
 using FluentAssertions;
 

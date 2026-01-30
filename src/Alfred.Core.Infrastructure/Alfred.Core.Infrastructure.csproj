@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
             <PrivateAssets>all</PrivateAssets>
@@ -14,7 +15,9 @@
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.1"/>
         <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1"/>
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0"/>
+        <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1"/>
         <PackageReference Include="System.Threading.RateLimiting" Version="10.0.1"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.8.16"/>
     </ItemGroup>
 
     <ItemGroup>

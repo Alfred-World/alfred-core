@@ -1,12 +1,10 @@
 using System.ComponentModel;
 
-using Alfred.Core.Application.Querying;
+using Alfred.Core.Application.Querying.Core;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Swashbuckle.AspNetCore.Annotations;
-
-namespace FAM.WebApi.Contracts.Common;
+namespace Alfred.Core.WebApi.Contracts.Common;
 
 /// <summary>
 /// Standard pagination query parameters for list endpoints
@@ -31,11 +29,9 @@ public sealed record PaginationQueryParameters
 
     /// <summary>
     /// Filter expression using DSL syntax
-    /// Example: "isActive == true and name @contains('test')"
+    /// Examples: "name @contains('abc')", "phone == '123' or phone == '321'"
     /// </summary>
     [FromQuery(Name = "filter")]
-    [SwaggerParameter(
-        "Filter expression using DSL syntax. Examples: \"name @contains('abc')\", \"phone == '123' or phone == '321'\")")]
     public string? Filter { get; init; }
 
     /// <summary>
@@ -43,17 +39,14 @@ public sealed record PaginationQueryParameters
     /// Example: "name,-createdAt" (ascending by name, descending by createdAt)
     /// </summary>
     [FromQuery(Name = "sort")]
-    [SwaggerParameter(
-        "Sort expression. Use '-' prefix for descending. Examples: \"resource\", \"-createdAt\", \"resource,-action\"")]
     public string? Sort { get; init; }
 
     /// <summary>
-    /// Related entities to include (comma-separated)
-    /// Example: "createdBy,updatedBy"
+    /// View name to determine which fields to return.
+    /// Available views depend on the endpoint (e.g., "list", "detail", "minimal").
     /// </summary>
-    [FromQuery(Name = "include")]
-    [SwaggerParameter("Comma-separated related entities. Example: \"createdBy,updatedBy\"")]
-    public string? Include { get; init; }
+    [FromQuery(Name = "view")]
+    public string? View { get; init; }
 }
 
 /// <summary>
@@ -72,7 +65,7 @@ public static class QueryRequestExtensions
             Sort = parameters.Sort ?? string.Empty,
             Page = parameters.Page,
             PageSize = parameters.PageSize,
-            Include = parameters.Include ?? string.Empty
+            View = parameters.View ?? string.Empty
         };
     }
 }

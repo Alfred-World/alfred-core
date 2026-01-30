@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-using Alfred.Core.Infrastructure.Providers.PostgreSQL;
+using Alfred.Core.Infrastructure.Common.Abstractions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -146,10 +146,10 @@ public class DataSeederOrchestrator
     {
         _logger.LogInformation("=== Starting Database Resync (Delete All Data) ===");
 
-        var dbContext = _serviceProvider.GetService<PostgreSqlDbContext>();
+        var dbContext = _serviceProvider.GetService<IDbContext>();
         if (dbContext == null)
         {
-            _logger.LogError("PostgreSqlDbContext not found in service provider");
+            _logger.LogError("IDbContext not found in service provider");
             throw new InvalidOperationException("Database context is not configured");
         }
 
@@ -166,7 +166,7 @@ public class DataSeederOrchestrator
                     SELECT table_name 
                     FROM information_schema.tables 
                     WHERE table_type = 'BASE TABLE' 
-                    AND table_name NOT IN ('__SeedHistory', '__EFMigrationsHistory')
+                    AND table_name NOT IN ('__seed_history', '__ef_migrations_history')
                     AND table_schema = 'public'
                     ORDER BY table_name DESC";
 
@@ -179,9 +179,10 @@ public class DataSeederOrchestrator
                     }
                 }
 
-                _logger.LogInformation("Deleted: {TableCount} tables", tables.Count);
-
                 // Delete all data from tables and reset sequences
+                var clearedCount = 0;
+                var failedTables = new List<string>();
+
                 foreach (var table in tables)
                 {
                     using var deleteCommand = npgsqlConnection.CreateCommand();
@@ -190,21 +191,31 @@ public class DataSeederOrchestrator
                     try
                     {
                         await deleteCommand.ExecuteNonQueryAsync(cancellationToken);
-                        _logger.LogInformation("  ✓ Cleared [{Table}]", table);
+                        clearedCount++;
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning("  ⚠ Failed to clear [{Table}]: {Message}", table, ex.Message);
+                        failedTables.Add($"{table}: {ex.Message}");
                     }
+                }
+
+                _logger.LogInformation("Cleared {ClearedCount}/{TotalCount} tables", clearedCount, tables.Count);
+                foreach (var failed in failedTables)
+                {
+                    _logger.LogWarning("  ⚠ Failed: {Table}", failed);
                 }
 
                 // Clear seed history to force re-run all seeders and reset ID back to 1
                 using (var clearHistoryCommand = npgsqlConnection.CreateCommand())
                 {
                     clearHistoryCommand.CommandText = @"
-                        TRUNCATE TABLE ""__SeedHistory"" RESTART IDENTITY CASCADE;";
+                        DO $$
+                        BEGIN
+                            IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = '__seed_history') THEN
+                                TRUNCATE TABLE ""__seed_history"" RESTART IDENTITY CASCADE;
+                            END IF;
+                        END $$;";
                     await clearHistoryCommand.ExecuteNonQueryAsync(cancellationToken);
-                    _logger.LogInformation("  ✓ Cleared seed history and reset ID to 1");
                 }
 
                 await npgsqlConnection.CloseAsync();

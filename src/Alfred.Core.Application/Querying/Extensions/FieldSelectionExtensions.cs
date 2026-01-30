@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Reflection;
 
+using Alfred.Core.Application.Querying.Core;
+
 namespace Alfred.Core.Application.Querying.Extensions;
 
 /// <summary>

@@ -1,6 +1,9 @@
-using Alfred.Core.Application.Querying.Binding;
-using Alfred.Core.Application.Querying.Parsing;
-using Alfred.Core.Application.Querying.Validation;
+using Alfred.Core.Application.Querying.Core;
+using Alfred.Core.Application.Querying.Fields;
+using Alfred.Core.Application.Querying.Filtering;
+using Alfred.Core.Application.Querying.Filtering.Binding;
+using Alfred.Core.Application.Querying.Filtering.Parsing;
+using Alfred.Core.Application.Querying.Sorting;
 
 namespace Alfred.Core.Application.Querying.Extensions;
 

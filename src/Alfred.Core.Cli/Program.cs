@@ -55,8 +55,8 @@ internal class Program
             Console.WriteLine("❌ Seeder name is required");
             Console.ResetColor();
             Console.WriteLine();
-            Console.WriteLine("Usage: Alfred.Core.Cli create-seeder <SeederName>");
-            Console.WriteLine("Example: Alfred.Core.Cli create-seeder MyCustomSeeder");
+            Console.WriteLine("Usage: HSE.Cli create-seeder <SeederName>");
+            Console.WriteLine("Example: HSE.Cli create-seeder MyCustomSeeder");
             Console.WriteLine();
             return 1;
         }
@@ -126,7 +126,7 @@ internal class Program
 
         while (current != null)
         {
-            var seedersDir = Path.Combine(current.FullName, "src", "Alfred.Core.Infrastructure", "Seeders");
+            var seedersDir = Path.Combine(current.FullName, "src", "HSE.Infrastructure", "Seeders");
             if (Directory.Exists(seedersDir))
             {
                 return seedersDir;
@@ -202,9 +202,9 @@ public sealed class {className} : BaseDataSeeder
     private static int ShowHelp()
     {
         Console.WriteLine();
-        Console.WriteLine("Alfred.Core CLI - Database Management Tool");
+        Console.WriteLine("HSE CLI - Database Management Tool");
         Console.WriteLine();
-        Console.WriteLine("Usage: Alfred.Core.Cli <command> [options]");
+        Console.WriteLine("Usage: HSE.Cli <command> [options]");
         Console.WriteLine();
         Console.WriteLine("Commands:");
         Console.WriteLine("  seed                Seed the database with initial data");
@@ -218,11 +218,11 @@ public sealed class {className} : BaseDataSeeder
         Console.WriteLine("  --resync            Delete all data and resync (IDs restart from 1)");
         Console.WriteLine();
         Console.WriteLine("Examples:");
-        Console.WriteLine("  Alfred.Core.Cli seed                          # Run pending seeds only");
-        Console.WriteLine("  Alfred.Core.Cli seed --force                  # Re-run all seeds");
-        Console.WriteLine("  Alfred.Core.Cli seed --resync                 # Delete all data and resync");
-        Console.WriteLine("  Alfred.Core.Cli seed:history                  # View execution history");
-        Console.WriteLine("  Alfred.Core.Cli create-seeder MyNewSeeder     # Create new seeder template");
+        Console.WriteLine("  HSE.Cli seed                          # Run pending seeds only");
+        Console.WriteLine("  HSE.Cli seed --force                  # Re-run all seeds");
+        Console.WriteLine("  HSE.Cli seed --resync                 # Delete all data and resync");
+        Console.WriteLine("  HSE.Cli seed:history                  # View execution history");
+        Console.WriteLine("  HSE.Cli create-seeder MyNewSeeder     # Create new seeder template");
         Console.WriteLine();
         return 0;
     }
@@ -337,7 +337,7 @@ public sealed class {className} : BaseDataSeeder
         Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("╔════════════════════════════════════════════════╗");
-        Console.WriteLine("║   Alfred.Core Database Seeder                          ║");
+        Console.WriteLine("║   HSE Database Seeder                          ║");
         Console.WriteLine("╚════════════════════════════════════════════════╝");
         Console.ResetColor();
         Console.WriteLine();

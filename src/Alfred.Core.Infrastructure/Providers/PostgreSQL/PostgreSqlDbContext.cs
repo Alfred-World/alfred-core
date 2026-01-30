@@ -1,6 +1,5 @@
 using System.Reflection;
 
-using Alfred.Core.Domain.EmailTemplates;
 using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.Options;
 
@@ -21,20 +20,12 @@ public class PostgreSqlDbContext : DbContext, IDbContext
         _options = options;
     }
 
-    // System entities
-    public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
-
-    // Add your Identity DbSets here as you develop
-    // Example:
-    // public DbSet<User> Users { get; set; }
-    // public DbSet<RefreshToken> RefreshTokens { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(_options.ConnectionString, npgsqlOptions =>
         {
             // store migrations history table
-            npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory");
+            npgsqlOptions.MigrationsHistoryTable("__ef_migrations_history");
         });
 
         if (_options.EnableDetailedErrors)

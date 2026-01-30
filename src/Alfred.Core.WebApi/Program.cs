@@ -1,13 +1,20 @@
+using System.Reflection;
+using System.Text.Json.Serialization;
+
 using Alfred.Core.Application;
 using Alfred.Core.Infrastructure;
+using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
 using Alfred.Core.Infrastructure.Common.Seeding;
-using Alfred.Core.Infrastructure.Providers.PostgreSQL;
 using Alfred.Core.WebApi.Configuration;
 using Alfred.Core.WebApi.Middleware;
 
+using Asp.Versioning;
+
 using FluentValidation;
 
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -26,18 +33,27 @@ builder.WebHost.ConfigureKestrel((context, options) => { options.ListenAnyIP(app
 // Register AppConfiguration as singleton
 builder.Services.AddSingleton(appConfig);
 
-// Add services to the container
-builder.Services.AddControllers(options =>
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
     {
-        // Add validation filter to handle FluentValidation errors in our standard format
-        options.Filters.Add<ValidationFilter>();
-    })
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        // Disable automatic 400 responses for model validation errors
-        // Our ValidationFilter will handle it instead
-        options.SuppressModelStateInvalidFilter = true;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
+
+// Add API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1);
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new HeaderApiVersionReader("X-Api-Version"));
+}).AddMvc().AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 // Add FluentValidation - manual validation (no auto-validation to control error format)
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -55,9 +71,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Alfred Core Management API",
+        Title = "HSE Management API",
         Version = "v1",
-        Description = "API for Alfred Core"
+        Description = "API for Health, Safety, and Environment Management System"
     });
 
     // Enable annotations
@@ -94,6 +110,11 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
+
+    // Include XML comments
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 });
 
 // Add CORS
@@ -116,6 +137,33 @@ builder.Services.AddApplication();
 
 // Add Infrastructure layer (Database)
 builder.Services.AddInfrastructure();
+
+// Add Cookie Authentication for SSO
+var ssoCookieDomain = Environment.GetEnvironmentVariable("SSO_COOKIE_DOMAIN");
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "AlfredSession";
+        // Cookie domain is NOT set explicitly because:
+        // 1. Request comes to localhost (via YARP reverse proxy)
+        // 2. ASP.NET refuses to set cookie for different domain than request host
+        // Instead, we rely on ForwardedHeaders middleware to detect the correct host
+        // and the cookie will be set for that host (gateway.test when behind YARP)
+        // 
+        // For cross-subdomain sharing in production (e.g., *.alfred.com),
+        // configure ForwardedHeaders properly and consider using cookie path/domain options
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None; // Allow cross-origin cookie setting
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Required for SameSite=None
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
+        options.SlidingExpiration = true;
+        // For API-based auth, return 401 instead of redirect
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+    });
 
 // Add Health Checks
 builder.Services.AddHealthChecks();
@@ -142,19 +190,27 @@ if (app.Environment.IsProduction())
 }
 
 // Configure the HTTP request pipeline
+
+// Add ForwardedHeaders middleware FIRST to properly handle X-Forwarded-* headers from YARP/Caddy
+// This ensures cookies are set with the correct host (gateway.test instead of localhost)
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.All,
+    ForwardLimit = null // No limit on forwards
+};
+// Clear default known networks/proxies to trust all (for development)
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alfred.Core Management API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity Service v1");
         c.RoutePrefix = "swagger";
     });
-}
-else
-{
-    // Always enable swagger endpoint for gateway access (even in production for documentation)
-    app.UseSwagger();
 }
 
 // Add global exception handler (must be early in pipeline)
@@ -163,6 +219,10 @@ app.UseExceptionHandler();
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
+// Authentication & Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Map Health Check endpoint
 app.MapHealthChecks("/health");
 
@@ -170,15 +230,15 @@ app.MapControllers();
 
 app.Run();
 
-/// <summary>
-/// Run database migrations automatically
-/// </summary>
+// <summary>
+// Run database migrations automatically
+// </summary>
 static async Task RunDatabaseMigrationsAsync(IServiceProvider services, ILogger<Program> logger)
 {
     try
     {
         using var scope = services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<PostgreSqlDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<IDbContext>();
         var migrations = await context.Database.GetPendingMigrationsAsync();
 
         if (migrations.Any())
@@ -199,9 +259,9 @@ static async Task RunDatabaseMigrationsAsync(IServiceProvider services, ILogger<
     }
 }
 
-/// <summary>
-/// Run data seeders (environment-aware - runs different seeders based on environment)
-/// </summary>
+// <summary>
+// Run data seeders (environment-aware - runs different seeders based on environment)
+// </summary>
 static async Task RunDataSeedersAsync(IServiceProvider services, ILogger<Program> logger)
 {
     try
@@ -218,9 +278,9 @@ static async Task RunDataSeedersAsync(IServiceProvider services, ILogger<Program
     }
 }
 
-/// <summary>
-/// Validate all infrastructure services are available before starting the application
-/// </summary>
+// <summary>
+// Validate all infrastructure services are available before starting the application
+// </summary>
 static async Task ValidateServicesAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();

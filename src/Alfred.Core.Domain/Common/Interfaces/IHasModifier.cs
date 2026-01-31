@@ -5,5 +5,5 @@ namespace Alfred.Core.Domain.Common.Interfaces;
 /// </summary>
 public interface IHasModifier
 {
-    long? UpdatedById { get; set; }
+    Guid? UpdatedById { get; set; }
 }

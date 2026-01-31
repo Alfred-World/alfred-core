@@ -5,5 +5,5 @@ namespace Alfred.Core.Domain.Common.Interfaces;
 /// </summary>
 public interface IHasCreator
 {
-    long? CreatedById { get; set; }
+    Guid? CreatedById { get; set; }
 }

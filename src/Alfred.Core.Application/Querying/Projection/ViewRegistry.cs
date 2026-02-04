@@ -23,9 +23,10 @@ public sealed class ViewRegistry<TEntity, TDto>
     public ViewRegistry<TEntity, TDto> Register(
         string name,
         string[] fields,
-        Expression<Func<TEntity, object>>[]? includes = null)
+        Expression<Func<TEntity, object>>[]? includes = null,
+        Dictionary<string, string>? fieldAliases = null)
     {
-        _views[name] = new ViewDefinition<TEntity, TDto>(name, fields, includes);
+        _views[name] = new ViewDefinition<TEntity, TDto>(name, fields, includes, fieldAliases);
         return this;
     }
 
@@ -39,6 +40,14 @@ public sealed class ViewRegistry<TEntity, TDto>
     {
         var fieldNames = FieldExpressionHelper.GetFieldNames(fields);
         return Register(name, fieldNames, includes);
+    }
+
+    /// <summary>
+    /// Begin building a view with fluent API
+    /// </summary>
+    public ViewBuilder View(string name)
+    {
+        return new ViewBuilder(this, name);
     }
 
     /// <summary>
@@ -101,5 +110,73 @@ public sealed class ViewRegistry<TEntity, TDto>
     public IEnumerable<string> GetViewNames()
     {
         return _views.Keys;
+    }
+
+    /// <summary>
+    /// Fluent builder for constructing views with field aliases
+    /// </summary>
+    public sealed class ViewBuilder
+    {
+        private readonly ViewRegistry<TEntity, TDto> _registry;
+        private readonly string _name;
+        private readonly List<string> _fields = new();
+        private readonly Dictionary<string, string> _fieldAliases = new(StringComparer.OrdinalIgnoreCase);
+        private List<Expression<Func<TEntity, object>>>? _includes;
+
+        internal ViewBuilder(ViewRegistry<TEntity, TDto> registry, string name)
+        {
+            _registry = registry;
+            _name = name;
+        }
+
+        /// <summary>
+        /// Add fields to the view
+        /// </summary>
+        public ViewBuilder Select(params string[] fields)
+        {
+            _fields.AddRange(fields);
+            return this;
+        }
+
+        /// <summary>
+        /// Add fields to the view using strongly-typed expressions
+        /// </summary>
+        public ViewBuilder Select(params Expression<Func<TDto, object?>>[] fields)
+        {
+            _fields.AddRange(FieldExpressionHelper.GetFieldNames(fields));
+            return this;
+        }
+
+        /// <summary>
+        /// Add a field with an alias (maps DTO property to different FieldMap key)
+        /// </summary>
+        public ViewBuilder SelectAs(string dtoPropertyName, string fieldMapKey)
+        {
+            _fields.Add(dtoPropertyName);
+            _fieldAliases[dtoPropertyName] = fieldMapKey;
+            return this;
+        }
+
+        /// <summary>
+        /// Add navigation includes
+        /// </summary>
+        public ViewBuilder Include(params Expression<Func<TEntity, object>>[] includes)
+        {
+            _includes ??= new List<Expression<Func<TEntity, object>>>();
+            _includes.AddRange(includes);
+            return this;
+        }
+
+        /// <summary>
+        /// Build and register the view
+        /// </summary>
+        public ViewRegistry<TEntity, TDto> Build()
+        {
+            return _registry.Register(
+                _name,
+                _fields.ToArray(),
+                _includes?.ToArray(),
+                _fieldAliases.Count > 0 ? _fieldAliases : null);
+        }
     }
 }

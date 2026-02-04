@@ -10,25 +10,20 @@ namespace Alfred.Core.Application.Querying.Filtering.Parsing;
 /// </summary>
 public sealed class PrattFilterParser : IFilterParser
 {
-    private const int MaxFilterLength = 2048;
     private List<FilterToken> _tokens = new();
     private int _current;
 
     public FilterNode Parse(string filter)
     {
-        if (string.IsNullOrWhiteSpace(filter))
+        // Sanitize input first - throws FilterSecurityException if malicious
+        var sanitizedFilter = FilterSanitizer.Sanitize(filter);
+
+        if (string.IsNullOrWhiteSpace(sanitizedFilter))
         {
             throw new ArgumentException("Filter cannot be empty", nameof(filter));
         }
 
-        if (filter.Length > MaxFilterLength)
-        {
-            throw new ArgumentException(
-                $"Filter string too long (max {MaxFilterLength} characters, got {filter.Length})",
-                nameof(filter));
-        }
-
-        FilterTokenizer tokenizer = new(filter);
+        FilterTokenizer tokenizer = new(sanitizedFilter);
         _tokens = tokenizer.Tokenize().ToList();
         _current = 0;
 

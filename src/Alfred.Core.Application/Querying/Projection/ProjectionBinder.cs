@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
+using Alfred.Core.Application.Querying.Common;
 using Alfred.Core.Application.Querying.Fields;
 
 namespace Alfred.Core.Application.Querying.Projection;
@@ -70,9 +71,85 @@ public static class ProjectionBinder
                 continue;
             }
 
-            // Replace parameter in source expression
-            ParameterReplacerVisitor visitor = new(sourceExpression.Parameters[0], parameter);
-            var sourceBody = visitor.Visit(sourceExpression.Body);
+            // Replace parameter in source expression using shared ParameterReplacer
+            var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
+
+            // Convert if types don't match
+            if (sourceBody.Type != dtoProperty.PropertyType)
+            {
+                if (dtoProperty.PropertyType.IsAssignableFrom(sourceBody.Type))
+                {
+                    sourceBody = Expression.Convert(sourceBody, dtoProperty.PropertyType);
+                }
+            }
+
+            bindings.Add(Expression.Bind(dtoProperty, sourceBody));
+        }
+
+        // Create: x => new TDto { Field1 = x.Field1, Field2 = x.Field2, ... }
+        var memberInit = Expression.MemberInit(Expression.New(dtoType), bindings);
+        var lambda = Expression.Lambda<Func<TSource, TDto>>(memberInit, parameter);
+
+        return query.Select(lambda);
+    }
+
+    /// <summary>
+    /// Apply field selection (projection) to query using a ViewDefinition.
+    /// Supports field aliases for mapping DTO properties to different FieldMap keys.
+    /// </summary>
+    /// <typeparam name="TSource">Source entity type</typeparam>
+    /// <typeparam name="TDto">DTO type to project to</typeparam>
+    public static IQueryable<TDto> ApplyProjection<TSource, TDto>(
+        IQueryable<TSource> query,
+        ViewDefinition<TSource, TDto> viewDefinition,
+        FieldMap<TSource> fieldMap)
+        where TSource : class
+        where TDto : class, new()
+    {
+        var fields = viewDefinition.Fields;
+
+        if (fields.Length == 0)
+        {
+            throw new InvalidOperationException(
+                "Cannot auto-project without field specification. " +
+                "Either specify fields or use manual mapping.");
+        }
+
+        // Build projection expression dynamically
+        var parameter = Expression.Parameter(typeof(TSource), "x");
+        var dtoType = typeof(TDto);
+
+        // Create member bindings for each requested field
+        List<MemberBinding> bindings = new();
+
+        foreach (var fieldName in fields)
+        {
+            // Get the actual FieldMap key (may be aliased)
+            var fieldMapKey = viewDefinition.GetFieldMapKey(fieldName);
+
+            // Get source expression from field map using the resolved key
+            if (!fieldMap.TryGet(fieldMapKey, out var sourceExpression, out _))
+            {
+                throw new InvalidOperationException($"Field '{fieldMapKey}' not found in field map");
+            }
+
+            if (!fieldMap.CanSelect(fieldMapKey))
+            {
+                throw new InvalidOperationException($"Field '{fieldMapKey}' cannot be selected");
+            }
+
+            // Find matching property in DTO using the original field name
+            var dtoProperty = dtoType.GetProperty(
+                fieldName,
+                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+            if (dtoProperty == null || !dtoProperty.CanWrite)
+            {
+                continue;
+            }
+
+            // Replace parameter in source expression using shared ParameterReplacer
+            var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
 
             // Convert if types don't match
             if (sourceBody.Type != dtoProperty.PropertyType)
@@ -128,9 +205,8 @@ public static class ProjectionBinder
                 continue;
             }
 
-            // Replace parameter in source expression
-            ParameterReplacerVisitor visitor = new(sourceExpression.Parameters[0], parameter);
-            var sourceBody = visitor.Visit(sourceExpression.Body);
+            // Replace parameter in source expression using shared ParameterReplacer
+            var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
 
             // Convert to object
             var objectValue = Expression.Convert(sourceBody, typeof(object));
@@ -179,22 +255,5 @@ public static class ProjectionBinder
         }
 
         return char.ToLowerInvariant(str[0]) + str.Substring(1);
-    }
-
-    private class ParameterReplacerVisitor : ExpressionVisitor
-    {
-        private readonly ParameterExpression _oldParameter;
-        private readonly ParameterExpression _newParameter;
-
-        public ParameterReplacerVisitor(ParameterExpression oldParameter, ParameterExpression newParameter)
-        {
-            _oldParameter = oldParameter;
-            _newParameter = newParameter;
-        }
-
-        protected override Expression VisitParameter(ParameterExpression node)
-        {
-            return node == _oldParameter ? _newParameter : base.VisitParameter(node);
-        }
     }
 }

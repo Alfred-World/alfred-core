@@ -26,13 +26,31 @@ public sealed class ViewDefinition<TEntity, TDto>
     /// </summary>
     public Expression<Func<TEntity, object>>[]? Includes { get; }
 
+    /// <summary>
+    /// Field aliases for mapping DTO property names to different FieldMap keys.
+    /// Key = DTO property name (camelCase), Value = FieldMap key
+    /// Example: "permissionsSummary" -> "permissionsSummary" (maps to separate lightweight expression)
+    /// </summary>
+    public Dictionary<string, string> FieldAliases { get; }
+
     public ViewDefinition(
         string name,
         string[] fields,
-        Expression<Func<TEntity, object>>[]? includes = null)
+        Expression<Func<TEntity, object>>[]? includes = null,
+        Dictionary<string, string>? fieldAliases = null)
     {
         Name = name ?? throw new ArgumentNullException(nameof(name));
         Fields = fields ?? throw new ArgumentNullException(nameof(fields));
         Includes = includes;
+        FieldAliases = fieldAliases ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Get the FieldMap key for a given DTO field.
+    /// Returns the alias if defined, otherwise returns the original field name.
+    /// </summary>
+    public string GetFieldMapKey(string dtoFieldName)
+    {
+        return FieldAliases.TryGetValue(dtoFieldName, out var alias) ? alias : dtoFieldName;
     }
 }

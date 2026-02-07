@@ -260,7 +260,7 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
     ForwardLimit = null // No limit on forwards
 };
 // Clear default known networks/proxies to trust all (for development)
-forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownIPNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
 

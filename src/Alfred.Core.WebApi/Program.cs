@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
@@ -8,6 +7,7 @@ using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
 using Alfred.Core.Infrastructure.Common.Seeding;
 using Alfred.Core.WebApi.Configuration;
+using Alfred.Core.WebApi.Extensions;
 using Alfred.Core.WebApi.Middleware;
 
 using Asp.Versioning;
@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 // Load environment variables from .env file
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
@@ -127,56 +126,8 @@ builder.Services.AddProblemDetails(options =>
     options.CustomizeProblemDetails = context => { context.ProblemDetails.Extensions.Clear(); };
 });
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "HSE Management API",
-        Version = "v1",
-        Description = "API for Health, Safety, and Environment Management System"
-    });
-
-    // Enable annotations
-    c.EnableAnnotations();
-
-    // Support non-nullable reference types for proper required field detection in .NET 9
-    c.SupportNonNullableReferenceTypes();
-
-    c.UseAllOfForInheritance();
-    c.UseAllOfToExtendReferenceSchemas();
-
-    // Add JWT authentication to Swagger (for future use)
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "Enter only your JWT token (the Bearer prefix will be added automatically)",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new List<string>()
-        }
-    });
-
-    // Include XML comments
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
-});
+// Add Scalar API documentation
+builder.Services.AddScalarConfiguration();
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -264,15 +215,8 @@ forwardedHeadersOptions.KnownIPNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity Service v1");
-        c.RoutePrefix = "swagger";
-    });
-}
+// Use Scalar API reference in development
+app.UseScalarInDevelopment();
 
 // Add global exception handler (must be early in pipeline)
 app.UseExceptionHandler();

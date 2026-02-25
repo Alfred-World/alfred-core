@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using Alfred.Core.Domain.Entities;
 using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.Options;
 
@@ -13,6 +14,16 @@ namespace Alfred.Core.Infrastructure.Providers.PostgreSQL;
 /// </summary>
 public class PostgreSqlDbContext : DbContext, IDbContext
 {
+    public DbSet<Unit> Units => Set<Unit>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Brand> Brands => Set<Brand>();
+    public DbSet<BrandCategory> BrandCategories => Set<BrandCategory>();
+    public DbSet<Asset> Assets => Set<Asset>();
+    public DbSet<AssetLog> AssetLogs => Set<AssetLog>();
+    public DbSet<Commodity> Commodities => Set<Commodity>();
+    public DbSet<InvestmentTransaction> InvestmentTransactions => Set<InvestmentTransaction>();
+    public DbSet<MarketPrice> MarketPrices => Set<MarketPrice>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
     private readonly PostgreSqlOptions _options;
 
     public PostgreSqlDbContext(PostgreSqlOptions options)

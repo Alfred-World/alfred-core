@@ -1,3 +1,4 @@
+using Alfred.Core.Application.Assets;
 using Alfred.Core.Application.Common.Behaviors;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 
@@ -26,6 +27,9 @@ public static class ApplicationModule
 
         // Register querying services
         services.AddScoped<IFilterParser, PrattFilterParser>();
+
+        // Register application services
+        services.AddScoped<IAssetService, AssetService>();
 
         return services;
     }

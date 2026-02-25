@@ -1,5 +1,6 @@
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,7 +21,7 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(x => x.Code)
             .IsRequired()
             .HasMaxLength(50);
-            
+
         builder.HasIndex(x => x.Code)
             .IsUnique();
 

@@ -1,5 +1,6 @@
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,7 +21,7 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
         builder.Property(x => x.InitialCost)
             .HasColumnType("decimal(18, 2)")
             .HasDefaultValue(0m);
-            
+
         builder.Property(x => x.PurchaseDate)
             .HasColumnType("date");
 
@@ -30,7 +31,7 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
         builder.Property(x => x.Specs)
             .HasColumnType("jsonb")
             .HasDefaultValue("{}");
-            
+
         builder.HasIndex(x => x.Specs)
             .IsTsVectorExpressionIndex("gin"); // GIN Index for JSONB Search
 
@@ -47,7 +48,7 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .WithMany()
             .HasForeignKey(x => x.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);
-            
+
         builder.HasIndex(x => x.CategoryId);
 
         builder.HasOne(x => x.Brand)

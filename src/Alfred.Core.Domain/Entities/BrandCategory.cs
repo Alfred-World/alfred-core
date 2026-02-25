@@ -4,7 +4,7 @@ public sealed class BrandCategory
 {
     public Guid BrandId { get; private set; }
     public Guid CategoryId { get; private set; }
-    
+
     // Navigation
     public Brand? Brand { get; private set; }
     public Category? Category { get; private set; }

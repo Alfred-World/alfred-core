@@ -9,7 +9,7 @@ public sealed class Unit : BaseEntity, IHasCreationTime
     public string Name { get; private set; } = null!;
     public Guid? BaseUnitId { get; private set; }
     public decimal ConversionRate { get; private set; }
-    
+
     public DateTime CreatedAt { get; set; }
 
     // Navigation
@@ -29,7 +29,7 @@ public sealed class Unit : BaseEntity, IHasCreationTime
             CreatedAt = DateTime.UtcNow
         };
     }
-    
+
     public void Update(string name, Guid? baseUnitId, decimal conversionRate)
     {
         Name = name;

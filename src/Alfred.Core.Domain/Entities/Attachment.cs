@@ -9,7 +9,7 @@ public sealed class Attachment : BaseEntity
     public string FileUrl { get; private set; } = null!;
     public string? FileType { get; private set; }
     public string? Description { get; private set; }
-    
+
     public DateTimeOffset UploadedAt { get; private set; }
 
     private Attachment() { }

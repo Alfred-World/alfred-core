@@ -1,5 +1,6 @@
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -46,7 +47,7 @@ internal sealed class InvestmentTransactionConfiguration : IEntityTypeConfigurat
             .WithMany()
             .HasForeignKey(x => x.CommodityId)
             .OnDelete(DeleteBehavior.Restrict);
-            
+
         builder.HasIndex(x => x.CommodityId);
 
         builder.HasOne(x => x.Unit)

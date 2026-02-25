@@ -8,7 +8,7 @@ public sealed class Brand : BaseEntity, IHasCreationTime
     public string Name { get; private set; } = null!;
     public string? Website { get; private set; }
     public string? SupportPhone { get; private set; }
-    
+
     public DateTime CreatedAt { get; set; }
 
     // Navigation

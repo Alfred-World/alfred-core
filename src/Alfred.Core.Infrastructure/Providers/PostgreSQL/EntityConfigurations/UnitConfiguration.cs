@@ -1,4 +1,5 @@
 using Alfred.Core.Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +16,7 @@ internal sealed class UnitConfiguration : IEntityTypeConfiguration<Unit>
         builder.Property(x => x.Code)
             .IsRequired()
             .HasMaxLength(50);
-            
+
         builder.HasIndex(x => x.Code)
             .IsUnique();
 

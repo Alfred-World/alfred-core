@@ -1,5 +1,6 @@
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -37,7 +38,7 @@ internal sealed class AssetLogConfiguration : IEntityTypeConfiguration<AssetLog>
             .WithMany()
             .HasForeignKey(x => x.AssetId)
             .OnDelete(DeleteBehavior.Cascade);
-            
+
         builder.HasIndex(x => x.AssetId);
 
         builder.HasOne(x => x.Brand)

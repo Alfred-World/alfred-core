@@ -153,8 +153,15 @@ public abstract class BaseApplicationService
         Expression<Func<TEntity, bool>>? left,
         Expression<Func<TEntity, bool>>? right)
     {
-        if (left == null) return right;
-        if (right == null) return left;
+        if (left == null)
+        {
+            return right;
+        }
+
+        if (right == null)
+        {
+            return left;
+        }
 
         var param = left.Parameters[0];
         var rightBody = new ParameterReplacerVisitor(right.Parameters[0], param).Visit(right.Body);

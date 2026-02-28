@@ -28,9 +28,10 @@ public sealed class BrandsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetBrands(
         [FromQuery] PaginationQueryParameters queryRequest,
+        [FromQuery] Guid? categoryId,
         CancellationToken cancellationToken)
     {
-        var result = await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), cancellationToken);
+        var result = await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), categoryId, cancellationToken);
         return OkPaginatedResponse(result);
     }
 

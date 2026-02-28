@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 using Alfred.Core.Application.Brands.Dtos;
 using Alfred.Core.Application.Brands.Shared;
 using Alfred.Core.Application.Common;
@@ -25,13 +27,18 @@ public sealed class BrandService : BaseApplicationService, IBrandService
     }
 
     public async Task<PageResult<BrandDto>> GetAllBrandsAsync(QueryRequest query,
+        Guid? categoryId = null,
         CancellationToken cancellationToken = default)
     {
+        Expression<Func<Brand, bool>>? preFilter = categoryId.HasValue
+            ? b => b.BrandCategories.Any(bc => bc.CategoryId == categoryId.Value)
+            : null;
+
         return await GetPagedAsync(
             _brandRepository,
             query,
             BrandFieldMap.Instance,
-            null,
+            preFilter,
             [b => b.BrandCategories],
             b => b.ToDto(),
             cancellationToken);
@@ -81,7 +88,9 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
 
         if (entity is null)
+        {
             throw new KeyNotFoundException($"Brand with ID {id} not found.");
+        }
 
         entity.Update(
             dto.Name,
@@ -111,7 +120,9 @@ public sealed class BrandService : BaseApplicationService, IBrandService
     {
         var entity = await _brandRepository.GetByIdAsync(id, cancellationToken);
         if (entity is null)
+        {
             throw new KeyNotFoundException($"Brand with ID {id} not found.");
+        }
 
         _brandRepository.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

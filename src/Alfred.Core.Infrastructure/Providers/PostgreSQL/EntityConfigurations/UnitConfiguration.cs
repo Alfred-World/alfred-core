@@ -1,4 +1,5 @@
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Enums;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,20 +23,40 @@ internal sealed class UnitConfiguration : IEntityTypeConfiguration<Unit>
 
         builder.Property(x => x.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(255);
+
+        builder.Property(x => x.Symbol)
+            .HasMaxLength(20);
+
+        builder.Property(x => x.Category)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasConversion<string>();
 
         builder.Property(x => x.ConversionRate)
-            .HasColumnType("decimal(15, 6)")
+            .HasColumnType("decimal(18, 8)")
             .HasDefaultValue(1m);
+
+        builder.Property(x => x.Status)
+            .IsRequired()
+            .HasMaxLength(20)
+            .HasConversion<string>()
+            .HasDefaultValue(UnitStatus.Active);
+
+        builder.Property(x => x.Description)
+            .HasMaxLength(500);
 
         // Self-referencing relationship
         builder.HasOne(x => x.BaseUnit)
-            .WithMany(x => x.SubUnits)
+            .WithMany(x => x.DerivedUnits)
             .HasForeignKey(x => x.BaseUnitId)
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(x => x.CreatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("NOW()");
+
+        builder.Property(x => x.UpdatedAt)
+            .HasColumnType("timestamp with time zone");
     }
 }

@@ -1,9 +1,11 @@
 using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Application.Categories.Shared;
 using Alfred.Core.Application.Common;
+using Alfred.Core.Application.Common.Settings;
 using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Abstractions;
+using Alfred.Core.Domain.Common.Exceptions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 
@@ -38,24 +40,51 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             cancellationToken);
     }
 
-    public async Task<List<CategoryTreeNodeDto>> GetCategoryTreeAsync(string? type = null,
-        CancellationToken cancellationToken = default)
+    public async Task<PageResult<CategoryTreeNodeDto>> GetCategoryTreeAsync(CategoryType? type = null,
+        int page = 1, int pageSize = 0, CancellationToken cancellationToken = default)
     {
+        page = PaginationSettings.EnsureValidPage(page);
+        pageSize = PaginationSettings.ClampPageSize(pageSize);
+
         var queryable = _categoryRepository.GetQueryable()
             .Include(c => c.SubCategories)
+            .Where(c => c.ParentId == null)
             .AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(type) && Enum.TryParse<CategoryType>(type, true, out var categoryType))
+        if (type.HasValue)
         {
-            queryable = queryable.Where(c => c.Type == categoryType);
+            queryable = queryable.Where(c => c.Type == type.Value);
         }
 
-        var allCategories = await queryable.ToListAsync(cancellationToken);
+        var total = await queryable.CountAsync(cancellationToken);
+        var roots = await queryable
+            .OrderBy(c => c.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
 
-        // Build tree from root nodes (no parent)
-        var roots = allCategories.Where(c => c.ParentId == null).ToList();
+        var items = roots.Select(c => new CategoryTreeNodeDto(
+            c.Id, c.Code, c.Name, c.Icon, c.Type,
+            c.ParentId, c.SubCategories.Count, c.SubCategories.Count > 0
+        )).ToList();
 
-        return roots.Select(r => BuildTreeNode(r, allCategories)).ToList();
+        return new PageResult<CategoryTreeNodeDto>(items, page, pageSize, total);
+    }
+
+    public async Task<List<CategoryTreeNodeDto>> GetChildrenAsync(Guid parentId,
+        CancellationToken cancellationToken = default)
+    {
+        var children = await _categoryRepository.GetQueryable()
+            .Include(c => c.SubCategories)
+            .Where(c => c.ParentId == parentId)
+            .OrderBy(c => c.Name)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return children.Select(c => new CategoryTreeNodeDto(
+            c.Id, c.Code, c.Name, c.Icon, c.Type,
+            c.ParentId, c.SubCategories.Count, c.SubCategories.Count > 0
+        )).ToList();
     }
 
     public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -72,13 +101,27 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto,
         CancellationToken cancellationToken = default)
     {
-        if (!Enum.TryParse<CategoryType>(dto.Type, true, out var categoryType))
-            throw new ArgumentException($"Invalid category type: {dto.Type}");
+        // Validate parent type match
+        if (dto.ParentId.HasValue)
+        {
+            var parent = await _categoryRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
+
+            if (parent is null)
+            {
+                throw new KeyNotFoundException($"Parent category with ID {dto.ParentId.Value} not found.");
+            }
+
+            if (parent.Type != dto.Type)
+            {
+                throw new DomainException(
+                    $"Child category type '{dto.Type}' must match parent category type '{parent.Type}'.");
+            }
+        }
 
         var entity = Category.Create(
             dto.Code,
             dto.Name,
-            categoryType,
+            dto.Type,
             dto.Icon,
             dto.ParentId,
             dto.FormSchema);
@@ -97,44 +140,130 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (entity is null)
+        {
             throw new KeyNotFoundException($"Category with ID {id} not found.");
+        }
 
-        if (!Enum.TryParse<CategoryType>(dto.Type, true, out var categoryType))
-            throw new ArgumentException($"Invalid category type: {dto.Type}");
+        // Cannot set self as parent
+        if (dto.ParentId.HasValue && dto.ParentId.Value == id)
+        {
+            throw new DomainException("A category cannot be its own parent.");
+        }
 
-        entity.Update(dto.Name, dto.ParentId, categoryType, dto.Icon, dto.FormSchema);
+        // Validate parent type match
+        if (dto.ParentId.HasValue)
+        {
+            var parent = await _categoryRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
 
+            if (parent is null)
+            {
+                throw new KeyNotFoundException($"Parent category with ID {dto.ParentId.Value} not found.");
+            }
+
+            if (parent.Type != dto.Type)
+            {
+                throw new DomainException(
+                    $"Child category type '{dto.Type}' must match parent category type '{parent.Type}'.");
+            }
+
+            // Prevent circular reference: parent must not be a descendant of this category
+            if (await IsDescendantAsync(dto.ParentId.Value, id, cancellationToken))
+            {
+                throw new DomainException("Cannot set a descendant category as parent (circular reference).");
+            }
+        }
+
+        // Cascade type change to all descendants if type changed
+        var typeChanged = entity.Type != dto.Type;
+
+        entity.Update(dto.Name, dto.ParentId, dto.Type, dto.Icon, dto.FormSchema);
         _categoryRepository.Update(entity);
+
+        if (typeChanged)
+        {
+            await CascadeTypeToDescendantsAsync(id, dto.Type, cancellationToken);
+        }
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return (await GetCategoryByIdAsync(entity.Id, cancellationToken))!;
+    }
+
+    /// <summary>
+    /// Check if <paramref name="candidateId"/> is a descendant of <paramref name="ancestorId"/>.
+    /// </summary>
+    private async Task<bool> IsDescendantAsync(Guid candidateId, Guid ancestorId,
+        CancellationToken cancellationToken)
+    {
+        var visited = new HashSet<Guid>();
+        var queue = new Queue<Guid>();
+        queue.Enqueue(ancestorId);
+
+        while (queue.Count > 0)
+        {
+            var currentId = queue.Dequeue();
+            if (!visited.Add(currentId))
+            {
+                continue;
+            }
+
+            var childIds = await _categoryRepository.GetQueryable()
+                .Where(c => c.ParentId == currentId)
+                .Select(c => c.Id)
+                .ToListAsync(cancellationToken);
+
+            foreach (var childId in childIds)
+            {
+                if (childId == candidateId)
+                {
+                    return true;
+                }
+
+                queue.Enqueue(childId);
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Recursively update type for all descendants of the given category.
+    /// </summary>
+    private async Task CascadeTypeToDescendantsAsync(Guid parentId, CategoryType newType,
+        CancellationToken cancellationToken)
+    {
+        var children = await _categoryRepository.GetQueryable()
+            .Where(c => c.ParentId == parentId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var child in children)
+        {
+            child.Update(child.Name, child.ParentId, newType, child.Icon, child.FormSchema);
+            _categoryRepository.Update(child);
+            await CascadeTypeToDescendantsAsync(child.Id, newType, cancellationToken);
+        }
     }
 
     public async Task DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _categoryRepository.GetByIdAsync(id, cancellationToken);
         if (entity is null)
+        {
             throw new KeyNotFoundException($"Category with ID {id} not found.");
+        }
 
         _categoryRepository.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    private static CategoryTreeNodeDto BuildTreeNode(Category category, List<Category> allCategories)
+    public async Task<List<CategoryCountByTypeDto>> GetCategoryCountsByTypeAsync(
+        CancellationToken cancellationToken = default)
     {
-        var children = allCategories
-            .Where(c => c.ParentId == category.Id)
-            .Select(c => BuildTreeNode(c, allCategories))
-            .ToList();
-
-        return new CategoryTreeNodeDto(
-            category.Id,
-            category.Code,
-            category.Name,
-            category.Icon,
-            category.Type.ToString(),
-            category.ParentId,
-            children.Count,
-            children);
+        return await _categoryRepository.GetQueryable()
+            .AsNoTracking()
+            .GroupBy(c => c.Type)
+            .Select(g => new CategoryCountByTypeDto(g.Key, g.Count()))
+            .ToListAsync(cancellationToken);
     }
+
 }

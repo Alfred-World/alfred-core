@@ -1,3 +1,5 @@
+using Alfred.Core.Domain.Enums;
+
 namespace Alfred.Core.Application.Categories.Dtos;
 
 public sealed record CategoryDto(
@@ -5,7 +7,7 @@ public sealed record CategoryDto(
     string Code,
     string Name,
     string? Icon,
-    string Type,
+    CategoryType Type,
     Guid? ParentId,
     string? ParentName,
     string FormSchema,
@@ -17,7 +19,7 @@ public sealed record CreateCategoryDto(
     string Code,
     string Name,
     string? Icon,
-    string Type,
+    CategoryType Type,
     Guid? ParentId,
     string FormSchema
 );
@@ -25,7 +27,7 @@ public sealed record CreateCategoryDto(
 public sealed record UpdateCategoryDto(
     string Name,
     string? Icon,
-    string Type,
+    CategoryType Type,
     Guid? ParentId,
     string FormSchema
 );
@@ -35,8 +37,13 @@ public sealed record CategoryTreeNodeDto(
     string Code,
     string Name,
     string? Icon,
-    string Type,
+    CategoryType Type,
     Guid? ParentId,
     int SubCategoryCount,
-    List<CategoryTreeNodeDto> Children
+    bool HasChildren
+);
+
+public sealed record CategoryCountByTypeDto(
+    CategoryType Type,
+    int Count
 );

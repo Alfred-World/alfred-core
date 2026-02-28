@@ -10,7 +10,7 @@ public static class CategoryMappingExtensions
         category.Code,
         category.Name,
         category.Icon,
-        category.Type.ToString(),
+        category.Type,
         category.ParentId,
         category.Parent?.Name,
         category.FormSchema,
@@ -23,9 +23,9 @@ public static class CategoryMappingExtensions
         category.Code,
         category.Name,
         category.Icon,
-        category.Type.ToString(),
+        category.Type,
         category.ParentId,
         category.SubCategories.Count,
-        category.SubCategories.Select(c => c.ToTreeNode()).ToList()
+        category.SubCategories.Count > 0
     );
 }

@@ -1,5 +1,7 @@
 using Alfred.Core.Application.Categories;
 using Alfred.Core.Application.Categories.Dtos;
+using Alfred.Core.Application.Common.Settings;
+using Alfred.Core.Domain.Enums;
 using Alfred.Core.WebApi.Contracts.Categories;
 using Alfred.Core.WebApi.Contracts.Common;
 
@@ -35,15 +37,29 @@ public sealed class CategoriesController : BaseApiController
     }
 
     /// <summary>
-    /// Get the category tree structure, optionally filtered by type (Asset, Brand, Consumable).
+    /// Get root-level categories (flat, with hasChildren flag), optionally filtered by type.
     /// </summary>
     [HttpGet("tree")]
-    [ProducesResponseType(typeof(ApiResponse<List<CategoryTreeNodeDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiPagedResponse<CategoryTreeNodeDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCategoryTree(
-        [FromQuery] string? type,
-        CancellationToken cancellationToken)
+        [FromQuery] CategoryType? type,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 0,
+        CancellationToken cancellationToken = default)
     {
-        var result = await _categoryService.GetCategoryTreeAsync(type, cancellationToken);
+        pageSize = PaginationSettings.ClampPageSize(pageSize);
+        var result = await _categoryService.GetCategoryTreeAsync(type, page, pageSize, cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    /// <summary>
+    /// Get direct children of a category by parent ID.
+    /// </summary>
+    [HttpGet("{parentId:guid}/children")]
+    [ProducesResponseType(typeof(ApiResponse<List<CategoryTreeNodeDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetChildren(Guid parentId, CancellationToken cancellationToken)
+    {
+        var result = await _categoryService.GetChildrenAsync(parentId, cancellationToken);
         return OkResponse(result);
     }
 
@@ -104,5 +120,16 @@ public sealed class CategoriesController : BaseApiController
     {
         await _categoryService.DeleteCategoryAsync(id, cancellationToken);
         return OkResponse("Category deleted successfully");
+    }
+
+    /// <summary>
+    /// Get the count of categories grouped by type.
+    /// </summary>
+    [HttpGet("counts-by-type")]
+    [ProducesResponseType(typeof(ApiResponse<List<CategoryCountByTypeDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCategoryCountsByType(CancellationToken cancellationToken)
+    {
+        var result = await _categoryService.GetCategoryCountsByTypeAsync(cancellationToken);
+        return OkResponse(result);
     }
 }

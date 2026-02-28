@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -75,11 +76,16 @@ namespace Alfred.Core.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Symbol = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Category = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     BaseUnitId = table.Column<Guid>(type: "uuid", nullable: true),
-                    ConversionRate = table.Column<decimal>(type: "numeric(15,6)", nullable: false, defaultValue: 1m),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                    ConversionRate = table.Column<decimal>(type: "numeric(18,8)", nullable: false, defaultValue: 1m),
+                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "Active"),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {

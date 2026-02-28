@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Alfred.Core.Infrastructure.Migrations
 {
     [DbContext(typeof(PostgreSqlDbContext))]
-    [Migration("20260228182723_Initial")]
+    [Migration("20260228205907_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -416,6 +416,11 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.Property<Guid?>("BaseUnitId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -423,7 +428,7 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.Property<decimal>("ConversionRate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(15, 6)")
+                        .HasColumnType("decimal(18, 8)")
                         .HasDefaultValue(1m);
 
                     b.Property<DateTime>("CreatedAt")
@@ -431,10 +436,28 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Active");
+
+                    b.Property<string>("Symbol")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -553,7 +576,7 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Unit", b =>
                 {
                     b.HasOne("Alfred.Core.Domain.Entities.Unit", "BaseUnit")
-                        .WithMany("SubUnits")
+                        .WithMany("DerivedUnits")
                         .HasForeignKey("BaseUnitId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -574,7 +597,7 @@ namespace Alfred.Core.Infrastructure.Migrations
 
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Unit", b =>
                 {
-                    b.Navigation("SubUnits");
+                    b.Navigation("DerivedUnits");
                 });
 #pragma warning restore 612, 618
         }

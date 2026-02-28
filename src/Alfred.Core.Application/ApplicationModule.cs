@@ -4,6 +4,7 @@ using Alfred.Core.Application.Categories;
 using Alfred.Core.Application.Common.Behaviors;
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
+using Alfred.Core.Application.Units;
 
 using FluentValidation;
 
@@ -35,6 +36,7 @@ public static class ApplicationModule
         services.AddScoped<IAssetService, AssetService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IUnitService, UnitService>();
         services.AddScoped<IFileService, FileService>();
 
         return services;

@@ -83,8 +83,9 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("Specs")
-                        .HasAnnotation("Npgsql:TsVectorConfig", "gin");
+                    b.HasIndex("Specs");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Specs"), "gin");
 
                     b.ToTable("assets", (string)null);
                 });
@@ -188,6 +189,13 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -196,6 +204,9 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.Property<string>("SupportPhone")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Website")
                         .HasMaxLength(255)

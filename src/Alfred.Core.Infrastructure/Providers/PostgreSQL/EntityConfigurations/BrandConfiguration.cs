@@ -23,8 +23,17 @@ internal sealed class BrandConfiguration : IEntityTypeConfiguration<Brand>
         builder.Property(x => x.SupportPhone)
             .HasMaxLength(50);
 
+        builder.Property(x => x.Description)
+            .HasMaxLength(250);
+
+        builder.Property(x => x.LogoUrl)
+            .HasColumnType("text");
+
         builder.Property(x => x.CreatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("NOW()");
+
+        builder.Property(x => x.UpdatedAt)
+            .HasColumnType("timestamp with time zone");
     }
 }

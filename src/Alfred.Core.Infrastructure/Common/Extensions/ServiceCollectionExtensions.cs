@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetLogRepository, AssetLogRepository>();
+        services.AddScoped<IBrandRepository, BrandRepository>();
 
         return services;
     }

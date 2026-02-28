@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -37,7 +36,10 @@ namespace Alfred.Core.Infrastructure.Migrations
                     Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Website = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     SupportPhone = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                    Description = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
+                    LogoUrl = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -281,7 +283,7 @@ namespace Alfred.Core.Infrastructure.Migrations
                 name: "IX_assets_Specs",
                 table: "assets",
                 column: "Specs")
-                .Annotation("Npgsql:TsVectorConfig", "gin");
+                .Annotation("Npgsql:IndexMethod", "gin");
 
             migrationBuilder.CreateIndex(
                 name: "IX_attachments_TargetId_TargetType",

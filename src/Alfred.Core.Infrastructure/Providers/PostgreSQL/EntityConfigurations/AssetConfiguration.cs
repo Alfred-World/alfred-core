@@ -33,7 +33,7 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .HasDefaultValue("{}");
 
         builder.HasIndex(x => x.Specs)
-            .IsTsVectorExpressionIndex("gin"); // GIN Index for JSONB Search
+            .HasMethod("gin"); // GIN Index for JSONB Search
 
         builder.Property(x => x.Status)
             .IsRequired()

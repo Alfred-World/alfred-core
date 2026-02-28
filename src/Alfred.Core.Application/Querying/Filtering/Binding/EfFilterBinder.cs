@@ -248,17 +248,23 @@ public static class EfFilterBinder<T>
             {
                 try
                 {
-                    // Validate enum value is defined in the enum type
+                    if (constant.Value is string enumString)
+                    {
+                        // Parse string to enum (case-insensitive)
+                        var enumValue = Enum.Parse(underlyingTargetType, enumString, ignoreCase: true);
+                        return Expression.Constant(enumValue, targetType);
+                    }
+
+                    // Numeric value — validate and convert
                     if (!Enum.IsDefined(underlyingTargetType, constant.Value))
                     {
-                        var validValues = string.Join(", ", Enum.GetValues(underlyingTargetType).Cast<object>());
+                        var validValues = string.Join(", ", Enum.GetNames(underlyingTargetType));
                         throw new InvalidOperationException(
                             $"'{constant.Value}' is not a valid value for enum type '{underlyingTargetType.Name}'. Valid values: {validValues}");
                     }
 
-                    // Convert to the underlying enum type
-                    var enumValue = Enum.ToObject(underlyingTargetType, constant.Value);
-                    return Expression.Constant(enumValue, targetType);
+                    var enumObj = Enum.ToObject(underlyingTargetType, constant.Value);
+                    return Expression.Constant(enumObj, targetType);
                 }
                 catch (InvalidOperationException)
                 {

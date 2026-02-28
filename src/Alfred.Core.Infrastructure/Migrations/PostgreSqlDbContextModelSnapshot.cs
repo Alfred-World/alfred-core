@@ -254,6 +254,10 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("jsonb")
                         .HasDefaultValue("[]");
 
+                    b.Property<string>("Icon")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)

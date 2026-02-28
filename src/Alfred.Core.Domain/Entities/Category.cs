@@ -8,6 +8,7 @@ public sealed class Category : BaseEntity, IHasCreationTime
 {
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
+    public string? Icon { get; private set; }
     public Guid? ParentId { get; private set; }
     public CategoryType Type { get; private set; }
     public string FormSchema { get; private set; } = "[]";
@@ -21,12 +22,13 @@ public sealed class Category : BaseEntity, IHasCreationTime
 
     private Category() { }
 
-    public static Category Create(string code, string name, CategoryType type, Guid? parentId = null, string formSchema = "[]")
+    public static Category Create(string code, string name, CategoryType type, string? icon = null, Guid? parentId = null, string formSchema = "[]")
     {
         return new Category
         {
             Code = code,
             Name = name,
+            Icon = icon,
             Type = type,
             ParentId = parentId,
             FormSchema = formSchema ?? "[]",
@@ -34,9 +36,10 @@ public sealed class Category : BaseEntity, IHasCreationTime
         };
     }
 
-    public void Update(string name, Guid? parentId, CategoryType type, string formSchema)
+    public void Update(string name, Guid? parentId, CategoryType type, string? icon, string formSchema)
     {
         Name = name;
+        Icon = icon;
         ParentId = parentId;
         Type = type;
         FormSchema = formSchema ?? "[]";

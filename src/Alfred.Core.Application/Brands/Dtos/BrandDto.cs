@@ -15,5 +15,6 @@ public sealed record BrandDto(
 public sealed record BrandCategoryDto(
     Guid Id,
     string Name,
-    string Code
+    string Code,
+    string? Icon
 );

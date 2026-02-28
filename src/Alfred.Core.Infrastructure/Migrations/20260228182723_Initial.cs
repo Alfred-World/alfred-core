@@ -53,6 +53,7 @@ namespace Alfred.Core.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Icon = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ParentId = table.Column<Guid>(type: "uuid", nullable: true),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     FormSchema = table.Column<string>(type: "jsonb", nullable: false, defaultValue: "[]"),

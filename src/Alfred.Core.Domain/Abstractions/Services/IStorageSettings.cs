@@ -25,4 +25,17 @@ public interface IStorageSettings
     /// Default presigned URL expiration in minutes for downloads
     /// </summary>
     int DownloadUrlExpirationMinutes { get; }
+
+    /// <summary>
+    /// Cloudflare API token with Account Analytics: Read permission.
+    /// Used to query the Cloudflare GraphQL Analytics API for bucket storage metrics.
+    /// Leave empty to disable quota checking.
+    /// </summary>
+    string CloudflareApiToken { get; }
+
+    /// <summary>
+    /// Total storage quota in bytes. Default 10 GB (Cloudflare R2 free tier).
+    /// Set to 0 to disable quota checking.
+    /// </summary>
+    long StorageQuotaBytes { get; }
 }

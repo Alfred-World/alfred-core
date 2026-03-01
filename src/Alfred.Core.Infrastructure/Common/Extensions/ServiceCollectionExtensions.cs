@@ -104,6 +104,13 @@ public static class ServiceCollectionExtensions
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         }
 
+        options.CloudflareApiToken = Environment.GetEnvironmentVariable("CF_API_TOKEN") ?? string.Empty;
+
+        if (long.TryParse(Environment.GetEnvironmentVariable("R2_STORAGE_QUOTA_BYTES"), out var quotaBytes))
+        {
+            options.StorageQuotaBytes = quotaBytes;
+        }
+
         options.Validate();
 
         // Register options as singleton (concrete + interface)
@@ -124,6 +131,10 @@ public static class ServiceCollectionExtensions
 
         // Register storage service
         services.AddScoped<IStorageService, R2StorageService>();
+
+        // Register Cloudflare Metrics service (typed HttpClient)
+        services.AddHttpClient<CloudflareR2MetricsService>();
+        services.AddScoped<IR2MetricsService, CloudflareR2MetricsService>();
 
         return services;
     }

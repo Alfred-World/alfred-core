@@ -13,11 +13,16 @@ public sealed class FileService : IFileService
 {
     private readonly IStorageService _storageService;
     private readonly IStorageSettings _settings;
+    private readonly IR2MetricsService _metricsService;
 
-    public FileService(IStorageService storageService, IStorageSettings settings)
+    public FileService(
+        IStorageService storageService,
+        IStorageSettings settings,
+        IR2MetricsService metricsService)
     {
         _storageService = storageService;
         _settings = settings;
+        _metricsService = metricsService;
     }
 
     public async Task<UploadUrlResultDto> GenerateUploadUrlAsync(
@@ -38,6 +43,9 @@ public sealed class FileService : IFileService
             throw new ArgumentException(
                 $"Content type '{dto.ContentType}' is not allowed. Allowed types: {string.Join(", ", _settings.AllowedContentTypes)}");
         }
+
+        // Check Cloudflare R2 storage quota (estimatedUsageBytes via GraphQL API)
+        await CheckStorageQuotaAsync(dto.FileSize, cancellationToken);
 
         // Generate a unique object key with folder structure
         var objectKey = GenerateObjectKey(dto.FileName, dto.Folder);
@@ -104,6 +112,9 @@ public sealed class FileService : IFileService
                 $"Content type '{contentType}' is not allowed.");
         }
 
+        // Check Cloudflare R2 storage quota (estimatedUsageBytes via GraphQL API)
+        await CheckStorageQuotaAsync(fileSize, cancellationToken);
+
         var objectKey = GenerateObjectKey(fileName, folder);
 
         await _storageService.UploadFileAsync(fileStream, objectKey, contentType, cancellationToken);
@@ -145,5 +156,36 @@ public sealed class FileService : IFileService
         }
 
         return $"{sanitized}{ext}".ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Queries Cloudflare R2 Metrics API for estimated bucket usage and throws
+    /// if adding <paramref name="incomingBytes"/> would exceed the configured quota.
+    /// If the API token is not set or the call fails, the check is silently skipped.
+    /// </summary>
+    private async Task CheckStorageQuotaAsync(long incomingBytes, CancellationToken cancellationToken)
+    {
+        if (_settings.StorageQuotaBytes <= 0)
+        {
+            return;
+        }
+
+        var estimatedUsed = await _metricsService.GetEstimatedUsageBytesAsync(cancellationToken);
+
+        if (estimatedUsed is null)
+        {
+            // API token not configured or call failed — skip enforcement
+            return;
+        }
+
+        if (estimatedUsed.Value + incomingBytes > _settings.StorageQuotaBytes)
+        {
+            var usedGb = estimatedUsed.Value / 1_073_741_824.0;
+            var quotaGb = _settings.StorageQuotaBytes / 1_073_741_824.0;
+
+            throw new InvalidOperationException(
+                $"Storage quota exceeded: estimated {usedGb:F2} GB used of {quotaGb:F2} GB quota. " +
+                $"(Note: Cloudflare R2 metrics may be delayed by a few minutes.)");
+        }
     }
 }

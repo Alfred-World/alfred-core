@@ -37,6 +37,10 @@ public sealed class FilesController : BaseApiController
             var result = await _fileService.GenerateUploadUrlAsync(request.ToDto(), cancellationToken);
             return OkResponse(result);
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequestResponse(ex.Message, "STORAGE_QUOTA_EXCEEDED");
+        }
         catch (ArgumentException ex)
         {
             return BadRequestResponse(ex.Message, "INVALID_FILE");
@@ -116,6 +120,10 @@ public sealed class FilesController : BaseApiController
                 cancellationToken);
 
             return OkResponse(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequestResponse(ex.Message, "STORAGE_QUOTA_EXCEEDED");
         }
         catch (ArgumentException ex)
         {

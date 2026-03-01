@@ -49,6 +49,19 @@ public sealed class R2StorageOptions : IStorageSettings
     public string[] AllowedContentTypes { get; set; } = [];
 
     /// <summary>
+    /// Cloudflare API token with Account Analytics: Read permission.
+    /// Used to query the Cloudflare GraphQL Analytics API for bucket storage metrics.
+    /// Leave empty to disable quota checking.
+    /// </summary>
+    public string CloudflareApiToken { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Total storage quota in bytes. Default 10 GB (Cloudflare R2 free tier).
+    /// Set to 0 to disable quota checking.
+    /// </summary>
+    public long StorageQuotaBytes { get; set; } = 10L * 1024 * 1024 * 1024;
+
+    /// <summary>
     /// The S3-compatible endpoint URL for R2
     /// </summary>
     public string Endpoint => $"https://{AccountId}.r2.cloudflarestorage.com";

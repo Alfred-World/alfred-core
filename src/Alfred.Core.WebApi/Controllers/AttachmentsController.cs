@@ -53,6 +53,10 @@ public sealed class AttachmentsController : BaseApiController
 
             return OkResponse(result);
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequestResponse(ex.Message, "STORAGE_QUOTA_EXCEEDED");
+        }
         catch (ArgumentException ex)
         {
             return BadRequestResponse(ex.Message, "INVALID_FILE");

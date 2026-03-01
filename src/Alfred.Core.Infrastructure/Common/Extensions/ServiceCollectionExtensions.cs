@@ -4,7 +4,10 @@ using Alfred.Core.Infrastructure.Common.HealthChecks;
 using Alfred.Core.Infrastructure.Common.Options;
 using Alfred.Core.Infrastructure.Common.Seeding;
 using Alfred.Core.Infrastructure.Providers.Cache;
+using Alfred.Core.Infrastructure.Providers.Cache.HealthChecks;
 using Alfred.Core.Infrastructure.Providers.PostgreSQL;
+using Alfred.Core.Infrastructure.Providers.SqlServer.HealthChecks;
+using Alfred.Core.Infrastructure.Providers.Storage.HealthChecks;
 using Alfred.Core.Infrastructure.Repositories;
 using Alfred.Core.Infrastructure.Services;
 
@@ -43,6 +46,11 @@ public static class ServiceCollectionExtensions
 
         // Other Services
         services.AddScoped<IAuthorizationCodeService, AuthorizationCodeService>();
+
+        // Health Checks — registered before the orchestrator so it can enumerate them
+        services.AddScoped<IHealthCheck, DatabaseHealthCheck>();
+        services.AddScoped<IHealthCheck, RedisHealthCheck>();
+        services.AddScoped<IHealthCheck, R2StorageHealthCheck>();
 
         // Orchestrators
         services.AddScoped<HealthCheckOrchestrator>();

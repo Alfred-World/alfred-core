@@ -17,20 +17,30 @@ internal sealed class AttachmentConfiguration : IEntityTypeConfiguration<Attachm
             .IsRequired()
             .HasMaxLength(50);
 
-        // Polymorphic index
+        // Polymorphic index for fast lookups
         builder.HasIndex(x => new { x.TargetId, x.TargetType });
 
-        builder.Property(x => x.FileUrl)
+        builder.Property(x => x.ObjectKey)
             .IsRequired()
             .HasColumnType("text");
 
-        builder.Property(x => x.FileType)
-            .HasMaxLength(50);
-
-        builder.Property(x => x.Description)
+        builder.Property(x => x.FileName)
+            .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(x => x.UploadedAt)
+        builder.Property(x => x.ContentType)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(x => x.FileSize)
+            .IsRequired();
+
+        builder.Property(x => x.Purpose)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue("Attachment");
+
+        builder.Property(x => x.CreatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("NOW()");
     }

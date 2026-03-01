@@ -28,4 +28,15 @@ public interface IFileService
     Task DeleteFileAsync(
         DeleteFileDto dto,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Upload a file to R2 via server-side streaming (bypasses browser CORS).
+    /// </summary>
+    Task<FileUploadResultDto> UploadFileProxyAsync(
+        Stream fileStream,
+        string fileName,
+        string contentType,
+        long fileSize,
+        string? folder,
+        CancellationToken cancellationToken = default);
 }

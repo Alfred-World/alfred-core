@@ -1,0 +1,129 @@
+using Alfred.Core.Application.Attachments.Dtos;
+using Alfred.Core.Application.Files;
+using Alfred.Core.Application.Files.Dtos;
+using Alfred.Core.Domain.Abstractions;
+using Alfred.Core.Domain.Abstractions.Services;
+using Alfred.Core.Domain.Entities;
+
+namespace Alfred.Core.Application.Attachments;
+
+public sealed class AttachmentService : IAttachmentService
+{
+    private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileService _fileService;
+    private readonly IStorageService _storageService;
+    private readonly IStorageSettings _settings;
+
+    public AttachmentService(
+        IAttachmentRepository attachmentRepository,
+        IUnitOfWork unitOfWork,
+        IFileService fileService,
+        IStorageService storageService,
+        IStorageSettings settings)
+    {
+        _attachmentRepository = attachmentRepository;
+        _unitOfWork = unitOfWork;
+        _fileService = fileService;
+        _storageService = storageService;
+        _settings = settings;
+    }
+
+    public async Task<AttachmentDto> UploadAttachmentAsync(
+        Stream fileStream,
+        string fileName,
+        string contentType,
+        long fileSize,
+        CreateAttachmentDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        // Determine folder from target type + purpose
+        var folder = BuildFolder(dto.TargetType, dto.Purpose);
+
+        // Upload to R2 via the existing file service (validates size/type, generates key)
+        var uploadResult = await _fileService.UploadFileProxyAsync(
+            fileStream, fileName, contentType, fileSize, folder, cancellationToken);
+
+        // Create the DB record
+        var entity = Attachment.Create(
+            dto.TargetId,
+            dto.TargetType,
+            uploadResult.ObjectKey,
+            fileName,
+            contentType,
+            fileSize,
+            dto.Purpose);
+
+        await _attachmentRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Generate a signed download URL for the response
+        var downloadUrl = await GenerateSignedUrl(entity.ObjectKey, cancellationToken);
+
+        return ToDto(entity, downloadUrl);
+    }
+
+    public async Task<List<AttachmentDto>> GetAttachmentsByTargetAsync(
+        Guid targetId,
+        string targetType,
+        CancellationToken cancellationToken = default)
+    {
+        var attachments = await _attachmentRepository.GetByTargetAsync(targetId, targetType, cancellationToken);
+
+        var result = new List<AttachmentDto>(attachments.Count);
+
+        foreach (var a in attachments)
+        {
+            var downloadUrl = await GenerateSignedUrl(a.ObjectKey, cancellationToken);
+            result.Add(ToDto(a, downloadUrl));
+        }
+
+        return result;
+    }
+
+    public async Task DeleteAttachmentAsync(Guid attachmentId, CancellationToken cancellationToken = default)
+    {
+        var entity = await _attachmentRepository.GetByIdAsync(attachmentId, cancellationToken);
+
+        if (entity is null)
+            throw new KeyNotFoundException($"Attachment with ID {attachmentId} not found.");
+
+        // Delete from R2
+        await _storageService.DeleteObjectAsync(entity.ObjectKey, cancellationToken);
+
+        // Delete DB record
+        _attachmentRepository.Delete(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────────
+
+    private async Task<string> GenerateSignedUrl(string objectKey, CancellationToken cancellationToken)
+    {
+        return await _storageService.GeneratePresignedDownloadUrlAsync(
+            objectKey, _settings.DownloadUrlExpirationMinutes, cancellationToken);
+    }
+
+    private static AttachmentDto ToDto(Attachment entity, string downloadUrl) => new(
+        entity.Id,
+        entity.TargetId,
+        entity.TargetType,
+        entity.FileName,
+        entity.ContentType,
+        entity.FileSize,
+        entity.Purpose,
+        downloadUrl,
+        entity.CreatedAt);
+
+    private static string BuildFolder(string targetType, string purpose)
+    {
+        var type = targetType.ToLowerInvariant();
+        var purposeFolder = purpose.ToLowerInvariant() switch
+        {
+            "primaryimage" => "images",
+            _ => "attachments"
+        };
+
+        return $"{type}s/{purposeFolder}";
+    }
+}

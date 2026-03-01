@@ -84,4 +84,40 @@ public sealed class FilesController : BaseApiController
             return BadRequestResponse(ex.Message, "INVALID_REQUEST");
         }
     }
+
+    /// <summary>
+    /// Upload a file to R2 via server-side proxy (avoids browser CORS on direct R2 uploads).
+    /// Accepts multipart/form-data with a 'file' field and optional 'folder' field.
+    /// </summary>
+    [HttpPost("upload")]
+    [RequestSizeLimit(52_428_800)] // 50 MB
+    [ProducesResponseType(typeof(ApiResponse<FileUploadResultDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadFile(
+        IFormFile file,
+        [FromForm] string? folder,
+        CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequestResponse("No file provided.", "NO_FILE");
+
+        try
+        {
+            await using var stream = file.OpenReadStream();
+
+            var result = await _fileService.UploadFileProxyAsync(
+                stream,
+                file.FileName,
+                file.ContentType,
+                file.Length,
+                folder,
+                cancellationToken);
+
+            return OkResponse(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequestResponse(ex.Message, "INVALID_FILE");
+        }
+    }
 }

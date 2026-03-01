@@ -1,6 +1,8 @@
 using Alfred.Core.Application.Assets;
+using Alfred.Core.Application.Attachments;
 using Alfred.Core.Application.Brands;
 using Alfred.Core.Application.Categories;
+using Alfred.Core.Application.Commodities;
 using Alfred.Core.Application.Common.Behaviors;
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
@@ -34,8 +36,10 @@ public static class ApplicationModule
 
         // Register application services
         services.AddScoped<IAssetService, AssetService>();
+        services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IBrandService, BrandService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ICommodityService, CommodityService>();
         services.AddScoped<IUnitService, UnitService>();
         services.AddScoped<IFileService, FileService>();
 

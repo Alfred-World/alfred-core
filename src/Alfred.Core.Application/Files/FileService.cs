@@ -81,6 +81,34 @@ public sealed class FileService : IFileService
         await _storageService.DeleteObjectAsync(dto.ObjectKey, cancellationToken);
     }
 
+    public async Task<FileUploadResultDto> UploadFileProxyAsync(
+        Stream fileStream,
+        string fileName,
+        string contentType,
+        long fileSize,
+        string? folder,
+        CancellationToken cancellationToken = default)
+    {
+        if (fileSize > _settings.MaxFileSizeBytes)
+        {
+            throw new ArgumentException(
+                $"File size {fileSize} bytes exceeds maximum allowed size of {_settings.MaxFileSizeBytes} bytes.");
+        }
+
+        if (_settings.AllowedContentTypes.Length > 0 &&
+            !_settings.AllowedContentTypes.Contains(contentType, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException(
+                $"Content type '{contentType}' is not allowed.");
+        }
+
+        var objectKey = GenerateObjectKey(fileName, folder);
+
+        await _storageService.UploadFileAsync(fileStream, objectKey, contentType, cancellationToken);
+
+        return new FileUploadResultDto(ObjectKey: objectKey, FileName: fileName);
+    }
+
     /// <summary>
     /// Generate a unique object key: {folder}/{yyyy}/{MM}/{guid}_{sanitized-filename}
     /// </summary>

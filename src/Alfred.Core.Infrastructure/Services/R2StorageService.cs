@@ -83,4 +83,24 @@ public sealed class R2StorageService : IStorageService
 
         _logger.LogInformation("Deleted object from R2: {ObjectKey}", objectKey);
     }
+
+    public async Task UploadFileAsync(
+        Stream fileStream,
+        string objectKey,
+        string contentType,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new PutObjectRequest
+        {
+            BucketName = _options.BucketName,
+            Key = objectKey,
+            InputStream = fileStream,
+            ContentType = contentType,
+            DisablePayloadSigning = true
+        };
+
+        await _s3Client.PutObjectAsync(request, cancellationToken);
+
+        _logger.LogInformation("Uploaded file to R2: {ObjectKey}", objectKey);
+    }
 }

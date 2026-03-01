@@ -34,3 +34,10 @@ public sealed record DownloadUrlResultDto(
 /// Request DTO for deleting a file
 /// </summary>
 public sealed record DeleteFileDto(string ObjectKey);
+
+/// <summary>
+/// Result DTO for a server-side proxy file upload
+/// </summary>
+public sealed record FileUploadResultDto(
+    string ObjectKey,
+    string FileName);

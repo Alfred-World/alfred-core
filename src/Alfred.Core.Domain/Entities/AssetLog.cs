@@ -30,7 +30,7 @@ public sealed class AssetLog : BaseEntity, IHasCreationTime
             AssetId = assetId,
             EventType = eventType,
             BrandId = brandId,
-            PerformedAt = performedAt,
+            PerformedAt = performedAt.ToUniversalTime(),
             Cost = cost,
             Note = note,
             FinanceTxnId = financeTxnId,

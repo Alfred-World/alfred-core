@@ -21,6 +21,16 @@ public interface IStorageService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Upload a file directly to object storage via server-side streaming.
+    /// Use this to avoid browser CORS restrictions on direct R2 uploads.
+    /// </summary>
+    Task UploadFileAsync(
+        Stream fileStream,
+        string objectKey,
+        string contentType,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Generate a presigned URL for downloading/viewing a file from object storage.
     /// </summary>
     /// <param name="objectKey">The storage key/path for the object</param>

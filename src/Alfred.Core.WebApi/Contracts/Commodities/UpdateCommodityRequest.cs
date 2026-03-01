@@ -9,6 +9,8 @@ public sealed record UpdateCommodityRequest
     public Guid? DefaultUnitId { get; init; }
     public string? Description { get; init; }
 
-    public UpdateCommodityDto ToDto() =>
-        new(Name, AssetClass, DefaultUnitId, Description);
+    public UpdateCommodityDto ToDto()
+    {
+        return new UpdateCommodityDto(Name, AssetClass, DefaultUnitId, Description);
+    }
 }

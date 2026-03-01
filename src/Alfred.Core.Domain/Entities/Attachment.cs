@@ -33,7 +33,9 @@ public sealed class Attachment : BaseEntity, IHasCreationTime
 
     public DateTime CreatedAt { get; set; }
 
-    private Attachment() { }
+    private Attachment()
+    {
+    }
 
     public static Attachment Create(
         Guid targetId,

@@ -21,9 +21,12 @@ public sealed class AssetLog : BaseEntity, IHasCreationTime
     public Asset? Asset { get; private set; }
     public Brand? Brand { get; private set; }
 
-    private AssetLog() { }
+    private AssetLog()
+    {
+    }
 
-    public static AssetLog Create(Guid assetId, AssetLogEventType eventType, Guid? brandId, DateTimeOffset performedAt, decimal cost, string? note, Guid? financeTxnId, DateTime? nextDueDate)
+    public static AssetLog Create(Guid assetId, AssetLogEventType eventType, Guid? brandId, DateTimeOffset performedAt,
+        decimal cost, string? note, Guid? financeTxnId, DateTime? nextDueDate)
     {
         return new AssetLog
         {

@@ -119,8 +119,8 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             _assetLogRepository,
             query,
             AssetLogFieldMap.Instance,
-            preFilter: l => l.AssetId == assetId,
-            mapper: l => l.ToDto(),
+            l => l.AssetId == assetId,
+            l => l.ToDto(),
             cancellationToken);
     }
 
@@ -143,7 +143,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             throw new KeyNotFoundException($"Asset with ID {assetId} not found.");
         }
 
-        if (!Enum.TryParse<AssetLogEventType>(dto.EventType, ignoreCase: true, out var eventType))
+        if (!Enum.TryParse<AssetLogEventType>(dto.EventType, true, out var eventType))
         {
             throw new InvalidOperationException(
                 $"Invalid event type '{dto.EventType}'. Valid values: {string.Join(", ", Enum.GetNames<AssetLogEventType>())}");
@@ -186,7 +186,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             return AssetStatus.Active;
         }
 
-        if (!Enum.TryParse<AssetStatus>(status, ignoreCase: true, out var parsed))
+        if (!Enum.TryParse<AssetStatus>(status, true, out var parsed))
         {
             throw new InvalidOperationException(
                 $"Invalid asset status '{status}'. Valid values: {string.Join(", ", Enum.GetNames<AssetStatus>())}");

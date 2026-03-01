@@ -14,7 +14,8 @@ public interface ICommodityService
 
     Task<CommodityDto> CreateCommodityAsync(CreateCommodityDto dto, CancellationToken cancellationToken = default);
 
-    Task<CommodityDto> UpdateCommodityAsync(Guid id, UpdateCommodityDto dto, CancellationToken cancellationToken = default);
+    Task<CommodityDto> UpdateCommodityAsync(Guid id, UpdateCommodityDto dto,
+        CancellationToken cancellationToken = default);
 
     Task DeleteCommodityAsync(Guid id, CancellationToken cancellationToken = default);
 

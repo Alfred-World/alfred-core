@@ -1,6 +1,5 @@
 using Alfred.Core.Application.Attachments.Dtos;
 using Alfred.Core.Application.Files;
-using Alfred.Core.Application.Files.Dtos;
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Domain.Entities;
@@ -86,7 +85,9 @@ public sealed class AttachmentService : IAttachmentService
         var entity = await _attachmentRepository.GetByIdAsync(attachmentId, cancellationToken);
 
         if (entity is null)
+        {
             throw new KeyNotFoundException($"Attachment with ID {attachmentId} not found.");
+        }
 
         // Delete from R2
         await _storageService.DeleteObjectAsync(entity.ObjectKey, cancellationToken);
@@ -104,16 +105,19 @@ public sealed class AttachmentService : IAttachmentService
             objectKey, _settings.DownloadUrlExpirationMinutes, cancellationToken);
     }
 
-    private static AttachmentDto ToDto(Attachment entity, string downloadUrl) => new(
-        entity.Id,
-        entity.TargetId,
-        entity.TargetType,
-        entity.FileName,
-        entity.ContentType,
-        entity.FileSize,
-        entity.Purpose,
-        downloadUrl,
-        entity.CreatedAt);
+    private static AttachmentDto ToDto(Attachment entity, string downloadUrl)
+    {
+        return new AttachmentDto(
+            entity.Id,
+            entity.TargetId,
+            entity.TargetType,
+            entity.FileName,
+            entity.ContentType,
+            entity.FileSize,
+            entity.Purpose,
+            downloadUrl,
+            entity.CreatedAt);
+    }
 
     private static string BuildFolder(string targetType, string purpose)
     {

@@ -22,7 +22,9 @@ public sealed class Unit : BaseEntity, IHasCreationTime, IHasModificationTime
     public Unit? BaseUnit { get; private set; }
     public ICollection<Unit> DerivedUnits { get; private set; } = new List<Unit>();
 
-    private Unit() { }
+    private Unit()
+    {
+    }
 
     public static Unit Create(
         string code,

@@ -236,7 +236,7 @@ public sealed class UnitService : BaseApplicationService, IUnitService
         var toRate = toUnit.BaseUnitId == null ? 1m : toUnit.ConversionRate;
         var result = value * fromRate / toRate;
 
-        var formula = $"1 {fromUnit.Code} = {(fromRate / toRate):G} {toUnit.Code}";
+        var formula = $"1 {fromUnit.Code} = {fromRate / toRate:G} {toUnit.Code}";
 
         return new ConvertResultDto(value, fromUnit.Code, result, toUnit.Code, formula);
     }

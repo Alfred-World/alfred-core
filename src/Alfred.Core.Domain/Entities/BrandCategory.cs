@@ -9,7 +9,9 @@ public sealed class BrandCategory
     public Brand? Brand { get; private set; }
     public Category? Category { get; private set; }
 
-    private BrandCategory() { }
+    private BrandCategory()
+    {
+    }
 
     public static BrandCategory Create(Guid brandId, Guid categoryId)
     {

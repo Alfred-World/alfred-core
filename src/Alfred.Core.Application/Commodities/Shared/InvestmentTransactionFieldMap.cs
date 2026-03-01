@@ -8,9 +8,12 @@ namespace Alfred.Core.Application.Commodities.Shared;
 /// </summary>
 public sealed class InvestmentTransactionFieldMap : BaseFieldMap<InvestmentTransaction>
 {
-    private static readonly Lazy<InvestmentTransactionFieldMap> _instance = new(() => new InvestmentTransactionFieldMap());
+    private static readonly Lazy<InvestmentTransactionFieldMap> _instance = new(() =>
+        new InvestmentTransactionFieldMap());
 
-    private InvestmentTransactionFieldMap() { }
+    private InvestmentTransactionFieldMap()
+    {
+    }
 
     public static InvestmentTransactionFieldMap Instance => _instance.Value;
 

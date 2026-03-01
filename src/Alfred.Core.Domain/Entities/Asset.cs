@@ -23,9 +23,13 @@ public sealed class Asset : BaseEntity, IHasCreationTime, IHasModificationTime
     public Category? Category { get; private set; }
     public Brand? Brand { get; private set; }
 
-    private Asset() { }
+    private Asset()
+    {
+    }
 
-    public static Asset Create(string name, Guid? categoryId, Guid? brandId, DateTime? purchaseDate, decimal initialCost, DateTime? warrantyExpiryDate, string specs, AssetStatus status = AssetStatus.Active, string? location = null)
+    public static Asset Create(string name, Guid? categoryId, Guid? brandId, DateTime? purchaseDate,
+        decimal initialCost, DateTime? warrantyExpiryDate, string specs, AssetStatus status = AssetStatus.Active,
+        string? location = null)
     {
         return new Asset
         {
@@ -42,7 +46,8 @@ public sealed class Asset : BaseEntity, IHasCreationTime, IHasModificationTime
         };
     }
 
-    public void Update(string name, Guid? categoryId, Guid? brandId, DateTime? purchaseDate, decimal initialCost, DateTime? warrantyExpiryDate, string specs, AssetStatus status, string? location)
+    public void Update(string name, Guid? categoryId, Guid? brandId, DateTime? purchaseDate, decimal initialCost,
+        DateTime? warrantyExpiryDate, string specs, AssetStatus status, string? location)
     {
         Name = name;
         CategoryId = categoryId;

@@ -7,5 +7,7 @@ namespace Alfred.Core.Infrastructure.Repositories;
 
 public sealed class CategoryRepository : BaseRepository<Category, Guid>, ICategoryRepository
 {
-    public CategoryRepository(IDbContext context) : base(context) { }
+    public CategoryRepository(IDbContext context) : base(context)
+    {
+    }
 }

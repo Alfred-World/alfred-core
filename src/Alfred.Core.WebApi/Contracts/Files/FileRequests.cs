@@ -28,8 +28,10 @@ public sealed record GenerateUploadUrlRequest
     /// </summary>
     public string? Folder { get; init; }
 
-    public GenerateUploadUrlDto ToDto() =>
-        new(FileName, ContentType, FileSize, Folder);
+    public GenerateUploadUrlDto ToDto()
+    {
+        return new GenerateUploadUrlDto(FileName, ContentType, FileSize, Folder);
+    }
 }
 
 /// <summary>
@@ -42,7 +44,10 @@ public sealed record GenerateDownloadUrlRequest
     /// </summary>
     public string ObjectKey { get; init; } = null!;
 
-    public GenerateDownloadUrlDto ToDto() => new(ObjectKey);
+    public GenerateDownloadUrlDto ToDto()
+    {
+        return new GenerateDownloadUrlDto(ObjectKey);
+    }
 }
 
 /// <summary>
@@ -55,5 +60,8 @@ public sealed record DeleteFileRequest
     /// </summary>
     public string ObjectKey { get; init; } = null!;
 
-    public DeleteFileDto ToDto() => new(ObjectKey);
+    public DeleteFileDto ToDto()
+    {
+        return new DeleteFileDto(ObjectKey);
+    }
 }

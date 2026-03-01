@@ -17,9 +17,12 @@ public sealed class Commodity : BaseEntity, IHasCreationTime
     // Navigation
     public Unit? DefaultUnit { get; private set; }
 
-    private Commodity() { }
+    private Commodity()
+    {
+    }
 
-    public static Commodity Create(string code, string name, CommodityAssetClass assetClass, Guid? defaultUnitId, string? description)
+    public static Commodity Create(string code, string name, CommodityAssetClass assetClass, Guid? defaultUnitId,
+        string? description)
     {
         return new Commodity
         {

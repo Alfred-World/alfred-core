@@ -10,7 +10,9 @@ public sealed class CommodityFieldMap : BaseFieldMap<Commodity>
 {
     private static readonly Lazy<CommodityFieldMap> _instance = new(() => new CommodityFieldMap());
 
-    private CommodityFieldMap() { }
+    private CommodityFieldMap()
+    {
+    }
 
     public static CommodityFieldMap Instance => _instance.Value;
 

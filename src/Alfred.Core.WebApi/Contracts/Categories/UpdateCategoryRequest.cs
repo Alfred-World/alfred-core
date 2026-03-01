@@ -11,6 +11,8 @@ public sealed record UpdateCategoryRequest
     public Guid? ParentId { get; init; }
     public string FormSchema { get; init; } = "[]";
 
-    public UpdateCategoryDto ToDto() =>
-        new(Name, Icon, Type, ParentId, FormSchema);
+    public UpdateCategoryDto ToDto()
+    {
+        return new UpdateCategoryDto(Name, Icon, Type, ParentId, FormSchema);
+    }
 }

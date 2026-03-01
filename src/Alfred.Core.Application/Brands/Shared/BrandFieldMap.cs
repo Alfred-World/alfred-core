@@ -7,7 +7,9 @@ public sealed class BrandFieldMap : BaseFieldMap<Brand>
 {
     private static readonly Lazy<BrandFieldMap> _instance = new(() => new BrandFieldMap());
 
-    private BrandFieldMap() { }
+    private BrandFieldMap()
+    {
+    }
 
     public static BrandFieldMap Instance => _instance.Value;
 

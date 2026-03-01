@@ -23,9 +23,13 @@ public sealed class InvestmentTransaction : BaseEntity, IHasCreationTime
     public Commodity? Commodity { get; private set; }
     public Unit? Unit { get; private set; }
 
-    private InvestmentTransaction() { }
+    private InvestmentTransaction()
+    {
+    }
 
-    public static InvestmentTransaction Create(Guid commodityId, InvestmentTransactionType transactionType, DateTimeOffset transactionDate, decimal quantity, Guid unitId, decimal pricePerUnit, decimal totalAmount, decimal feeAmount, Guid? financeTxnId, string? notes)
+    public static InvestmentTransaction Create(Guid commodityId, InvestmentTransactionType transactionType,
+        DateTimeOffset transactionDate, decimal quantity, Guid unitId, decimal pricePerUnit, decimal totalAmount,
+        decimal feeAmount, Guid? financeTxnId, string? notes)
     {
         return new InvestmentTransaction
         {

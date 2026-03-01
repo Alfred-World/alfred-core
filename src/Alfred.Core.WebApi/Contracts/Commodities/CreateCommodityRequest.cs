@@ -10,6 +10,8 @@ public sealed record CreateCommodityRequest
     public Guid? DefaultUnitId { get; init; }
     public string? Description { get; init; }
 
-    public CreateCommodityDto ToDto() =>
-        new(Code, Name, AssetClass, DefaultUnitId, Description);
+    public CreateCommodityDto ToDto()
+    {
+        return new CreateCommodityDto(Code, Name, AssetClass, DefaultUnitId, Description);
+    }
 }

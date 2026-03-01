@@ -12,6 +12,8 @@ public sealed record CreateAssetLogRequest
     public Guid? FinanceTxnId { get; init; }
     public DateTime? NextDueDate { get; init; }
 
-    public CreateAssetLogDto ToDto() =>
-        new(EventType, BrandId, PerformedAt, Cost, Note, FinanceTxnId, NextDueDate);
+    public CreateAssetLogDto ToDto()
+    {
+        return new CreateAssetLogDto(EventType, BrandId, PerformedAt, Cost, Note, FinanceTxnId, NextDueDate);
+    }
 }

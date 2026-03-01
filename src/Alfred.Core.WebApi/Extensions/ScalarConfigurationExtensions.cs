@@ -83,7 +83,8 @@ public static class ScalarConfigurationExtensions
             {
                 c.Title = "Core API";
                 c.Theme = ScalarTheme.Purple;
-                c.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
+                c.DefaultHttpClient =
+                    new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.CSharp, ScalarClient.HttpClient);
                 c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json";
                 c.PersistentAuthentication = true;
             });

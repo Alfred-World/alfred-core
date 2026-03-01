@@ -7,7 +7,9 @@ public sealed class UnitFieldMap : BaseFieldMap<Unit>
 {
     private static readonly Lazy<UnitFieldMap> _instance = new(() => new UnitFieldMap());
 
-    private UnitFieldMap() { }
+    private UnitFieldMap()
+    {
+    }
 
     public static UnitFieldMap Instance => _instance.Value;
 

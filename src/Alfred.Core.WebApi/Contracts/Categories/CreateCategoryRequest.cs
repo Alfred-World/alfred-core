@@ -12,6 +12,8 @@ public sealed record CreateCategoryRequest
     public Guid? ParentId { get; init; }
     public string FormSchema { get; init; } = "[]";
 
-    public CreateCategoryDto ToDto() =>
-        new(Code, Name, Icon, Type, ParentId, FormSchema);
+    public CreateCategoryDto ToDto()
+    {
+        return new CreateCategoryDto(Code, Name, Icon, Type, ParentId, FormSchema);
+    }
 }

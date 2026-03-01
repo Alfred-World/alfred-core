@@ -13,6 +13,8 @@ public sealed record UpdateUnitRequest
     public UnitStatus Status { get; init; } = UnitStatus.Active;
     public string? Description { get; init; }
 
-    public UpdateUnitDto ToDto() =>
-        new(Name, Symbol, Category, BaseUnitId, ConversionRate, Status, Description);
+    public UpdateUnitDto ToDto()
+    {
+        return new UpdateUnitDto(Name, Symbol, Category, BaseUnitId, ConversionRate, Status, Description);
+    }
 }

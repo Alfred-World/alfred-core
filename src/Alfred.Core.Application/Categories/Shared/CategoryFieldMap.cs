@@ -7,7 +7,9 @@ public sealed class CategoryFieldMap : BaseFieldMap<Category>
 {
     private static readonly Lazy<CategoryFieldMap> _instance = new(() => new CategoryFieldMap());
 
-    private CategoryFieldMap() { }
+    private CategoryFieldMap()
+    {
+    }
 
     public static CategoryFieldMap Instance => _instance.Value;
 

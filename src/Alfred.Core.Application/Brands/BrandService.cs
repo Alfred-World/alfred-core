@@ -49,7 +49,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
         var entity = await _brandRepository
             .GetQueryable()
             .Include(b => b.BrandCategories)
-                .ThenInclude(bc => bc.Category)
+            .ThenInclude(bc => bc.Category)
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
 
         return entity?.ToDto();

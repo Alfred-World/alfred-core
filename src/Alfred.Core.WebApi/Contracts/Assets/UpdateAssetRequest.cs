@@ -14,6 +14,9 @@ public sealed record UpdateAssetRequest
     public string? Status { get; init; }
     public string? Location { get; init; }
 
-    public UpdateAssetDto ToDto() =>
-        new(Name, CategoryId, BrandId, PurchaseDate, InitialCost, WarrantyExpiryDate, Specs, Status, Location);
+    public UpdateAssetDto ToDto()
+    {
+        return new UpdateAssetDto(Name, CategoryId, BrandId, PurchaseDate, InitialCost, WarrantyExpiryDate, Specs,
+            Status, Location);
+    }
 }

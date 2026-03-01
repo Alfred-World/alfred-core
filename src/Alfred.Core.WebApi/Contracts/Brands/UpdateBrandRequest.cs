@@ -11,6 +11,8 @@ public sealed record UpdateBrandRequest
     public string? LogoUrl { get; init; }
     public List<Guid>? CategoryIds { get; init; }
 
-    public UpdateBrandDto ToDto() =>
-        new(Name, Website, SupportPhone, Description, LogoUrl, CategoryIds);
+    public UpdateBrandDto ToDto()
+    {
+        return new UpdateBrandDto(Name, Website, SupportPhone, Description, LogoUrl, CategoryIds);
+    }
 }

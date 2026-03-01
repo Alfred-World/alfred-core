@@ -115,9 +115,9 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             _transactionRepository,
             query,
             InvestmentTransactionFieldMap.Instance,
-            preFilter: t => t.CommodityId == commodityId,
-            includes: [t => t.Commodity!, t => t.Unit!],
-            mapper: t => t.ToDto(),
+            t => t.CommodityId == commodityId,
+            [t => t.Commodity!, t => t.Unit!],
+            t => t.ToDto(),
             cancellationToken);
     }
 
@@ -142,7 +142,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             throw new KeyNotFoundException($"Commodity with ID {commodityId} not found.");
         }
 
-        if (!Enum.TryParse<InvestmentTransactionType>(dto.TransactionType, ignoreCase: true, out var transactionType))
+        if (!Enum.TryParse<InvestmentTransactionType>(dto.TransactionType, true, out var transactionType))
         {
             throw new InvalidOperationException(
                 $"Invalid transaction type '{dto.TransactionType}'. Valid values: {string.Join(", ", Enum.GetNames<InvestmentTransactionType>())}");
@@ -187,7 +187,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             return CommodityAssetClass.Metal;
         }
 
-        if (!Enum.TryParse<CommodityAssetClass>(assetClass, ignoreCase: true, out var parsed))
+        if (!Enum.TryParse<CommodityAssetClass>(assetClass, true, out var parsed))
         {
             throw new InvalidOperationException(
                 $"Invalid asset class '{assetClass}'. Valid values: {string.Join(", ", Enum.GetNames<CommodityAssetClass>())}");

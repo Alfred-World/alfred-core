@@ -1,5 +1,4 @@
 using Alfred.Core.Domain.Entities;
-using Alfred.Core.Domain.Enums;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

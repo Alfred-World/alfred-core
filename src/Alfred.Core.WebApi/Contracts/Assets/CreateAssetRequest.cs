@@ -14,6 +14,9 @@ public sealed record CreateAssetRequest
     public string? Status { get; init; }
     public string? Location { get; init; }
 
-    public CreateAssetDto ToDto() =>
-        new(Name, CategoryId, BrandId, PurchaseDate, InitialCost, WarrantyExpiryDate, Specs, Status, Location);
+    public CreateAssetDto ToDto()
+    {
+        return new CreateAssetDto(Name, CategoryId, BrandId, PurchaseDate, InitialCost, WarrantyExpiryDate, Specs,
+            Status, Location);
+    }
 }

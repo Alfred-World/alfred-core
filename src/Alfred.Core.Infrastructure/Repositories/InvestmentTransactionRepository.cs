@@ -5,7 +5,10 @@ using Alfred.Core.Infrastructure.Repositories.Base;
 
 namespace Alfred.Core.Infrastructure.Repositories;
 
-public sealed class InvestmentTransactionRepository : BaseRepository<InvestmentTransaction, Guid>, IInvestmentTransactionRepository
+public sealed class InvestmentTransactionRepository : BaseRepository<InvestmentTransaction, Guid>,
+    IInvestmentTransactionRepository
 {
-    public InvestmentTransactionRepository(IDbContext context) : base(context) { }
+    public InvestmentTransactionRepository(IDbContext context) : base(context)
+    {
+    }
 }

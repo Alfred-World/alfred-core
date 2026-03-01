@@ -14,6 +14,8 @@ public sealed record CreateUnitRequest
     public UnitStatus Status { get; init; } = UnitStatus.Active;
     public string? Description { get; init; }
 
-    public CreateUnitDto ToDto() =>
-        new(Code, Name, Symbol, Category, BaseUnitId, ConversionRate, Status, Description);
+    public CreateUnitDto ToDto()
+    {
+        return new CreateUnitDto(Code, Name, Symbol, Category, BaseUnitId, ConversionRate, Status, Description);
+    }
 }

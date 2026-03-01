@@ -10,7 +10,9 @@ public sealed class AssetFieldMap : BaseFieldMap<Asset>
 {
     private static readonly Lazy<AssetFieldMap> _instance = new(() => new AssetFieldMap());
 
-    private AssetFieldMap() { }
+    private AssetFieldMap()
+    {
+    }
 
     public static AssetFieldMap Instance => _instance.Value;
 

@@ -20,9 +20,12 @@ public sealed class Category : BaseEntity, IHasCreationTime
     public ICollection<Category> SubCategories { get; private set; } = new List<Category>();
     public ICollection<BrandCategory> BrandCategories { get; private set; } = new List<BrandCategory>();
 
-    private Category() { }
+    private Category()
+    {
+    }
 
-    public static Category Create(string code, string name, CategoryType type, string? icon = null, Guid? parentId = null, string formSchema = "[]")
+    public static Category Create(string code, string name, CategoryType type, string? icon = null,
+        Guid? parentId = null, string formSchema = "[]")
     {
         return new Category
         {

@@ -14,6 +14,10 @@ public sealed record CreateInvestmentTransactionRequest
     public Guid? FinanceTxnId { get; init; }
     public string? Notes { get; init; }
 
-    public CreateInvestmentTransactionDto ToDto() =>
-        new(TransactionType, TransactionDate, Quantity, UnitId, PricePerUnit, TotalAmount, FeeAmount, FinanceTxnId, Notes);
+    public CreateInvestmentTransactionDto ToDto()
+    {
+        return new CreateInvestmentTransactionDto(TransactionType, TransactionDate, Quantity, UnitId, PricePerUnit,
+            TotalAmount, FeeAmount,
+            FinanceTxnId, Notes);
+    }
 }

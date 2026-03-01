@@ -92,7 +92,8 @@ public static class ServiceCollectionExtensions
         var allowedTypes = Environment.GetEnvironmentVariable("R2_ALLOWED_CONTENT_TYPES");
         if (!string.IsNullOrWhiteSpace(allowedTypes))
         {
-            options.AllowedContentTypes = allowedTypes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            options.AllowedContentTypes = allowedTypes.Split(',',
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         }
 
         options.Validate();

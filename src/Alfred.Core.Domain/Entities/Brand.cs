@@ -17,7 +17,9 @@ public sealed class Brand : BaseEntity, IHasCreationTime, IHasModificationTime
     // Navigation
     public ICollection<BrandCategory> BrandCategories { get; private set; } = new List<BrandCategory>();
 
-    private Brand() { }
+    private Brand()
+    {
+    }
 
     public static Brand Create(
         string name,

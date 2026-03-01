@@ -13,7 +13,8 @@ public sealed class AttachmentRepository : BaseRepository<Attachment, Guid>, IAt
     {
     }
 
-    public async Task<List<Attachment>> GetByTargetAsync(Guid targetId, string targetType, CancellationToken cancellationToken = default)
+    public async Task<List<Attachment>> GetByTargetAsync(Guid targetId, string targetType,
+        CancellationToken cancellationToken = default)
     {
         return await _dbSet
             .Where(a => a.TargetId == targetId && a.TargetType == targetType)
@@ -21,7 +22,8 @@ public sealed class AttachmentRepository : BaseRepository<Attachment, Guid>, IAt
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Attachment>> GetByTargetAndPurposeAsync(Guid targetId, string targetType, string purpose, CancellationToken cancellationToken = default)
+    public async Task<List<Attachment>> GetByTargetAndPurposeAsync(Guid targetId, string targetType, string purpose,
+        CancellationToken cancellationToken = default)
     {
         return await _dbSet
             .Where(a => a.TargetId == targetId && a.TargetType == targetType && a.Purpose == purpose)

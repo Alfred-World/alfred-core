@@ -172,6 +172,8 @@ public abstract class BaseApplicationService
         : ExpressionVisitor
     {
         protected override Expression VisitParameter(ParameterExpression node)
-            => node == oldParam ? newParam : base.VisitParameter(node);
+        {
+            return node == oldParam ? newParam : base.VisitParameter(node);
+        }
     }
 }

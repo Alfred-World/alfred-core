@@ -265,5 +265,4 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             .Select(g => new CategoryCountByTypeDto(g.Key, g.Count()))
             .ToListAsync(cancellationToken);
     }
-
 }

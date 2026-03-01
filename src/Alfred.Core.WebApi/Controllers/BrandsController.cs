@@ -31,7 +31,8 @@ public sealed class BrandsController : BaseApiController
         [FromQuery] Guid? categoryId,
         CancellationToken cancellationToken)
     {
-        var result = await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), categoryId, cancellationToken);
+        var result =
+            await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), categoryId, cancellationToken);
         return OkPaginatedResponse(result);
     }
 

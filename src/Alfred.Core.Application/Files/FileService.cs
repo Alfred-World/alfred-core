@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using Alfred.Core.Application.Files.Dtos;
 using Alfred.Core.Domain.Abstractions.Services;
 
@@ -45,9 +47,9 @@ public sealed class FileService : IFileService
             objectKey, dto.ContentType, expirationMinutes, cancellationToken);
 
         return new UploadUrlResultDto(
-            UploadUrl: uploadUrl,
-            ObjectKey: objectKey,
-            ExpiresAt: DateTime.UtcNow.AddMinutes(expirationMinutes));
+            uploadUrl,
+            objectKey,
+            DateTime.UtcNow.AddMinutes(expirationMinutes));
     }
 
     public async Task<DownloadUrlResultDto> GenerateDownloadUrlAsync(
@@ -65,8 +67,8 @@ public sealed class FileService : IFileService
             dto.ObjectKey, expirationMinutes, cancellationToken);
 
         return new DownloadUrlResultDto(
-            DownloadUrl: downloadUrl,
-            ExpiresAt: DateTime.UtcNow.AddMinutes(expirationMinutes));
+            downloadUrl,
+            DateTime.UtcNow.AddMinutes(expirationMinutes));
     }
 
     public async Task DeleteFileAsync(
@@ -106,7 +108,7 @@ public sealed class FileService : IFileService
 
         await _storageService.UploadFileAsync(fileStream, objectKey, contentType, cancellationToken);
 
-        return new FileUploadResultDto(ObjectKey: objectKey, FileName: fileName);
+        return new FileUploadResultDto(objectKey, fileName);
     }
 
     /// <summary>
@@ -134,7 +136,7 @@ public sealed class FileService : IFileService
         var ext = Path.GetExtension(fileName);
 
         // Replace non-alphanumeric (except - _ .) with underscore
-        var sanitized = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w\-.]", "_");
+        var sanitized = Regex.Replace(name, @"[^\w\-.]", "_");
 
         // Limit length
         if (sanitized.Length > 100)

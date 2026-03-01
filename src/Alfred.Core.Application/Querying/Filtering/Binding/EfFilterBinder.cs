@@ -251,7 +251,7 @@ public static class EfFilterBinder<T>
                     if (constant.Value is string enumString)
                     {
                         // Parse string to enum (case-insensitive)
-                        var enumValue = Enum.Parse(underlyingTargetType, enumString, ignoreCase: true);
+                        var enumValue = Enum.Parse(underlyingTargetType, enumString, true);
                         return Expression.Constant(enumValue, targetType);
                     }
 

@@ -99,7 +99,9 @@ public sealed class FilesController : BaseApiController
         CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)
+        {
             return BadRequestResponse("No file provided.", "NO_FILE");
+        }
 
         try
         {

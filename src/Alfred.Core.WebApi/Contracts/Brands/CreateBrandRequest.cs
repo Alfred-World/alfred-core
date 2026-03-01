@@ -11,6 +11,8 @@ public sealed record CreateBrandRequest
     public string? LogoUrl { get; init; }
     public List<Guid>? CategoryIds { get; init; }
 
-    public CreateBrandDto ToDto() =>
-        new(Name, Website, SupportPhone, Description, LogoUrl, CategoryIds);
+    public CreateBrandDto ToDto()
+    {
+        return new CreateBrandDto(Name, Website, SupportPhone, Description, LogoUrl, CategoryIds);
+    }
 }

@@ -15,9 +15,12 @@ public sealed class MarketPrice
     // Navigation
     public Commodity? Commodity { get; private set; }
 
-    private MarketPrice() { }
+    private MarketPrice()
+    {
+    }
 
-    public static MarketPrice Create(DateTimeOffset time, Guid commodityId, decimal buyPrice, decimal sellPrice, string? source)
+    public static MarketPrice Create(DateTimeOffset time, Guid commodityId, decimal buyPrice, decimal sellPrice,
+        string? source)
     {
         return new MarketPrice
         {

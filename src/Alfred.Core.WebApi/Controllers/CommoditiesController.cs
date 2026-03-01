@@ -110,7 +110,8 @@ public sealed class CommoditiesController : BaseApiController
         [FromQuery] PaginationQueryParameters queryRequest,
         CancellationToken cancellationToken)
     {
-        var result = await _commodityService.GetTransactionsAsync(commodityId, queryRequest.ToQueryRequest(), cancellationToken);
+        var result =
+            await _commodityService.GetTransactionsAsync(commodityId, queryRequest.ToQueryRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 
@@ -120,7 +121,8 @@ public sealed class CommoditiesController : BaseApiController
     [HttpGet("{commodityId:guid}/transactions/{transactionId:guid}")]
     [ProducesResponseType(typeof(ApiResponse<InvestmentTransactionDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTransactionById(Guid commodityId, Guid transactionId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTransactionById(Guid commodityId, Guid transactionId,
+        CancellationToken cancellationToken)
     {
         var result = await _commodityService.GetTransactionByIdAsync(transactionId, cancellationToken);
         if (result is null)

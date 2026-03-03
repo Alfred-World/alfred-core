@@ -11,23 +11,15 @@ COPY ["src/Alfred.Core.Infrastructure/Alfred.Core.Infrastructure.csproj", "src/A
 COPY ["src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj", "src/Alfred.Core.WebApi/"]
 COPY ["src/Alfred.Core.Cli/Alfred.Core.Cli.csproj", "src/Alfred.Core.Cli/"]
 
-# Restore dependencies for each project (skip test projects)
-RUN dotnet restore "src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj"
-RUN dotnet restore "src/Alfred.Core.Cli/Alfred.Core.Cli.csproj"
+# Restore all dependencies in one layer (cache invalidated only when .csproj files change)
+RUN dotnet restore "src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj" && \
+    dotnet restore "src/Alfred.Core.Cli/Alfred.Core.Cli.csproj"
 
 # Copy toàn bộ source code (excluding tests via .dockerignore)
 COPY . .
 
-# Build ứng dụng
-WORKDIR "/src/src/Alfred.Core.WebApi"
-RUN dotnet build "Alfred.Core.WebApi.csproj" -c Release -o /app/build
-
-# Build CLI tool
-WORKDIR "/src/src/Alfred.Core.Cli"
-RUN dotnet build "Alfred.Core.Cli.csproj" -c Release -o /app/cli
-
 # ============================================
-# Publish Stage - Tạo artifact để deploy
+# Publish Stage - Build + Publish in one step (dotnet publish compiles implicitly)
 # ============================================
 FROM build AS publish
 WORKDIR "/src/src/Alfred.Core.WebApi"

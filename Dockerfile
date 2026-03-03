@@ -1,65 +1,47 @@
 # ============================================
-# Build Stage - Compile ứng dụng
+# Build Stage
 # ============================================
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
-# Copy csproj files and restore dependencies (tận dụng Docker layer caching)
 COPY ["src/Alfred.Core.Domain/Alfred.Core.Domain.csproj", "src/Alfred.Core.Domain/"]
 COPY ["src/Alfred.Core.Application/Alfred.Core.Application.csproj", "src/Alfred.Core.Application/"]
 COPY ["src/Alfred.Core.Infrastructure/Alfred.Core.Infrastructure.csproj", "src/Alfred.Core.Infrastructure/"]
 COPY ["src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj", "src/Alfred.Core.WebApi/"]
 COPY ["src/Alfred.Core.Cli/Alfred.Core.Cli.csproj", "src/Alfred.Core.Cli/"]
 
-# Restore all dependencies in one layer (cache invalidated only when .csproj files change)
-RUN dotnet restore "src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj" && \
+RUN --mount=type=cache,id=nuget-core,target=/root/.nuget/packages \
+    dotnet restore "src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj" && \
     dotnet restore "src/Alfred.Core.Cli/Alfred.Core.Cli.csproj"
 
-# Copy toàn bộ source code (excluding tests via .dockerignore)
 COPY . .
 
 # ============================================
-# Publish Stage - Build + Publish in one step (dotnet publish compiles implicitly)
+# Publish Stage
 # ============================================
 FROM build AS publish
-WORKDIR "/src/src/Alfred.Core.WebApi"
-RUN dotnet publish "Alfred.Core.WebApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-WORKDIR "/src/src/Alfred.Core.Cli"
-RUN dotnet publish "Alfred.Core.Cli.csproj" -c Release -o /app/publish/cli /p:UseAppHost=false
+RUN --mount=type=cache,id=nuget-core,target=/root/.nuget/packages \
+    dotnet publish "src/Alfred.Core.WebApi/Alfred.Core.WebApi.csproj" -c Release -o /app/publish /p:UseAppHost=false && \
+    dotnet publish "src/Alfred.Core.Cli/Alfred.Core.Cli.csproj" -c Release -o /app/publish/cli /p:UseAppHost=false
 
 # ============================================
-# Final Stage - Image runtime siêu nhẹ
+# Final Stage
 # ============================================
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
 WORKDIR /app
 
-# Install runtime dependencies + tools for healthcheck
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgssapi-krb5-2 \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk --no-cache add curl libgcc libstdc++ icu-libs
 
-# Tạo non-root user để bảo mật
-RUN groupadd --system --gid 1001 alfred && \
-    useradd --system --uid 1001 --gid alfred --no-create-home alfred
+RUN addgroup -S -g 1001 alfred && adduser -S -u 1001 -G alfred -H alfred
 
-# Copy artifact từ publish stage
-COPY --from=publish /app/publish .
-COPY --from=publish /app/publish/cli ./cli
+COPY --from=publish --chown=alfred:alfred /app/publish .
+COPY --from=publish --chown=alfred:alfred /app/publish/cli ./cli
 
-# Đổi ownership cho user alfred
-RUN chown -R alfred:alfred /app
-
-# Switch sang user alfred (không dùng root)
 USER alfred
 
-# Expose port
 EXPOSE 8200
 
-# Health check using wget (available by default in aspnet image)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8200/health || exit 1
 
-# Entry point
 ENTRYPOINT ["dotnet", "Alfred.Core.WebApi.dll"]

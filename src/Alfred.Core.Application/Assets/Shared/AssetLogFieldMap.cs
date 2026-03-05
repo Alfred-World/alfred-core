@@ -23,6 +23,7 @@ public sealed class AssetLogFieldMap : BaseFieldMap<AssetLog>
         .Add("brandId", l => l.BrandId!).AllowAll()
         .Add("performedAt", l => l.PerformedAt).AllowAll()
         .Add("cost", l => l.Cost).AllowAll()
+        .Add("quantity", l => l.Quantity).AllowAll()
         .Add("nextDueDate", l => l.NextDueDate!).AllowAll()
         .Add("createdAt", l => l.CreatedAt).Sortable().Selectable();
 }

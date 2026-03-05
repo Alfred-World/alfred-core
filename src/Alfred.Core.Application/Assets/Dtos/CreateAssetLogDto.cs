@@ -5,6 +5,7 @@ public sealed record CreateAssetLogDto(
     Guid? BrandId,
     DateTimeOffset PerformedAt,
     decimal Cost,
+    decimal Quantity,
     string? Note,
     Guid? FinanceTxnId,
     DateTime? NextDueDate

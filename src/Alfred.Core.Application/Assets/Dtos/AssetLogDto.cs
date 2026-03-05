@@ -8,6 +8,7 @@ public sealed record AssetLogDto(
     string? BrandName,
     DateTimeOffset PerformedAt,
     decimal Cost,
+    decimal Quantity,
     string? Note,
     Guid? FinanceTxnId,
     DateTime? NextDueDate,

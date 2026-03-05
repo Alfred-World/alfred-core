@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -191,6 +190,7 @@ namespace Alfred.Core.Infrastructure.Migrations
                     BrandId = table.Column<Guid>(type: "uuid", nullable: true),
                     PerformedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
                     Cost = table.Column<decimal>(type: "numeric(18,2)", nullable: false, defaultValue: 0m),
+                    Quantity = table.Column<decimal>(type: "numeric(10,2)", nullable: false, defaultValue: 1m),
                     Note = table.Column<string>(type: "text", nullable: true),
                     FinanceTxnId = table.Column<Guid>(type: "uuid", nullable: true),
                     NextDueDate = table.Column<DateTime>(type: "date", nullable: true),

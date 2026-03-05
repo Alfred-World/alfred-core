@@ -27,6 +27,10 @@ internal sealed class AssetLogConfiguration : IEntityTypeConfiguration<AssetLog>
             .HasColumnType("decimal(18, 2)")
             .HasDefaultValue(0m);
 
+        builder.Property(x => x.Quantity)
+            .HasColumnType("decimal(10, 2)")
+            .HasDefaultValue(1m);
+
         builder.Property(x => x.Note)
             .HasColumnType("text");
 

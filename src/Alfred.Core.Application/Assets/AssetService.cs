@@ -155,6 +155,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             dto.BrandId,
             dto.PerformedAt,
             dto.Cost,
+            dto.Quantity,
             dto.Note,
             dto.FinanceTxnId,
             dto.NextDueDate);

@@ -38,6 +38,7 @@ public static class AssetMappingExtensions
             log.Brand?.Name,
             log.PerformedAt,
             log.Cost,
+            log.Quantity,
             log.Note,
             log.FinanceTxnId,
             log.NextDueDate,

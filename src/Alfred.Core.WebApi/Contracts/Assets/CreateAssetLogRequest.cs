@@ -8,12 +8,13 @@ public sealed record CreateAssetLogRequest
     public Guid? BrandId { get; init; }
     public DateTimeOffset PerformedAt { get; init; } = DateTimeOffset.UtcNow;
     public decimal Cost { get; init; }
+    public decimal Quantity { get; init; } = 1m;
     public string? Note { get; init; }
     public Guid? FinanceTxnId { get; init; }
     public DateTime? NextDueDate { get; init; }
 
     public CreateAssetLogDto ToDto()
     {
-        return new CreateAssetLogDto(EventType, BrandId, PerformedAt, Cost, Note, FinanceTxnId, NextDueDate);
+        return new CreateAssetLogDto(EventType, BrandId, PerformedAt, Cost, Quantity, Note, FinanceTxnId, NextDueDate);
     }
 }

@@ -11,6 +11,7 @@ public sealed class AssetLog : BaseEntity, IHasCreationTime
     public Guid? BrandId { get; private set; }
     public DateTimeOffset PerformedAt { get; private set; }
     public decimal Cost { get; private set; }
+    public decimal Quantity { get; private set; } = 1m;
     public string? Note { get; private set; }
     public Guid? FinanceTxnId { get; private set; }
     public DateTime? NextDueDate { get; private set; }
@@ -26,7 +27,7 @@ public sealed class AssetLog : BaseEntity, IHasCreationTime
     }
 
     public static AssetLog Create(Guid assetId, AssetLogEventType eventType, Guid? brandId, DateTimeOffset performedAt,
-        decimal cost, string? note, Guid? financeTxnId, DateTime? nextDueDate)
+        decimal cost, decimal quantity, string? note, Guid? financeTxnId, DateTime? nextDueDate)
     {
         return new AssetLog
         {
@@ -35,6 +36,7 @@ public sealed class AssetLog : BaseEntity, IHasCreationTime
             BrandId = brandId,
             PerformedAt = performedAt.ToUniversalTime(),
             Cost = cost,
+            Quantity = quantity > 0 ? quantity : 1m,
             Note = note,
             FinanceTxnId = financeTxnId,
             NextDueDate = nextDueDate,

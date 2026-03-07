@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 
 using Alfred.Core.Infrastructure.Common.HealthChecks;
 using Alfred.Core.Infrastructure.Common.Options;
@@ -47,7 +48,7 @@ public sealed class R2StorageHealthCheck : IHealthCheck
                 $"R2 bucket '{_options.BucketName}' is accessible at {_options.Endpoint}",
                 stopwatch.Elapsed);
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.Forbidden)
         {
             stopwatch.Stop();
             return HealthCheckResult.Unhealthy(
@@ -55,7 +56,7 @@ public sealed class R2StorageHealthCheck : IHealthCheck
                 $"R2 access denied for bucket '{_options.BucketName}' — check R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY",
                 stopwatch.Elapsed);
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             stopwatch.Stop();
             return HealthCheckResult.Unhealthy(

@@ -8,12 +8,12 @@ public static class UnitMappingExtensions
     public static UnitDto ToDto(this Unit unit)
     {
         return new UnitDto(
-            unit.Id,
+            unit.Id.Value,
             unit.Code,
             unit.Name,
             unit.Symbol,
             unit.Category,
-            unit.BaseUnitId,
+            unit.BaseUnitId?.Value,
             unit.BaseUnit?.Name,
             unit.BaseUnit?.Code,
             unit.ConversionRate,
@@ -28,7 +28,7 @@ public static class UnitMappingExtensions
     public static UnitTreeNodeDto ToTreeNode(this Unit unit)
     {
         return new UnitTreeNodeDto(
-            unit.Id,
+            unit.Id.Value,
             unit.Code,
             unit.Name,
             unit.Symbol,

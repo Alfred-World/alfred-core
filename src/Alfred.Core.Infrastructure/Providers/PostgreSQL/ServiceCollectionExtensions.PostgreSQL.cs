@@ -17,7 +17,7 @@ namespace Alfred.Core.Infrastructure.Providers.PostgreSQL;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    private static readonly Assembly DomainAssembly = typeof(IRepository<>).Assembly;
+    private static readonly Assembly DomainAssembly = typeof(IRepository<,>).Assembly;
     private static readonly Assembly InfraAssembly = typeof(ServiceCollectionExtensions).Assembly;
 
     public static IServiceCollection AddPostgreSQL(this IServiceCollection services, string connectionString)

@@ -1,7 +1,5 @@
 using System.Linq.Expressions;
 
-using Alfred.Core.Domain.Common.Base;
-
 namespace Alfred.Core.Domain.Abstractions;
 
 /// <summary>
@@ -51,11 +49,4 @@ public interface IRepository<T, TId> : IReadRepository<T> where T : class
     }
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// Repository for entities with Guid Id (UUID v7)
-/// </summary>
-public interface IRepository<T> : IRepository<T, Guid> where T : BaseEntity
-{
 }

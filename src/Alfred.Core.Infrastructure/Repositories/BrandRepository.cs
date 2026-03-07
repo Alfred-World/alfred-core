@@ -5,7 +5,7 @@ using Alfred.Core.Infrastructure.Repositories.Base;
 
 namespace Alfred.Core.Infrastructure.Repositories;
 
-public sealed class BrandRepository : BaseRepository<Brand, Guid>, IBrandRepository
+public sealed class BrandRepository : BaseRepository<Brand, BrandId>, IBrandRepository
 {
     public BrandRepository(IDbContext context) : base(context)
     {

@@ -64,8 +64,8 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             .ToListAsync(cancellationToken);
 
         var items = roots.Select(c => new CategoryTreeNodeDto(
-            c.Id, c.Code, c.Name, c.Icon, c.Type,
-            c.ParentId, c.SubCategories.Count, c.SubCategories.Count > 0
+            c.Id.Value, c.Code, c.Name, c.Icon, c.Type,
+            c.ParentId?.Value, c.SubCategories.Count, c.SubCategories.Count > 0
         )).ToList();
 
         return new PageResult<CategoryTreeNodeDto>(items, page, pageSize, total);
@@ -76,14 +76,13 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     {
         var children = await _categoryRepository.GetQueryable()
             .Include(c => c.SubCategories)
-            .Where(c => c.ParentId == parentId)
-            .OrderBy(c => c.Name)
+            .Where(c => c.ParentId == (CategoryId?)parentId)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
         return children.Select(c => new CategoryTreeNodeDto(
-            c.Id, c.Code, c.Name, c.Icon, c.Type,
-            c.ParentId, c.SubCategories.Count, c.SubCategories.Count > 0
+            c.Id.Value, c.Code, c.Name, c.Icon, c.Type,
+            c.ParentId?.Value, c.SubCategories.Count, c.SubCategories.Count > 0
         )).ToList();
     }
 
@@ -93,7 +92,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             .GetQueryable()
             .Include(c => c.Parent)
             .Include(c => c.SubCategories)
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == (CategoryId)id, cancellationToken);
 
         return entity?.ToDto();
     }
@@ -104,7 +103,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         // Validate parent type match
         if (dto.ParentId.HasValue)
         {
-            var parent = await _categoryRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
+            var parent = await _categoryRepository.GetByIdAsync((CategoryId)dto.ParentId.Value, cancellationToken);
 
             if (parent is null)
             {
@@ -123,13 +122,13 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             dto.Name,
             dto.Type,
             dto.Icon,
-            dto.ParentId,
+            dto.ParentId.HasValue ? (CategoryId?)dto.ParentId.Value : null,
             dto.FormSchema);
 
         await _categoryRepository.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetCategoryByIdAsync(entity.Id, cancellationToken))!;
+        return (await GetCategoryByIdAsync(entity.Id.Value, cancellationToken))!;
     }
 
     public async Task<CategoryDto> UpdateCategoryAsync(Guid id, UpdateCategoryDto dto,
@@ -137,7 +136,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     {
         var entity = await _categoryRepository
             .GetQueryable()
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == (CategoryId)id, cancellationToken);
 
         if (entity is null)
         {
@@ -153,7 +152,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         // Validate parent type match
         if (dto.ParentId.HasValue)
         {
-            var parent = await _categoryRepository.GetByIdAsync(dto.ParentId.Value, cancellationToken);
+            var parent = await _categoryRepository.GetByIdAsync((CategoryId)dto.ParentId.Value, cancellationToken);
 
             if (parent is null)
             {
@@ -176,7 +175,8 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         // Cascade type change to all descendants if type changed
         var typeChanged = entity.Type != dto.Type;
 
-        entity.Update(dto.Name, dto.ParentId, dto.Type, dto.Icon, dto.FormSchema);
+        entity.Update(dto.Name, dto.ParentId.HasValue ? (CategoryId?)dto.ParentId.Value : null,
+            dto.Type, dto.Icon, dto.FormSchema);
         _categoryRepository.Update(entity);
 
         if (typeChanged)
@@ -186,7 +186,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetCategoryByIdAsync(entity.Id, cancellationToken))!;
+        return (await GetCategoryByIdAsync(entity.Id.Value, cancellationToken))!;
     }
 
     /// <summary>
@@ -208,8 +208,8 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             }
 
             var childIds = await _categoryRepository.GetQueryable()
-                .Where(c => c.ParentId == currentId)
-                .Select(c => c.Id)
+                .Where(c => c.ParentId == (CategoryId?)currentId)
+                .Select(c => c.Id.Value)
                 .ToListAsync(cancellationToken);
 
             foreach (var childId in childIds)
@@ -233,20 +233,20 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         CancellationToken cancellationToken)
     {
         var children = await _categoryRepository.GetQueryable()
-            .Where(c => c.ParentId == parentId)
+            .Where(c => c.ParentId == (CategoryId?)parentId)
             .ToListAsync(cancellationToken);
 
         foreach (var child in children)
         {
             child.Update(child.Name, child.ParentId, newType, child.Icon, child.FormSchema);
             _categoryRepository.Update(child);
-            await CascadeTypeToDescendantsAsync(child.Id, newType, cancellationToken);
+            await CascadeTypeToDescendantsAsync(child.Id.Value, newType, cancellationToken);
         }
     }
 
     public async Task DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _categoryRepository.GetByIdAsync(id, cancellationToken);
+        var entity = await _categoryRepository.GetByIdAsync((CategoryId)id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Category with ID {id} not found.");

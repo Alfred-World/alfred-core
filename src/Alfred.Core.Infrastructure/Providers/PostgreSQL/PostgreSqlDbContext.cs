@@ -2,6 +2,7 @@ using System.Reflection;
 
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Infrastructure.Common.Abstractions;
+using Alfred.Core.Infrastructure.Common.Converters;
 using Alfred.Core.Infrastructure.Common.Options;
 
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,18 @@ public class PostgreSqlDbContext : DbContext, IDbContext
     public PostgreSqlDbContext(PostgreSqlOptions options)
     {
         _options = options;
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<AssetId>().HaveConversion<AssetIdConverter>();
+        configurationBuilder.Properties<CategoryId>().HaveConversion<CategoryIdConverter>();
+        configurationBuilder.Properties<BrandId>().HaveConversion<BrandIdConverter>();
+        configurationBuilder.Properties<UnitId>().HaveConversion<UnitIdConverter>();
+        configurationBuilder.Properties<AssetLogId>().HaveConversion<AssetLogIdConverter>();
+        configurationBuilder.Properties<AttachmentId>().HaveConversion<AttachmentIdConverter>();
+        configurationBuilder.Properties<CommodityId>().HaveConversion<CommodityIdConverter>();
+        configurationBuilder.Properties<InvestmentTransactionId>().HaveConversion<InvestmentTransactionIdConverter>();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

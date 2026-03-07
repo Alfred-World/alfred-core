@@ -4,11 +4,11 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Asset : BaseEntity, IHasCreationTime, IHasModificationTime
+public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificationTime
 {
     public string Name { get; private set; } = null!;
-    public Guid? CategoryId { get; private set; }
-    public Guid? BrandId { get; private set; }
+    public CategoryId? CategoryId { get; private set; }
+    public BrandId? BrandId { get; private set; }
     public DateTime? PurchaseDate { get; private set; }
     public decimal InitialCost { get; private set; }
     public DateTime? WarrantyExpiryDate { get; private set; }
@@ -25,9 +25,10 @@ public sealed class Asset : BaseEntity, IHasCreationTime, IHasModificationTime
 
     private Asset()
     {
+        Id = AssetId.New();
     }
 
-    public static Asset Create(string name, Guid? categoryId, Guid? brandId, DateTime? purchaseDate,
+    public static Asset Create(string name, CategoryId? categoryId, BrandId? brandId, DateTime? purchaseDate,
         decimal initialCost, DateTime? warrantyExpiryDate, string specs, AssetStatus status = AssetStatus.Active,
         string? location = null)
     {
@@ -46,7 +47,8 @@ public sealed class Asset : BaseEntity, IHasCreationTime, IHasModificationTime
         };
     }
 
-    public void Update(string name, Guid? categoryId, Guid? brandId, DateTime? purchaseDate, decimal initialCost,
+    public void Update(string name, CategoryId? categoryId, BrandId? brandId, DateTime? purchaseDate,
+        decimal initialCost,
         DateTime? warrantyExpiryDate, string specs, AssetStatus status, string? location)
     {
         Name = name;

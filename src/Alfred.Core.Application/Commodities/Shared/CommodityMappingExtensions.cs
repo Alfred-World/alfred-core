@@ -11,11 +11,11 @@ public static class CommodityMappingExtensions
     public static CommodityDto ToDto(this Commodity commodity)
     {
         return new CommodityDto(
-            commodity.Id,
+            commodity.Id.Value,
             commodity.Code,
             commodity.Name,
             commodity.AssetClass.ToString(),
-            commodity.DefaultUnitId,
+            commodity.DefaultUnitId?.Value,
             commodity.DefaultUnit?.Name,
             commodity.DefaultUnit?.Code,
             commodity.Description,
@@ -26,13 +26,13 @@ public static class CommodityMappingExtensions
     public static InvestmentTransactionDto ToDto(this InvestmentTransaction txn)
     {
         return new InvestmentTransactionDto(
-            txn.Id,
-            txn.CommodityId,
+            txn.Id.Value,
+            txn.CommodityId.Value,
             txn.Commodity?.Name,
             txn.TransactionType.ToString(),
             txn.TransactionDate,
             txn.Quantity,
-            txn.UnitId,
+            txn.UnitId.Value,
             txn.Unit?.Name,
             txn.Unit?.Code,
             txn.PricePerUnit,

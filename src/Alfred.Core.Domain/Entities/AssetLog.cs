@@ -4,11 +4,11 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class AssetLog : BaseEntity, IHasCreationTime
+public sealed class AssetLog : BaseEntity<AssetLogId>, IHasCreationTime
 {
-    public Guid AssetId { get; private set; }
+    public AssetId AssetId { get; private set; }
     public AssetLogEventType EventType { get; private set; }
-    public Guid? BrandId { get; private set; }
+    public BrandId? BrandId { get; private set; }
     public DateTimeOffset PerformedAt { get; private set; }
     public decimal Cost { get; private set; }
     public decimal Quantity { get; private set; } = 1m;
@@ -24,9 +24,11 @@ public sealed class AssetLog : BaseEntity, IHasCreationTime
 
     private AssetLog()
     {
+        Id = AssetLogId.New();
     }
 
-    public static AssetLog Create(Guid assetId, AssetLogEventType eventType, Guid? brandId, DateTimeOffset performedAt,
+    public static AssetLog Create(AssetId assetId, AssetLogEventType eventType, BrandId? brandId,
+        DateTimeOffset performedAt,
         decimal cost, decimal quantity, string? note, Guid? financeTxnId, DateTime? nextDueDate)
     {
         return new AssetLog

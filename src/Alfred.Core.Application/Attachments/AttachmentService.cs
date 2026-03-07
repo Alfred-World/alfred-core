@@ -108,7 +108,7 @@ public sealed class AttachmentService : IAttachmentService
     private static AttachmentDto ToDto(Attachment entity, string downloadUrl)
     {
         return new AttachmentDto(
-            entity.Id,
+            entity.Id.Value,
             entity.TargetId,
             entity.TargetType,
             entity.FileName,

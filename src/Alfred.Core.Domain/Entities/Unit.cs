@@ -4,13 +4,13 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Unit : BaseEntity, IHasCreationTime, IHasModificationTime
+public sealed class Unit : BaseEntity<UnitId>, IHasCreationTime, IHasModificationTime
 {
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
     public string? Symbol { get; private set; }
     public UnitCategory Category { get; private set; }
-    public Guid? BaseUnitId { get; private set; }
+    public UnitId? BaseUnitId { get; private set; }
     public decimal ConversionRate { get; private set; } = 1m;
     public UnitStatus Status { get; private set; } = UnitStatus.Active;
     public string? Description { get; private set; }
@@ -24,6 +24,7 @@ public sealed class Unit : BaseEntity, IHasCreationTime, IHasModificationTime
 
     private Unit()
     {
+        Id = UnitId.New();
     }
 
     public static Unit Create(
@@ -31,7 +32,7 @@ public sealed class Unit : BaseEntity, IHasCreationTime, IHasModificationTime
         string name,
         UnitCategory category,
         string? symbol = null,
-        Guid? baseUnitId = null,
+        UnitId? baseUnitId = null,
         decimal conversionRate = 1m,
         UnitStatus status = UnitStatus.Active,
         string? description = null)
@@ -54,7 +55,7 @@ public sealed class Unit : BaseEntity, IHasCreationTime, IHasModificationTime
         string name,
         string? symbol,
         UnitCategory category,
-        Guid? baseUnitId,
+        UnitId? baseUnitId,
         decimal conversionRate,
         UnitStatus status,
         string? description)

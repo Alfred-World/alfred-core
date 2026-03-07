@@ -4,12 +4,12 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Category : BaseEntity, IHasCreationTime
+public sealed class Category : BaseEntity<CategoryId>, IHasCreationTime
 {
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
     public string? Icon { get; private set; }
-    public Guid? ParentId { get; private set; }
+    public CategoryId? ParentId { get; private set; }
     public CategoryType Type { get; private set; }
     public string FormSchema { get; private set; } = "[]";
 
@@ -22,10 +22,11 @@ public sealed class Category : BaseEntity, IHasCreationTime
 
     private Category()
     {
+        Id = CategoryId.New();
     }
 
     public static Category Create(string code, string name, CategoryType type, string? icon = null,
-        Guid? parentId = null, string formSchema = "[]")
+        CategoryId? parentId = null, string formSchema = "[]")
     {
         return new Category
         {
@@ -39,7 +40,7 @@ public sealed class Category : BaseEntity, IHasCreationTime
         };
     }
 
-    public void Update(string name, Guid? parentId, CategoryType type, string? icon, string formSchema)
+    public void Update(string name, CategoryId? parentId, CategoryType type, string? icon, string formSchema)
     {
         Name = name;
         Icon = icon;

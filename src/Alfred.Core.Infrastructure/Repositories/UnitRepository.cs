@@ -5,7 +5,7 @@ using Alfred.Core.Infrastructure.Repositories.Base;
 
 namespace Alfred.Core.Infrastructure.Repositories;
 
-public sealed class UnitRepository : BaseRepository<Unit, Guid>, IUnitRepository
+public sealed class UnitRepository : BaseRepository<Unit, UnitId>, IUnitRepository
 {
     public UnitRepository(IDbContext context) : base(context)
     {

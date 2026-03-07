@@ -48,7 +48,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         var entity = await _commodityRepository
             .GetQueryable()
             .Include(c => c.DefaultUnit)
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == (CommodityId)id, cancellationToken);
 
         return entity?.ToDto();
     }
@@ -61,13 +61,13 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             dto.Code,
             dto.Name,
             assetClass,
-            dto.DefaultUnitId,
+            dto.DefaultUnitId.HasValue ? (UnitId?)dto.DefaultUnitId.Value : null,
             dto.Description);
 
         await _commodityRepository.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetCommodityByIdAsync(entity.Id, cancellationToken))!;
+        return (await GetCommodityByIdAsync(entity.Id.Value, cancellationToken))!;
     }
 
     public async Task<CommodityDto> UpdateCommodityAsync(Guid id, UpdateCommodityDto dto,
@@ -83,13 +83,13 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         entity.Update(
             dto.Name,
             assetClass,
-            dto.DefaultUnitId,
+            dto.DefaultUnitId.HasValue ? (UnitId?)dto.DefaultUnitId.Value : null,
             dto.Description);
 
         _commodityRepository.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetCommodityByIdAsync(entity.Id, cancellationToken))!;
+        return (await GetCommodityByIdAsync(entity.Id.Value, cancellationToken))!;
     }
 
     public async Task DeleteCommodityAsync(Guid id, CancellationToken cancellationToken = default)
@@ -115,7 +115,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             _transactionRepository,
             query,
             InvestmentTransactionFieldMap.Instance,
-            t => t.CommodityId == commodityId,
+            t => t.CommodityId == (CommodityId)commodityId,
             [t => t.Commodity!, t => t.Unit!],
             t => t.ToDto(),
             cancellationToken);
@@ -128,7 +128,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             .GetQueryable()
             .Include(t => t.Commodity)
             .Include(t => t.Unit)
-            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == (InvestmentTransactionId)id, cancellationToken);
 
         return entity?.ToDto();
     }
@@ -153,7 +153,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             transactionType,
             dto.TransactionDate,
             dto.Quantity,
-            dto.UnitId,
+            (UnitId)dto.UnitId,
             dto.PricePerUnit,
             dto.TotalAmount,
             dto.FeeAmount,
@@ -163,7 +163,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         await _transactionRepository.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetTransactionByIdAsync(entity.Id, cancellationToken))!;
+        return (await GetTransactionByIdAsync(entity.Id.Value, cancellationToken))!;
     }
 
     public async Task DeleteTransactionAsync(Guid id, CancellationToken cancellationToken = default)

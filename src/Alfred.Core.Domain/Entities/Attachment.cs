@@ -8,7 +8,7 @@ namespace Alfred.Core.Domain.Entities;
 /// The actual file lives in R2; only the ObjectKey is stored here.
 /// Download URLs are always generated as presigned (time-limited) to prevent leaks.
 /// </summary>
-public sealed class Attachment : BaseEntity, IHasCreationTime
+public sealed class Attachment : BaseEntity<AttachmentId>, IHasCreationTime
 {
     /// <summary>The ID of the owning entity (Asset, AssetLog, etc.)</summary>
     public Guid TargetId { get; private set; }
@@ -35,6 +35,7 @@ public sealed class Attachment : BaseEntity, IHasCreationTime
 
     private Attachment()
     {
+        Id = AttachmentId.New();
     }
 
     public static Attachment Create(

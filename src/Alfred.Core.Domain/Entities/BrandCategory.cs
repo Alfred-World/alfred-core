@@ -2,8 +2,8 @@ namespace Alfred.Core.Domain.Entities;
 
 public sealed class BrandCategory
 {
-    public Guid BrandId { get; private set; }
-    public Guid CategoryId { get; private set; }
+    public BrandId BrandId { get; private set; }
+    public CategoryId CategoryId { get; private set; }
 
     // Navigation
     public Brand? Brand { get; private set; }
@@ -13,7 +13,7 @@ public sealed class BrandCategory
     {
     }
 
-    public static BrandCategory Create(Guid brandId, Guid categoryId)
+    public static BrandCategory Create(BrandId brandId, CategoryId categoryId)
     {
         return new BrandCategory
         {

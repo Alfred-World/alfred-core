@@ -4,13 +4,13 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class InvestmentTransaction : BaseEntity, IHasCreationTime
+public sealed class InvestmentTransaction : BaseEntity<InvestmentTransactionId>, IHasCreationTime
 {
-    public Guid CommodityId { get; private set; }
+    public CommodityId CommodityId { get; private set; }
     public InvestmentTransactionType TransactionType { get; private set; }
     public DateTimeOffset TransactionDate { get; private set; }
     public decimal Quantity { get; private set; }
-    public Guid UnitId { get; private set; }
+    public UnitId UnitId { get; private set; }
     public decimal PricePerUnit { get; private set; }
     public decimal TotalAmount { get; private set; }
     public decimal FeeAmount { get; private set; }
@@ -25,10 +25,11 @@ public sealed class InvestmentTransaction : BaseEntity, IHasCreationTime
 
     private InvestmentTransaction()
     {
+        Id = InvestmentTransactionId.New();
     }
 
-    public static InvestmentTransaction Create(Guid commodityId, InvestmentTransactionType transactionType,
-        DateTimeOffset transactionDate, decimal quantity, Guid unitId, decimal pricePerUnit, decimal totalAmount,
+    public static InvestmentTransaction Create(CommodityId commodityId, InvestmentTransactionType transactionType,
+        DateTimeOffset transactionDate, decimal quantity, UnitId unitId, decimal pricePerUnit, decimal totalAmount,
         decimal feeAmount, Guid? financeTxnId, string? notes)
     {
         return new InvestmentTransaction

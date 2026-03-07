@@ -8,7 +8,7 @@ public static class BrandMappingExtensions
     public static BrandDto ToDto(this Brand brand)
     {
         return new BrandDto(
-            brand.Id,
+            brand.Id.Value,
             brand.Name,
             brand.Website,
             brand.SupportPhone,
@@ -17,7 +17,7 @@ public static class BrandMappingExtensions
             brand.BrandCategories
                 .Where(bc => bc.Category is not null)
                 .Select(bc =>
-                    new BrandCategoryDto(bc.Category!.Id, bc.Category.Name, bc.Category.Code, bc.Category.Icon))
+                    new BrandCategoryDto(bc.Category!.Id.Value, bc.Category.Name, bc.Category.Code, bc.Category.Icon))
                 .ToList(),
             brand.CreatedAt,
             brand.UpdatedAt

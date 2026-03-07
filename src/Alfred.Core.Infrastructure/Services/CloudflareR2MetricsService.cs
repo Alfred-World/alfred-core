@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Alfred.Core.Domain.Abstractions.Services;
@@ -48,10 +47,10 @@ public sealed class CloudflareR2MetricsService : IR2MetricsService
             var dateTo = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
 
             var query = $$"""
-                {
-                  "query": "{ viewer { accounts(filter: {accountTag: \"{{_options.AccountId}}\"}) { r2StorageUsageAdaptiveGroups(filter: {date_geq: \"{{dateFrom}}\", date_leq: \"{{dateTo}}\", bucketName: \"{{_options.BucketName}}\"}, limit: 1, orderBy: [date_DESC]) { max { payloadSize metadataSize } } } } }"
-                }
-                """;
+                          {
+                            "query": "{ viewer { accounts(filter: {accountTag: \"{{_options.AccountId}}\"}) { r2StorageUsageAdaptiveGroups(filter: {date_geq: \"{{dateFrom}}\", date_leq: \"{{dateTo}}\", bucketName: \"{{_options.BucketName}}\"}, limit: 1, orderBy: [date_DESC]) { max { payloadSize metadataSize } } } } }"
+                          }
+                          """;
 
             using var request = new HttpRequestMessage(HttpMethod.Post, GraphQlEndpoint)
             {
@@ -63,10 +62,10 @@ public sealed class CloudflareR2MetricsService : IR2MetricsService
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<CloudflareGraphQlResponse>(
-                cancellationToken: cancellationToken);
+                cancellationToken);
 
             var groups = result?.Data?.Viewer?.Accounts?.FirstOrDefault()
-                              ?.R2StorageUsageAdaptiveGroups;
+                ?.R2StorageUsageAdaptiveGroups;
 
             if (groups is null || groups.Count == 0)
             {
@@ -94,20 +93,17 @@ public sealed class CloudflareR2MetricsService : IR2MetricsService
 
     private sealed class CloudflareGraphQlResponse
     {
-        [JsonPropertyName("data")]
-        public GraphQlData? Data { get; init; }
+        [JsonPropertyName("data")] public GraphQlData? Data { get; init; }
     }
 
     private sealed class GraphQlData
     {
-        [JsonPropertyName("viewer")]
-        public Viewer? Viewer { get; init; }
+        [JsonPropertyName("viewer")] public Viewer? Viewer { get; init; }
     }
 
     private sealed class Viewer
     {
-        [JsonPropertyName("accounts")]
-        public List<AccountData>? Accounts { get; init; }
+        [JsonPropertyName("accounts")] public List<AccountData>? Accounts { get; init; }
     }
 
     private sealed class AccountData
@@ -118,16 +114,13 @@ public sealed class CloudflareR2MetricsService : IR2MetricsService
 
     private sealed class UsageGroup
     {
-        [JsonPropertyName("max")]
-        public UsageMax? Max { get; init; }
+        [JsonPropertyName("max")] public UsageMax? Max { get; init; }
     }
 
     private sealed class UsageMax
     {
-        [JsonPropertyName("payloadSize")]
-        public long PayloadSize { get; init; }
+        [JsonPropertyName("payloadSize")] public long PayloadSize { get; init; }
 
-        [JsonPropertyName("metadataSize")]
-        public long MetadataSize { get; init; }
+        [JsonPropertyName("metadataSize")] public long MetadataSize { get; init; }
     }
 }

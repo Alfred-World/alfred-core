@@ -11,11 +11,11 @@ public static class AssetMappingExtensions
     public static AssetDto ToDto(this Asset asset)
     {
         return new AssetDto(
-            asset.Id,
+            asset.Id.Value,
             asset.Name,
-            asset.CategoryId,
+            asset.CategoryId?.Value,
             asset.Category?.Name,
-            asset.BrandId,
+            asset.BrandId?.Value,
             asset.Brand?.Name,
             asset.PurchaseDate,
             asset.InitialCost,
@@ -31,10 +31,10 @@ public static class AssetMappingExtensions
     public static AssetLogDto ToDto(this AssetLog log)
     {
         return new AssetLogDto(
-            log.Id,
-            log.AssetId,
+            log.Id.Value,
+            log.AssetId.Value,
             log.EventType.ToString(),
-            log.BrandId,
+            log.BrandId?.Value,
             log.Brand?.Name,
             log.PerformedAt,
             log.Cost,

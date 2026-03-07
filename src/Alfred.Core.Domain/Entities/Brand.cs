@@ -3,7 +3,7 @@ using Alfred.Core.Domain.Common.Interfaces;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Brand : BaseEntity, IHasCreationTime, IHasModificationTime
+public sealed class Brand : BaseEntity<BrandId>, IHasCreationTime, IHasModificationTime
 {
     public string Name { get; private set; } = null!;
     public string? Website { get; private set; }
@@ -19,6 +19,7 @@ public sealed class Brand : BaseEntity, IHasCreationTime, IHasModificationTime
 
     private Brand()
     {
+        Id = BrandId.New();
     }
 
     public static Brand Create(

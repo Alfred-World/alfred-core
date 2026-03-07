@@ -5,7 +5,7 @@ using Alfred.Core.Infrastructure.Repositories.Base;
 
 namespace Alfred.Core.Infrastructure.Repositories;
 
-public sealed class CommodityRepository : BaseRepository<Commodity, Guid>, ICommodityRepository
+public sealed class CommodityRepository : BaseRepository<Commodity, CommodityId>, ICommodityRepository
 {
     public CommodityRepository(IDbContext context) : base(context)
     {

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Alfred.Core.Infrastructure.Repositories;
 
-public sealed class AttachmentRepository : BaseRepository<Attachment, Guid>, IAttachmentRepository
+public sealed class AttachmentRepository : BaseRepository<Attachment, AttachmentId>, IAttachmentRepository
 {
     public AttachmentRepository(IDbContext context) : base(context)
     {

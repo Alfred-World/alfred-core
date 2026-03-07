@@ -5,7 +5,7 @@ using Alfred.Core.Infrastructure.Repositories.Base;
 
 namespace Alfred.Core.Infrastructure.Repositories;
 
-public sealed class CategoryRepository : BaseRepository<Category, Guid>, ICategoryRepository
+public sealed class CategoryRepository : BaseRepository<Category, CategoryId>, ICategoryRepository
 {
     public CategoryRepository(IDbContext context) : base(context)
     {

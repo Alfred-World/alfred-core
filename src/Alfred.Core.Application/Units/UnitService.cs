@@ -8,8 +8,6 @@ using Alfred.Core.Domain.Common.Exceptions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Alfred.Core.Application.Units;
 
 public sealed class UnitService : BaseApplicationService, IUnitService
@@ -20,7 +18,8 @@ public sealed class UnitService : BaseApplicationService, IUnitService
     public UnitService(
         IUnitRepository unitRepository,
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser) : base(filterParser)
+        IFilterParser filterParser,
+        IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
         _unitRepository = unitRepository;
         _unitOfWork = unitOfWork;
@@ -41,11 +40,10 @@ public sealed class UnitService : BaseApplicationService, IUnitService
 
     public async Task<UnitDto?> GetUnitByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitRepository
-            .GetQueryable()
-            .Include(u => u.BaseUnit)
-            .Include(u => u.DerivedUnits)
-            .FirstOrDefaultAsync(u => u.Id == (UnitId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _unitRepository.GetQueryable([u => u.BaseUnit!, u => u.DerivedUnits])
+                .Where(u => u.Id == (UnitId)id),
+            cancellationToken);
 
         return entity?.ToDto();
     }
@@ -88,9 +86,9 @@ public sealed class UnitService : BaseApplicationService, IUnitService
     public async Task<UnitDto> UpdateUnitAsync(Guid id, UpdateUnitDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _unitRepository
-            .GetQueryable()
-            .FirstOrDefaultAsync(u => u.Id == (UnitId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _unitRepository.GetQueryable().Where(u => u.Id == (UnitId)id),
+            cancellationToken);
 
         if (entity is null)
         {
@@ -137,10 +135,10 @@ public sealed class UnitService : BaseApplicationService, IUnitService
 
     public async Task DeleteUnitAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitRepository
-            .GetQueryable()
-            .Include(u => u.DerivedUnits)
-            .FirstOrDefaultAsync(u => u.Id == (UnitId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _unitRepository.GetQueryable([u => u.DerivedUnits])
+                .Where(u => u.Id == (UnitId)id),
+            cancellationToken);
 
         if (entity is null)
         {
@@ -160,56 +158,42 @@ public sealed class UnitService : BaseApplicationService, IUnitService
     public async Task<List<UnitTreeNodeDto>> GetBaseUnitTreeAsync(UnitCategory? category = null,
         CancellationToken cancellationToken = default)
     {
-        var queryable = _unitRepository.GetQueryable()
-            .Include(u => u.DerivedUnits)
-            .ThenInclude(d => d.DerivedUnits)
-            .Where(u => u.BaseUnitId == null)
-            .AsNoTracking();
-
-        if (category.HasValue)
-        {
-            queryable = queryable.Where(u => u.Category == category.Value);
-        }
-
-        var baseUnits = await queryable
-            .OrderBy(u => u.Name)
-            .ToListAsync(cancellationToken);
-
+        var baseUnits = await _unitRepository.GetBaseUnitsWithDerivedAsync(category, cancellationToken);
         return baseUnits.Select(u => u.ToTreeNode()).ToList();
     }
 
     public async Task<List<UnitCountByStatusDto>> GetCountsByStatusAsync(
         CancellationToken cancellationToken = default)
     {
-        return await _unitRepository.GetQueryable()
-            .AsNoTracking()
-            .GroupBy(u => u.Status)
-            .Select(g => new UnitCountByStatusDto(g.Key, g.Count()))
-            .ToListAsync(cancellationToken);
+        return await _executor.ToListAsync(
+            _executor.AsNoTracking(_unitRepository.GetQueryable())
+                .GroupBy(u => u.Status)
+                .Select(g => new UnitCountByStatusDto(g.Key, g.Count())),
+            cancellationToken);
     }
 
     public async Task<List<UnitCountByCategoryDto>> GetCountsByCategoryAsync(
         CancellationToken cancellationToken = default)
     {
-        return await _unitRepository.GetQueryable()
-            .AsNoTracking()
-            .GroupBy(u => u.Category)
-            .Select(g => new UnitCountByCategoryDto(g.Key, g.Count()))
-            .ToListAsync(cancellationToken);
+        return await _executor.ToListAsync(
+            _executor.AsNoTracking(_unitRepository.GetQueryable())
+                .GroupBy(u => u.Category)
+                .Select(g => new UnitCountByCategoryDto(g.Key, g.Count())),
+            cancellationToken);
     }
 
     public async Task<ConvertResultDto> ConvertAsync(Guid fromUnitId, Guid toUnitId, decimal value,
         CancellationToken cancellationToken = default)
     {
-        var fromUnit = await _unitRepository
-            .GetQueryable()
-            .Include(u => u.BaseUnit)
-            .FirstOrDefaultAsync(u => u.Id == (UnitId)fromUnitId, cancellationToken);
+        var fromUnit = await _executor.FirstOrDefaultAsync(
+            _unitRepository.GetQueryable([u => u.BaseUnit!])
+                .Where(u => u.Id == (UnitId)fromUnitId),
+            cancellationToken);
 
-        var toUnit = await _unitRepository
-            .GetQueryable()
-            .Include(u => u.BaseUnit)
-            .FirstOrDefaultAsync(u => u.Id == (UnitId)toUnitId, cancellationToken);
+        var toUnit = await _executor.FirstOrDefaultAsync(
+            _unitRepository.GetQueryable([u => u.BaseUnit!])
+                .Where(u => u.Id == (UnitId)toUnitId),
+            cancellationToken);
 
         if (fromUnit is null)
         {

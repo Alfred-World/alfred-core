@@ -74,12 +74,19 @@ public static class ProjectionBinder
             // Replace parameter in source expression using shared ParameterReplacer
             var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
 
-            // Convert if types don't match
+            // Align types when source and DTO property types differ.
+            // Expression.Convert handles nullable lift (T→T?), unwrap (T?→T),
+            // class hierarchy, and user-defined implicit/explicit operators.
             if (sourceBody.Type != dtoProperty.PropertyType)
             {
-                if (dtoProperty.PropertyType.IsAssignableFrom(sourceBody.Type))
+                try
                 {
                     sourceBody = Expression.Convert(sourceBody, dtoProperty.PropertyType);
+                }
+                catch (InvalidOperationException)
+                {
+                    // No valid conversion path — skip this binding
+                    continue;
                 }
             }
 
@@ -151,12 +158,19 @@ public static class ProjectionBinder
             // Replace parameter in source expression using shared ParameterReplacer
             var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
 
-            // Convert if types don't match
+            // Align types when source and DTO property types differ.
+            // Expression.Convert handles nullable lift (T→T?), unwrap (T?→T),
+            // class hierarchy, and user-defined implicit/explicit operators.
             if (sourceBody.Type != dtoProperty.PropertyType)
             {
-                if (dtoProperty.PropertyType.IsAssignableFrom(sourceBody.Type))
+                try
                 {
                     sourceBody = Expression.Convert(sourceBody, dtoProperty.PropertyType);
+                }
+                catch (InvalidOperationException)
+                {
+                    // No valid conversion path — skip this binding
+                    continue;
                 }
             }
 

@@ -7,8 +7,6 @@ using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Alfred.Core.Application.Assets;
 
 public sealed class AssetService : BaseApplicationService, IAssetService
@@ -21,7 +19,8 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         IAssetRepository assetRepository,
         IAssetLogRepository assetLogRepository,
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser) : base(filterParser)
+        IFilterParser filterParser,
+        IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
         _assetRepository = assetRepository;
         _assetLogRepository = assetLogRepository;
@@ -39,11 +38,10 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     public async Task<AssetDto?> GetAssetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _assetRepository
-            .GetQueryable()
-            .Include(a => a.Category)
-            .Include(a => a.Brand)
-            .FirstOrDefaultAsync(a => a.Id == (AssetId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _assetRepository.GetQueryable([a => a.Category!, a => a.Brand!])
+                .Where(a => a.Id == (AssetId)id),
+            cancellationToken);
 
         return entity?.ToDto();
     }
@@ -126,10 +124,10 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     public async Task<AssetLogDto?> GetAssetLogByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _assetLogRepository
-            .GetQueryable()
-            .Include(l => l.Brand)
-            .FirstOrDefaultAsync(l => l.Id == (AssetLogId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _assetLogRepository.GetQueryable([l => l.Brand!])
+                .Where(l => l.Id == (AssetLogId)id),
+            cancellationToken);
 
         return entity?.ToDto();
     }

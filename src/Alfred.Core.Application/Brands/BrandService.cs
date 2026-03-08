@@ -8,8 +8,6 @@ using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Entities;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Alfred.Core.Application.Brands;
 
 public sealed class BrandService : BaseApplicationService, IBrandService
@@ -20,7 +18,8 @@ public sealed class BrandService : BaseApplicationService, IBrandService
     public BrandService(
         IBrandRepository brandRepository,
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser) : base(filterParser)
+        IFilterParser filterParser,
+        IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
         _brandRepository = brandRepository;
         _unitOfWork = unitOfWork;
@@ -46,12 +45,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
 
     public async Task<BrandDto?> GetBrandByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _brandRepository
-            .GetQueryable()
-            .Include(b => b.BrandCategories)
-            .ThenInclude(bc => bc.Category)
-            .FirstOrDefaultAsync(b => b.Id == (BrandId)id, cancellationToken);
-
+        var entity = await _brandRepository.GetByIdWithCategoriesAsync(id, cancellationToken);
         return entity?.ToDto();
     }
 
@@ -82,10 +76,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
     public async Task<BrandDto> UpdateBrandAsync(Guid id, UpdateBrandDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _brandRepository
-            .GetQueryable()
-            .Include(b => b.BrandCategories)
-            .FirstOrDefaultAsync(b => b.Id == (BrandId)id, cancellationToken);
+        var entity = await _brandRepository.GetByIdWithCategoriesAsync(id, cancellationToken);
 
         if (entity is null)
         {

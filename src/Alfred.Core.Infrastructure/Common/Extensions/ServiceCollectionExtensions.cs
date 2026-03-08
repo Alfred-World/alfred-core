@@ -3,6 +3,7 @@ using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
 using Alfred.Core.Infrastructure.Common.Options;
 using Alfred.Core.Infrastructure.Common.Seeding;
+using Alfred.Core.Infrastructure.Persistence;
 using Alfred.Core.Infrastructure.Providers.Cache;
 using Alfred.Core.Infrastructure.Providers.Cache.HealthChecks;
 using Alfred.Core.Infrastructure.Providers.PostgreSQL;
@@ -37,6 +38,9 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        // Query Executor — keeps EF materialisation methods out of the Application layer
+        services.AddScoped<IAsyncQueryExecutor, EfQueryExecutor>();
+
         // Caching
         services.AddInMemoryCache();
 

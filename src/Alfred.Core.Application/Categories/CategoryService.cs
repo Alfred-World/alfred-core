@@ -9,8 +9,6 @@ using Alfred.Core.Domain.Common.Exceptions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Alfred.Core.Application.Categories;
 
 public sealed class CategoryService : BaseApplicationService, ICategoryService
@@ -21,7 +19,8 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public CategoryService(
         ICategoryRepository categoryRepository,
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser) : base(filterParser)
+        IFilterParser filterParser,
+        IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
         _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
@@ -46,22 +45,21 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         page = PaginationSettings.EnsureValidPage(page);
         pageSize = PaginationSettings.ClampPageSize(pageSize);
 
-        var queryable = _categoryRepository.GetQueryable()
-            .Include(c => c.SubCategories)
-            .Where(c => c.ParentId == null)
-            .AsNoTracking();
+        var queryable = _categoryRepository.GetQueryable([c => c.SubCategories])
+            .Where(c => c.ParentId == null);
 
         if (type.HasValue)
         {
             queryable = queryable.Where(c => c.Type == type.Value);
         }
 
-        var total = await queryable.CountAsync(cancellationToken);
-        var roots = await queryable
-            .OrderBy(c => c.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var total = await _executor.LongCountAsync(queryable, cancellationToken);
+        var roots = await _executor.ToListAsync(
+            _executor.AsNoTracking(queryable)
+                .OrderBy(c => c.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize),
+            cancellationToken);
 
         var items = roots.Select(c => new CategoryTreeNodeDto(
             c.Id.Value, c.Code, c.Name, c.Icon, c.Type,
@@ -74,11 +72,11 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public async Task<List<CategoryTreeNodeDto>> GetChildrenAsync(Guid parentId,
         CancellationToken cancellationToken = default)
     {
-        var children = await _categoryRepository.GetQueryable()
-            .Include(c => c.SubCategories)
-            .Where(c => c.ParentId == (CategoryId?)parentId)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        var children = await _executor.ToListAsync(
+            _executor.AsNoTracking(
+                _categoryRepository.GetQueryable([c => c.SubCategories])
+                    .Where(c => c.ParentId == (CategoryId?)parentId)),
+            cancellationToken);
 
         return children.Select(c => new CategoryTreeNodeDto(
             c.Id.Value, c.Code, c.Name, c.Icon, c.Type,
@@ -88,11 +86,10 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
 
     public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _categoryRepository
-            .GetQueryable()
-            .Include(c => c.Parent)
-            .Include(c => c.SubCategories)
-            .FirstOrDefaultAsync(c => c.Id == (CategoryId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _categoryRepository.GetQueryable([c => c.Parent!, c => c.SubCategories])
+                .Where(c => c.Id == (CategoryId)id),
+            cancellationToken);
 
         return entity?.ToDto();
     }
@@ -134,9 +131,9 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public async Task<CategoryDto> UpdateCategoryAsync(Guid id, UpdateCategoryDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _categoryRepository
-            .GetQueryable()
-            .FirstOrDefaultAsync(c => c.Id == (CategoryId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _categoryRepository.GetQueryable().Where(c => c.Id == (CategoryId)id),
+            cancellationToken);
 
         if (entity is null)
         {
@@ -207,10 +204,11 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
                 continue;
             }
 
-            var childIds = await _categoryRepository.GetQueryable()
-                .Where(c => c.ParentId == (CategoryId?)currentId)
-                .Select(c => c.Id.Value)
-                .ToListAsync(cancellationToken);
+            var childIds = await _executor.ToListAsync(
+                _categoryRepository.GetQueryable()
+                    .Where(c => c.ParentId == (CategoryId?)currentId)
+                    .Select(c => c.Id.Value),
+                cancellationToken);
 
             foreach (var childId in childIds)
             {
@@ -232,9 +230,10 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     private async Task CascadeTypeToDescendantsAsync(Guid parentId, CategoryType newType,
         CancellationToken cancellationToken)
     {
-        var children = await _categoryRepository.GetQueryable()
-            .Where(c => c.ParentId == (CategoryId?)parentId)
-            .ToListAsync(cancellationToken);
+        var children = await _executor.ToListAsync(
+            _categoryRepository.GetQueryable()
+                .Where(c => c.ParentId == (CategoryId?)parentId),
+            cancellationToken);
 
         foreach (var child in children)
         {
@@ -259,10 +258,11 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public async Task<List<CategoryCountByTypeDto>> GetCategoryCountsByTypeAsync(
         CancellationToken cancellationToken = default)
     {
-        return await _categoryRepository.GetQueryable()
-            .AsNoTracking()
-            .GroupBy(c => c.Type)
-            .Select(g => new CategoryCountByTypeDto(g.Key, g.Count()))
-            .ToListAsync(cancellationToken);
+        return await _executor.ToListAsync(
+            _executor.AsNoTracking(
+                _categoryRepository.GetQueryable()
+                    .GroupBy(c => c.Type)
+                    .Select(g => new CategoryCountByTypeDto(g.Key, g.Count()))),
+            cancellationToken);
     }
 }

@@ -8,8 +8,6 @@ using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Common.Base;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Alfred.Core.Application.Common;
 
 /// <summary>
@@ -19,10 +17,12 @@ namespace Alfred.Core.Application.Common;
 public abstract class BaseApplicationService
 {
     private readonly IFilterParser _filterParser;
+    protected readonly IAsyncQueryExecutor _executor;
 
-    protected BaseApplicationService(IFilterParser filterParser)
+    protected BaseApplicationService(IFilterParser filterParser, IAsyncQueryExecutor executor)
     {
         _filterParser = filterParser;
+        _executor = executor;
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public abstract class BaseApplicationService
             fieldSelector,
             cancellationToken);
 
-        var entities = await dbQuery.AsNoTracking().ToListAsync(cancellationToken);
+        var entities = await _executor.ToListAsync(_executor.AsNoTracking(dbQuery), cancellationToken);
         var items = entities.Select(mapper).ToList();
 
         return new PageResult<TDto>(items, page, pageSize, total);

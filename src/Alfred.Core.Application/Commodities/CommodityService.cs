@@ -7,8 +7,6 @@ using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Alfred.Core.Application.Commodities;
 
 public sealed class CommodityService : BaseApplicationService, ICommodityService
@@ -21,7 +19,8 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         ICommodityRepository commodityRepository,
         IInvestmentTransactionRepository transactionRepository,
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser) : base(filterParser)
+        IFilterParser filterParser,
+        IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
         _commodityRepository = commodityRepository;
         _transactionRepository = transactionRepository;
@@ -45,10 +44,10 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
 
     public async Task<CommodityDto?> GetCommodityByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _commodityRepository
-            .GetQueryable()
-            .Include(c => c.DefaultUnit)
-            .FirstOrDefaultAsync(c => c.Id == (CommodityId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _commodityRepository.GetQueryable([c => c.DefaultUnit!])
+                .Where(c => c.Id == (CommodityId)id),
+            cancellationToken);
 
         return entity?.ToDto();
     }
@@ -124,11 +123,10 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<InvestmentTransactionDto?> GetTransactionByIdAsync(Guid id,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _transactionRepository
-            .GetQueryable()
-            .Include(t => t.Commodity)
-            .Include(t => t.Unit)
-            .FirstOrDefaultAsync(t => t.Id == (InvestmentTransactionId)id, cancellationToken);
+        var entity = await _executor.FirstOrDefaultAsync(
+            _transactionRepository.GetQueryable([t => t.Commodity!, t => t.Unit!])
+                .Where(t => t.Id == (InvestmentTransactionId)id),
+            cancellationToken);
 
         return entity?.ToDto();
     }

@@ -5,8 +5,8 @@ using Alfred.Core.Application.Querying.Fields;
 namespace Alfred.Core.Application.Querying.Projection;
 
 /// <summary>
-/// Registry of available views for an entity/DTO pair
-/// Provides fluent API to register and lookup views
+/// Registry of available views for an entity/DTO pair.
+/// Provides fluent API to register and lookup views with field alias support.
 /// </summary>
 /// <typeparam name="TEntity">Source entity type</typeparam>
 /// <typeparam name="TDto">Target DTO type</typeparam>
@@ -36,18 +36,24 @@ public sealed class ViewRegistry<TEntity, TDto>
     public ViewRegistry<TEntity, TDto> Register(
         string name,
         Expression<Func<TDto, object?>>[] fields,
-        Expression<Func<TEntity, object>>[]? includes = null)
+        Expression<Func<TEntity, object>>[]? includes = null,
+        Dictionary<string, string>? fieldAliases = null)
     {
         var fieldNames = FieldExpressionHelper.GetFieldNames(fields);
-        return Register(name, fieldNames, includes);
+        return Register(name, fieldNames, includes, fieldAliases);
     }
 
     /// <summary>
-    /// Begin building a view with fluent API
+    /// Register a view with field aliases using fluent builder
     /// </summary>
-    public ViewBuilder View(string name)
+    public ViewRegistry<TEntity, TDto> Register(
+        string name,
+        Action<ViewBuilder<TEntity, TDto>> configure)
     {
-        return new ViewBuilder(this, name);
+        var builder = new ViewBuilder<TEntity, TDto>(name);
+        configure(builder);
+        _views[name] = builder.Build();
+        return this;
     }
 
     /// <summary>
@@ -111,72 +117,76 @@ public sealed class ViewRegistry<TEntity, TDto>
     {
         return _views.Keys;
     }
+}
+
+/// <summary>
+/// Fluent builder for creating ViewDefinitions with field aliases
+/// </summary>
+public sealed class ViewBuilder<TEntity, TDto>
+    where TEntity : class
+    where TDto : class, new()
+{
+    private readonly string _name;
+    private readonly List<string> _fields = new();
+    private readonly Dictionary<string, string> _fieldAliases = new();
+    private readonly List<Expression<Func<TEntity, object>>> _includes = new();
+    private readonly HashSet<string> _computedFields = new(StringComparer.OrdinalIgnoreCase);
+
+    public ViewBuilder(string name)
+    {
+        _name = name;
+    }
 
     /// <summary>
-    /// Fluent builder for constructing views with field aliases
+    /// Add a simple field to the view
     /// </summary>
-    public sealed class ViewBuilder
+    public ViewBuilder<TEntity, TDto> Select(Expression<Func<TDto, object?>> field)
     {
-        private readonly ViewRegistry<TEntity, TDto> _registry;
-        private readonly string _name;
-        private readonly List<string> _fields = new();
-        private readonly Dictionary<string, string> _fieldAliases = new(StringComparer.OrdinalIgnoreCase);
-        private List<Expression<Func<TEntity, object>>>? _includes;
+        var fieldName = FieldExpressionHelper.GetFieldName(field);
+        _fields.Add(fieldName);
+        return this;
+    }
 
-        internal ViewBuilder(ViewRegistry<TEntity, TDto> registry, string name)
-        {
-            _registry = registry;
-            _name = name;
-        }
+    /// <summary>
+    /// Add a field with an alias (DTO property -> FieldMap key).
+    /// Example: SelectAs(r => r.Permissions, "permissionsSummary") 
+    /// means DTO's Permissions property will be populated from FieldMap's "permissionsSummary" expression.
+    /// </summary>
+    public ViewBuilder<TEntity, TDto> SelectAs(Expression<Func<TDto, object?>> dtoField, string fieldMapKey)
+    {
+        var dtoFieldName = FieldExpressionHelper.GetFieldName(dtoField);
+        _fields.Add(dtoFieldName);
+        _fieldAliases[dtoFieldName] = fieldMapKey;
+        return this;
+    }
 
-        /// <summary>
-        /// Add fields to the view
-        /// </summary>
-        public ViewBuilder Select(params string[] fields)
-        {
-            _fields.AddRange(fields);
-            return this;
-        }
+    /// <summary>
+    /// Declare a computed (enriched) field: it appears in the view output but is NOT projected
+    /// from the entity by EF. The service layer is responsible for filling it after the query.
+    /// </summary>
+    public ViewBuilder<TEntity, TDto> SelectComputed(Expression<Func<TDto, object?>> field)
+    {
+        var fieldName = FieldExpressionHelper.GetFieldName(field);
+        _computedFields.Add(fieldName);
+        return this;
+    }
 
-        /// <summary>
-        /// Add fields to the view using strongly-typed expressions
-        /// </summary>
-        public ViewBuilder Select(params Expression<Func<TDto, object?>>[] fields)
-        {
-            _fields.AddRange(FieldExpressionHelper.GetFieldNames(fields));
-            return this;
-        }
+    /// <summary>
+    /// Add an include for eager loading navigation properties
+    /// </summary>
+    public ViewBuilder<TEntity, TDto> Include(Expression<Func<TEntity, object>> include)
+    {
+        _includes.Add(include);
+        return this;
+    }
 
-        /// <summary>
-        /// Add a field with an alias (maps DTO property to different FieldMap key)
-        /// </summary>
-        public ViewBuilder SelectAs(string dtoPropertyName, string fieldMapKey)
-        {
-            _fields.Add(dtoPropertyName);
-            _fieldAliases[dtoPropertyName] = fieldMapKey;
-            return this;
-        }
-
-        /// <summary>
-        /// Add navigation includes
-        /// </summary>
-        public ViewBuilder Include(params Expression<Func<TEntity, object>>[] includes)
-        {
-            _includes ??= new List<Expression<Func<TEntity, object>>>();
-            _includes.AddRange(includes);
-            return this;
-        }
-
-        /// <summary>
-        /// Build and register the view
-        /// </summary>
-        public ViewRegistry<TEntity, TDto> Build()
-        {
-            return _registry.Register(
-                _name,
-                _fields.ToArray(),
-                _includes?.ToArray(),
-                _fieldAliases.Count > 0 ? _fieldAliases : null);
-        }
+    internal ViewDefinition<TEntity, TDto> Build()
+    {
+        return new ViewDefinition<TEntity, TDto>(
+            _name,
+            _fields.ToArray(),
+            _includes.Count > 0 ? _includes.ToArray() : null,
+            _fieldAliases.Count > 0 ? _fieldAliases : null,
+            _computedFields.Count > 0 ? _computedFields : null);
     }
 }

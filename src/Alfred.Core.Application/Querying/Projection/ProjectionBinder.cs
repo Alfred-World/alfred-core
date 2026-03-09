@@ -7,14 +7,33 @@ using Alfred.Core.Application.Querying.Fields;
 namespace Alfred.Core.Application.Querying.Projection;
 
 /// <summary>
-/// Helper to apply field projection/selection to queries
-/// Optimizes performance by selecting only requested fields from database
+/// Helper to apply field projection/selection to queries.
+/// Optimizes performance by selecting only requested fields from database.
 /// </summary>
 public static class ProjectionBinder
 {
     /// <summary>
-    /// Apply field selection (projection) to query
-    /// If fields is null/empty, returns all fields
+    /// Apply field selection (projection) to query using a ViewDefinition.
+    /// Supports field aliases for mapping DTO properties to different FieldMap keys.
+    /// </summary>
+    public static IQueryable<TDto> ApplyProjection<TSource, TDto>(
+        IQueryable<TSource> query,
+        ViewDefinition<TSource, TDto> view,
+        FieldMap<TSource> fieldMap)
+        where TSource : class
+        where TDto : class, new()
+    {
+        return ApplyProjectionInternal<TSource, TDto>(
+            query,
+            view.Fields,
+            view.ComputedFields,
+            fieldMap,
+            dtoFieldName => view.GetFieldMapKey(dtoFieldName));
+    }
+
+    /// <summary>
+    /// Apply field selection (projection) to query.
+    /// If fields is null/empty, throws exception.
     /// </summary>
     /// <typeparam name="TSource">Source entity type</typeparam>
     /// <typeparam name="TDto">DTO type to project to</typeparam>
@@ -22,6 +41,22 @@ public static class ProjectionBinder
         IQueryable<TSource> query,
         string[]? fields,
         FieldMap<TSource> fieldMap)
+        where TDto : class, new()
+    {
+        return ApplyProjectionInternal<TSource, TDto>(
+            query,
+            fields,
+            null,
+            fieldMap,
+            dtoFieldName => dtoFieldName); // No aliasing
+    }
+
+    private static IQueryable<TDto> ApplyProjectionInternal<TSource, TDto>(
+        IQueryable<TSource> query,
+        string[]? fields,
+        IReadOnlySet<string>? computedFields,
+        FieldMap<TSource> fieldMap,
+        Func<string, string> getFieldMapKey)
         where TDto : class, new()
     {
         // If no fields specified, return all (will need manual mapping later)
@@ -32,122 +67,52 @@ public static class ProjectionBinder
                 "Either specify fields or use manual mapping.");
         }
 
-        // Validate all requested fields exist and are selectable
-        foreach (var field in fields)
+        // Validate all requested fields exist and are selectable (skip computed fields)
+        foreach (var dtoFieldName in fields)
         {
-            if (!fieldMap.TryGet(field, out _, out _))
-            {
-                throw new InvalidOperationException($"Field '{field}' not found");
-            }
-
-            if (!fieldMap.CanSelect(field))
-            {
-                throw new InvalidOperationException($"Field '{field}' cannot be selected");
-            }
-        }
-
-        // Build projection expression dynamically
-        var parameter = Expression.Parameter(typeof(TSource), "x");
-        var dtoType = typeof(TDto);
-
-        // Create member bindings for each requested field
-        List<MemberBinding> bindings = new();
-
-        foreach (var fieldName in fields)
-        {
-            // Get source expression from field map
-            if (!fieldMap.TryGet(fieldName, out var sourceExpression, out _))
+            if (computedFields != null && computedFields.Contains(dtoFieldName))
             {
                 continue;
             }
 
-            // Find matching property in DTO
-            var dtoProperty = dtoType.GetProperty(
-                fieldName,
-                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-
-            if (dtoProperty == null || !dtoProperty.CanWrite)
+            var fieldMapKey = getFieldMapKey(dtoFieldName);
+            if (!fieldMap.TryGet(fieldMapKey, out _, out _))
             {
-                continue;
-            }
-
-            // Replace parameter in source expression using shared ParameterReplacer
-            var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
-
-            // Align types when source and DTO property types differ.
-            // Expression.Convert handles nullable lift (T→T?), unwrap (T?→T),
-            // class hierarchy, and user-defined implicit/explicit operators.
-            if (sourceBody.Type != dtoProperty.PropertyType)
-            {
-                try
-                {
-                    sourceBody = Expression.Convert(sourceBody, dtoProperty.PropertyType);
-                }
-                catch (InvalidOperationException)
-                {
-                    // No valid conversion path — skip this binding
-                    continue;
-                }
-            }
-
-            bindings.Add(Expression.Bind(dtoProperty, sourceBody));
-        }
-
-        // Create: x => new TDto { Field1 = x.Field1, Field2 = x.Field2, ... }
-        var memberInit = Expression.MemberInit(Expression.New(dtoType), bindings);
-        var lambda = Expression.Lambda<Func<TSource, TDto>>(memberInit, parameter);
-
-        return query.Select(lambda);
-    }
-
-    /// <summary>
-    /// Apply field selection (projection) to query using a ViewDefinition.
-    /// Supports field aliases for mapping DTO properties to different FieldMap keys.
-    /// </summary>
-    /// <typeparam name="TSource">Source entity type</typeparam>
-    /// <typeparam name="TDto">DTO type to project to</typeparam>
-    public static IQueryable<TDto> ApplyProjection<TSource, TDto>(
-        IQueryable<TSource> query,
-        ViewDefinition<TSource, TDto> viewDefinition,
-        FieldMap<TSource> fieldMap)
-        where TSource : class
-        where TDto : class, new()
-    {
-        var fields = viewDefinition.Fields;
-
-        if (fields.Length == 0)
-        {
-            throw new InvalidOperationException(
-                "Cannot auto-project without field specification. " +
-                "Either specify fields or use manual mapping.");
-        }
-
-        // Build projection expression dynamically
-        var parameter = Expression.Parameter(typeof(TSource), "x");
-        var dtoType = typeof(TDto);
-
-        // Create member bindings for each requested field
-        List<MemberBinding> bindings = new();
-
-        foreach (var fieldName in fields)
-        {
-            // Get the actual FieldMap key (may be aliased)
-            var fieldMapKey = viewDefinition.GetFieldMapKey(fieldName);
-
-            // Get source expression from field map using the resolved key
-            if (!fieldMap.TryGet(fieldMapKey, out var sourceExpression, out _))
-            {
-                throw new InvalidOperationException($"Field '{fieldMapKey}' not found in field map");
+                throw new InvalidOperationException($"Field '{fieldMapKey}' not found");
             }
 
             if (!fieldMap.CanSelect(fieldMapKey))
             {
                 throw new InvalidOperationException($"Field '{fieldMapKey}' cannot be selected");
             }
+        }
 
-            // Find matching property in DTO using the original field name
+        // Build projection expression dynamically
+        var parameter = Expression.Parameter(typeof(TSource), "x");
+        var dtoType = typeof(TDto);
+
+        // Create member bindings for each requested field
+        List<MemberBinding> bindings = new();
+
+        foreach (var dtoFieldName in fields)
+        {
+            // Computed fields are skipped — they will be filled in by post-query enrichment
+            if (computedFields != null && computedFields.Contains(dtoFieldName))
+            {
+                continue;
+            }
+
+            var fieldMapKey = getFieldMapKey(dtoFieldName);
+
+            // Get source expression from field map using the mapped key
+            if (!fieldMap.TryGet(fieldMapKey, out var sourceExpression, out _))
+            {
+                continue;
+            }
+
+            // Find matching property in DTO using the DTO field name
             var dtoProperty = dtoType.GetProperty(
-                fieldName,
+                dtoFieldName,
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
 
             if (dtoProperty == null || !dtoProperty.CanWrite)
@@ -155,12 +120,14 @@ public static class ProjectionBinder
                 continue;
             }
 
-            // Replace parameter in source expression using shared ParameterReplacer
+            // Replace parameter in source expression using shared helper
             var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
 
-            // Align types when source and DTO property types differ.
-            // Expression.Convert handles nullable lift (T→T?), unwrap (T?→T),
+            // Align types when the source and DTO property types differ.
+            // Expression.Convert handles: nullable lift (T→T?), unwrap (T?→T),
             // class hierarchy, and user-defined implicit/explicit operators.
+            // All strongly-typed IDs (UserId, RoleId, …) have implicit operator→Guid,
+            // so (long)x.Id is EF-Core-translatable via the value converter.
             if (sourceBody.Type != dtoProperty.PropertyType)
             {
                 try
@@ -219,7 +186,7 @@ public static class ProjectionBinder
                 continue;
             }
 
-            // Replace parameter in source expression using shared ParameterReplacer
+            // Replace parameter in source expression using shared helper
             var sourceBody = ParameterReplacer.ReplaceIn(sourceExpression, parameter);
 
             // Convert to object

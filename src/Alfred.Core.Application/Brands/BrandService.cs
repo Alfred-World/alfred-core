@@ -5,7 +5,6 @@ using Alfred.Core.Application.Brands.Shared;
 using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
-using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.Brands;

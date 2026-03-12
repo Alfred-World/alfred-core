@@ -12,9 +12,14 @@ public sealed class Url : ValueObject
 
     public string Value { get; private set; } = string.Empty;
 
-    private Url() { }
+    private Url()
+    {
+    }
 
-    private Url(string value) => Value = value;
+    private Url(string value)
+    {
+        Value = value;
+    }
 
     public static Url Create(string? urlString)
     {
@@ -38,9 +43,15 @@ public sealed class Url : ValueObject
         return new Url(sanitized);
     }
 
-    public static Url Empty() => new(string.Empty);
+    public static Url Empty()
+    {
+        return new Url(string.Empty);
+    }
 
-    public bool IsEmpty() => string.IsNullOrWhiteSpace(Value);
+    public bool IsEmpty()
+    {
+        return string.IsNullOrWhiteSpace(Value);
+    }
 
     public bool IsHttps()
     {
@@ -68,9 +79,18 @@ public sealed class Url : ValueObject
         yield return Value;
     }
 
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 
-    public static implicit operator string(Url url) => url.Value;
+    public static implicit operator string(Url url)
+    {
+        return url.Value;
+    }
 
-    public static explicit operator Url(string? s) => Create(s);
+    public static explicit operator Url(string? s)
+    {
+        return Create(s);
+    }
 }

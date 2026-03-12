@@ -3,7 +3,6 @@ using Alfred.Core.Application.Assets.Shared;
 using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
-using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 

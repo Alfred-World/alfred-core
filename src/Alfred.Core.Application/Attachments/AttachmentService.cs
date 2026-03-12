@@ -1,6 +1,5 @@
 using Alfred.Core.Application.Attachments.Dtos;
 using Alfred.Core.Application.Files;
-using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Domain.Entities;
 

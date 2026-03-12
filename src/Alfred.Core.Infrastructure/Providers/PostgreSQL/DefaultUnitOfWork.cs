@@ -62,7 +62,8 @@ public class DefaultUnitOfWork : IUnitOfWork
         throw new InvalidOperationException("DbContext is not available");
     }
 
-    public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default)
+    public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action,
+        CancellationToken cancellationToken = default)
     {
         if (_context is not DbContext dbContext)
         {

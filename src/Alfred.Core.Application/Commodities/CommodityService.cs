@@ -11,19 +11,13 @@ namespace Alfred.Core.Application.Commodities;
 
 public sealed class CommodityService : BaseApplicationService, ICommodityService
 {
-    private readonly ICommodityRepository _commodityRepository;
-    private readonly IInvestmentTransactionRepository _transactionRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CommodityService(
-        ICommodityRepository commodityRepository,
-        IInvestmentTransactionRepository transactionRepository,
         IUnitOfWork unitOfWork,
         IFilterParser filterParser,
         IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
-        _commodityRepository = commodityRepository;
-        _transactionRepository = transactionRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -33,7 +27,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         CancellationToken cancellationToken = default)
     {
         return await GetPagedAsync(
-            _commodityRepository,
+            _unitOfWork.Commodities,
             query,
             CommodityFieldMap.Instance,
             null,
@@ -45,7 +39,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<CommodityDto?> GetCommodityByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _commodityRepository.GetQueryable([c => c.DefaultUnit!])
+            _unitOfWork.Commodities.GetQueryable([c => c.DefaultUnit!])
                 .Where(c => c.Id == (CommodityId)id),
             cancellationToken);
 
@@ -63,7 +57,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             dto.DefaultUnitId.HasValue ? (UnitId?)dto.DefaultUnitId.Value : null,
             dto.Description);
 
-        await _commodityRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.Commodities.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return (await GetCommodityByIdAsync(entity.Id.Value, cancellationToken))!;
@@ -72,7 +66,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<CommodityDto> UpdateCommodityAsync(Guid id, UpdateCommodityDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _commodityRepository.GetByIdAsync(id, cancellationToken);
+        var entity = await _unitOfWork.Commodities.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Commodity with ID {id} not found.");
@@ -85,7 +79,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             dto.DefaultUnitId.HasValue ? (UnitId?)dto.DefaultUnitId.Value : null,
             dto.Description);
 
-        _commodityRepository.Update(entity);
+        _unitOfWork.Commodities.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return (await GetCommodityByIdAsync(entity.Id.Value, cancellationToken))!;
@@ -93,13 +87,13 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
 
     public async Task DeleteCommodityAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _commodityRepository.GetByIdAsync(id, cancellationToken);
+        var entity = await _unitOfWork.Commodities.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Commodity with ID {id} not found.");
         }
 
-        _commodityRepository.Delete(entity);
+        _unitOfWork.Commodities.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -111,7 +105,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         CancellationToken cancellationToken = default)
     {
         return await GetPagedAsync(
-            _transactionRepository,
+            _unitOfWork.InvestmentTransactions,
             query,
             InvestmentTransactionFieldMap.Instance,
             t => t.CommodityId == (CommodityId)commodityId,
@@ -124,7 +118,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _transactionRepository.GetQueryable([t => t.Commodity!, t => t.Unit!])
+            _unitOfWork.InvestmentTransactions.GetQueryable([t => t.Commodity!, t => t.Unit!])
                 .Where(t => t.Id == (InvestmentTransactionId)id),
             cancellationToken);
 
@@ -134,7 +128,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<InvestmentTransactionDto> CreateTransactionAsync(Guid commodityId,
         CreateInvestmentTransactionDto dto, CancellationToken cancellationToken = default)
     {
-        var commodityExists = await _commodityRepository.ExistsAsync(commodityId, cancellationToken);
+        var commodityExists = await _unitOfWork.Commodities.ExistsAsync(commodityId, cancellationToken);
         if (!commodityExists)
         {
             throw new KeyNotFoundException($"Commodity with ID {commodityId} not found.");
@@ -158,7 +152,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             dto.FinanceTxnId,
             dto.Notes);
 
-        await _transactionRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.InvestmentTransactions.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return (await GetTransactionByIdAsync(entity.Id.Value, cancellationToken))!;
@@ -166,13 +160,13 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
 
     public async Task DeleteTransactionAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _transactionRepository.GetByIdAsync(id, cancellationToken);
+        var entity = await _unitOfWork.InvestmentTransactions.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Investment transaction with ID {id} not found.");
         }
 
-        _transactionRepository.Delete(entity);
+        _unitOfWork.InvestmentTransactions.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

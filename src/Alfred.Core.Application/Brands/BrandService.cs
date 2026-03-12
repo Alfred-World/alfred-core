@@ -12,16 +12,13 @@ namespace Alfred.Core.Application.Brands;
 
 public sealed class BrandService : BaseApplicationService, IBrandService
 {
-    private readonly IBrandRepository _brandRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public BrandService(
-        IBrandRepository brandRepository,
         IUnitOfWork unitOfWork,
         IFilterParser filterParser,
         IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
-        _brandRepository = brandRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -34,7 +31,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             : null;
 
         return await GetPagedAsync(
-            _brandRepository,
+            _unitOfWork.Brands,
             query,
             BrandFieldMap.Instance,
             preFilter,
@@ -45,7 +42,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
 
     public async Task<BrandDto?> GetBrandByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _brandRepository.GetByIdWithCategoriesAsync(id, cancellationToken);
+        var entity = await _unitOfWork.Brands.GetByIdWithCategoriesAsync(id, cancellationToken);
         return entity?.ToDto();
     }
 
@@ -66,7 +63,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             entity.UpdateCategories(brandCategories);
         }
 
-        await _brandRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.Brands.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Reload with navigation properties
@@ -76,7 +73,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
     public async Task<BrandDto> UpdateBrandAsync(Guid id, UpdateBrandDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _brandRepository.GetByIdWithCategoriesAsync(id, cancellationToken);
+        var entity = await _unitOfWork.Brands.GetByIdWithCategoriesAsync(id, cancellationToken);
 
         if (entity is null)
         {
@@ -100,7 +97,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             entity.UpdateCategories(brandCategories);
         }
 
-        _brandRepository.Update(entity);
+        _unitOfWork.Brands.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Reload with navigation properties
@@ -109,13 +106,13 @@ public sealed class BrandService : BaseApplicationService, IBrandService
 
     public async Task DeleteBrandAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _brandRepository.GetByIdAsync(id, cancellationToken);
+        var entity = await _unitOfWork.Brands.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Brand with ID {id} not found.");
         }
 
-        _brandRepository.Delete(entity);
+        _unitOfWork.Brands.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

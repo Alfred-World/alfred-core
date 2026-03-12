@@ -1,3 +1,5 @@
+using Alfred.Core.Domain.ValueObjects;
+
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Alfred.Core.Infrastructure.Common.Converters;
@@ -19,3 +21,6 @@ public sealed class CommodityIdConverter() : ValueConverter<CommodityId, Guid>(i
 
 public sealed class InvestmentTransactionIdConverter()
     : ValueConverter<InvestmentTransactionId, Guid>(id => id.Value, g => new InvestmentTransactionId(g));
+
+public sealed class UrlConverter()
+    : ValueConverter<Url, string>(u => u.Value, s => Url.Create(s));

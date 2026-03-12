@@ -8,20 +8,17 @@ namespace Alfred.Core.Application.Attachments;
 
 public sealed class AttachmentService : IAttachmentService
 {
-    private readonly IAttachmentRepository _attachmentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFileService _fileService;
     private readonly IStorageService _storageService;
     private readonly IStorageSettings _settings;
 
     public AttachmentService(
-        IAttachmentRepository attachmentRepository,
         IUnitOfWork unitOfWork,
         IFileService fileService,
         IStorageService storageService,
         IStorageSettings settings)
     {
-        _attachmentRepository = attachmentRepository;
         _unitOfWork = unitOfWork;
         _fileService = fileService;
         _storageService = storageService;
@@ -53,7 +50,7 @@ public sealed class AttachmentService : IAttachmentService
             fileSize,
             dto.Purpose);
 
-        await _attachmentRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.Attachments.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Generate a signed download URL for the response
@@ -67,7 +64,7 @@ public sealed class AttachmentService : IAttachmentService
         string targetType,
         CancellationToken cancellationToken = default)
     {
-        var attachments = await _attachmentRepository.GetByTargetAsync(targetId, targetType, cancellationToken);
+        var attachments = await _unitOfWork.Attachments.GetByTargetAsync(targetId, targetType, cancellationToken);
 
         var result = new List<AttachmentDto>(attachments.Count);
 
@@ -82,7 +79,7 @@ public sealed class AttachmentService : IAttachmentService
 
     public async Task DeleteAttachmentAsync(Guid attachmentId, CancellationToken cancellationToken = default)
     {
-        var entity = await _attachmentRepository.GetByIdAsync(attachmentId, cancellationToken);
+        var entity = await _unitOfWork.Attachments.GetByIdAsync(attachmentId, cancellationToken);
 
         if (entity is null)
         {
@@ -93,7 +90,7 @@ public sealed class AttachmentService : IAttachmentService
         await _storageService.DeleteObjectAsync(entity.ObjectKey, cancellationToken);
 
         // Delete DB record
-        _attachmentRepository.Delete(entity);
+        _unitOfWork.Attachments.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

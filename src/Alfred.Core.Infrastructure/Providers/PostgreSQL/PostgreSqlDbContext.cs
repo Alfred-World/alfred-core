@@ -1,6 +1,7 @@
 using System.Reflection;
 
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.ValueObjects;
 using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.Converters;
 using Alfred.Core.Infrastructure.Common.Options;
@@ -42,6 +43,7 @@ public class PostgreSqlDbContext : DbContext, IDbContext
         configurationBuilder.Properties<AttachmentId>().HaveConversion<AttachmentIdConverter>();
         configurationBuilder.Properties<CommodityId>().HaveConversion<CommodityIdConverter>();
         configurationBuilder.Properties<InvestmentTransactionId>().HaveConversion<InvestmentTransactionIdConverter>();
+        configurationBuilder.Properties<Url>().HaveConversion<UrlConverter>();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

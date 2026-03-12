@@ -11,19 +11,13 @@ namespace Alfred.Core.Application.Assets;
 
 public sealed class AssetService : BaseApplicationService, IAssetService
 {
-    private readonly IAssetRepository _assetRepository;
-    private readonly IAssetLogRepository _assetLogRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssetService(
-        IAssetRepository assetRepository,
-        IAssetLogRepository assetLogRepository,
         IUnitOfWork unitOfWork,
         IFilterParser filterParser,
         IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
-        _assetRepository = assetRepository;
-        _assetLogRepository = assetLogRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -32,14 +26,14 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     public async Task<PageResult<AssetDto>> GetAllAssetsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(_assetRepository, query, AssetFieldMap.Instance,
+        return await GetPagedAsync(_unitOfWork.Assets, query, AssetFieldMap.Instance,
             a => a.ToDto(), cancellationToken);
     }
 
     public async Task<AssetDto?> GetAssetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _assetRepository.GetQueryable([a => a.Category!, a => a.Brand!])
+            _unitOfWork.Assets.GetQueryable([a => a.Category!, a => a.Brand!])
                 .Where(a => a.Id == (AssetId)id),
             cancellationToken);
 
@@ -60,7 +54,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             status,
             dto.Location);
 
-        await _assetRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.Assets.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.ToDto();
@@ -69,7 +63,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     public async Task<AssetDto> UpdateAssetAsync(Guid id, UpdateAssetDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _assetRepository.GetByIdAsync((AssetId)id, cancellationToken);
+        var entity = await _unitOfWork.Assets.GetByIdAsync((AssetId)id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Asset with ID {id} not found.");
@@ -87,7 +81,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             status,
             dto.Location);
 
-        _assetRepository.Update(entity);
+        _unitOfWork.Assets.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.ToDto();
@@ -95,13 +89,13 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     public async Task DeleteAssetAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _assetRepository.GetByIdAsync((AssetId)id, cancellationToken);
+        var entity = await _unitOfWork.Assets.GetByIdAsync((AssetId)id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Asset with ID {id} not found.");
         }
 
-        _assetRepository.Delete(entity);
+        _unitOfWork.Assets.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -114,7 +108,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     {
         // Pre-filter by assetId; combined with DSL filter inside GetPagedAsync
         return await GetPagedAsync(
-            _assetLogRepository,
+            _unitOfWork.AssetLogs,
             query,
             AssetLogFieldMap.Instance,
             l => l.AssetId == (AssetId)assetId,
@@ -125,7 +119,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     public async Task<AssetLogDto?> GetAssetLogByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _assetLogRepository.GetQueryable([l => l.Brand!])
+            _unitOfWork.AssetLogs.GetQueryable([l => l.Brand!])
                 .Where(l => l.Id == (AssetLogId)id),
             cancellationToken);
 
@@ -135,7 +129,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     public async Task<AssetLogDto> CreateAssetLogAsync(Guid assetId, CreateAssetLogDto dto,
         CancellationToken cancellationToken = default)
     {
-        var assetExists = await _assetRepository.ExistsAsync((AssetId)assetId, cancellationToken);
+        var assetExists = await _unitOfWork.Assets.ExistsAsync((AssetId)assetId, cancellationToken);
         if (!assetExists)
         {
             throw new KeyNotFoundException($"Asset with ID {assetId} not found.");
@@ -158,7 +152,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             dto.FinanceTxnId,
             dto.NextDueDate);
 
-        await _assetLogRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.AssetLogs.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.ToDto();
@@ -166,13 +160,13 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     public async Task DeleteAssetLogAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _assetLogRepository.GetByIdAsync((AssetLogId)id, cancellationToken);
+        var entity = await _unitOfWork.AssetLogs.GetByIdAsync((AssetLogId)id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Asset log with ID {id} not found.");
         }
 
-        _assetLogRepository.Delete(entity);
+        _unitOfWork.AssetLogs.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 

@@ -13,16 +13,13 @@ namespace Alfred.Core.Application.Categories;
 
 public sealed class CategoryService : BaseApplicationService, ICategoryService
 {
-    private readonly ICategoryRepository _categoryRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CategoryService(
-        ICategoryRepository categoryRepository,
         IUnitOfWork unitOfWork,
         IFilterParser filterParser,
         IAsyncQueryExecutor executor) : base(filterParser, executor)
     {
-        _categoryRepository = categoryRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -30,7 +27,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         CancellationToken cancellationToken = default)
     {
         return await GetPagedAsync(
-            _categoryRepository,
+            _unitOfWork.Categories,
             query,
             CategoryFieldMap.Instance,
             null,
@@ -45,7 +42,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         page = PaginationSettings.EnsureValidPage(page);
         pageSize = PaginationSettings.ClampPageSize(pageSize);
 
-        var queryable = _categoryRepository.GetQueryable([c => c.SubCategories])
+        var queryable = _unitOfWork.Categories.GetQueryable([c => c.SubCategories])
             .Where(c => c.ParentId == null);
 
         if (type.HasValue)
@@ -74,7 +71,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     {
         var children = await _executor.ToListAsync(
             _executor.AsNoTracking(
-                _categoryRepository.GetQueryable([c => c.SubCategories])
+                _unitOfWork.Categories.GetQueryable([c => c.SubCategories])
                     .Where(c => c.ParentId == (CategoryId?)parentId)),
             cancellationToken);
 
@@ -87,7 +84,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _categoryRepository.GetQueryable([c => c.Parent!, c => c.SubCategories])
+            _unitOfWork.Categories.GetQueryable([c => c.Parent!, c => c.SubCategories])
                 .Where(c => c.Id == (CategoryId)id),
             cancellationToken);
 
@@ -100,7 +97,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         // Validate parent type match
         if (dto.ParentId.HasValue)
         {
-            var parent = await _categoryRepository.GetByIdAsync((CategoryId)dto.ParentId.Value, cancellationToken);
+            var parent = await _unitOfWork.Categories.GetByIdAsync((CategoryId)dto.ParentId.Value, cancellationToken);
 
             if (parent is null)
             {
@@ -122,7 +119,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             dto.ParentId.HasValue ? (CategoryId?)dto.ParentId.Value : null,
             dto.FormSchema);
 
-        await _categoryRepository.AddAsync(entity, cancellationToken);
+        await _unitOfWork.Categories.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return (await GetCategoryByIdAsync(entity.Id.Value, cancellationToken))!;
@@ -132,7 +129,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _categoryRepository.GetQueryable().Where(c => c.Id == (CategoryId)id),
+            _unitOfWork.Categories.GetQueryable().Where(c => c.Id == (CategoryId)id),
             cancellationToken);
 
         if (entity is null)
@@ -149,7 +146,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         // Validate parent type match
         if (dto.ParentId.HasValue)
         {
-            var parent = await _categoryRepository.GetByIdAsync((CategoryId)dto.ParentId.Value, cancellationToken);
+            var parent = await _unitOfWork.Categories.GetByIdAsync((CategoryId)dto.ParentId.Value, cancellationToken);
 
             if (parent is null)
             {
@@ -174,7 +171,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
 
         entity.Update(dto.Name, dto.ParentId.HasValue ? (CategoryId?)dto.ParentId.Value : null,
             dto.Type, dto.Icon, dto.FormSchema);
-        _categoryRepository.Update(entity);
+        _unitOfWork.Categories.Update(entity);
 
         if (typeChanged)
         {
@@ -205,7 +202,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             }
 
             var childIds = await _executor.ToListAsync(
-                _categoryRepository.GetQueryable()
+                _unitOfWork.Categories.GetQueryable()
                     .Where(c => c.ParentId == (CategoryId?)currentId)
                     .Select(c => c.Id.Value),
                 cancellationToken);
@@ -231,27 +228,27 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
         CancellationToken cancellationToken)
     {
         var children = await _executor.ToListAsync(
-            _categoryRepository.GetQueryable()
+            _unitOfWork.Categories.GetQueryable()
                 .Where(c => c.ParentId == (CategoryId?)parentId),
             cancellationToken);
 
         foreach (var child in children)
         {
             child.Update(child.Name, child.ParentId, newType, child.Icon, child.FormSchema);
-            _categoryRepository.Update(child);
+            _unitOfWork.Categories.Update(child);
             await CascadeTypeToDescendantsAsync(child.Id.Value, newType, cancellationToken);
         }
     }
 
     public async Task DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _categoryRepository.GetByIdAsync((CategoryId)id, cancellationToken);
+        var entity = await _unitOfWork.Categories.GetByIdAsync((CategoryId)id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Category with ID {id} not found.");
         }
 
-        _categoryRepository.Delete(entity);
+        _unitOfWork.Categories.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -260,7 +257,7 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     {
         return await _executor.ToListAsync(
             _executor.AsNoTracking(
-                _categoryRepository.GetQueryable()
+                _unitOfWork.Categories.GetQueryable()
                     .GroupBy(c => c.Type)
                     .Select(g => new CategoryCountByTypeDto(g.Key, g.Count()))),
             cancellationToken);

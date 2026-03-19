@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.EntityFrameworkCore;
 
+using Serilog;
+
 // Load environment variables from .env file
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 DotEnvLoader.LoadForEnvironment(environment);
@@ -28,6 +30,14 @@ AppConfiguration appConfig = new();
 MtlsConfiguration mtlsConfig = new();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console();
+});
 
 // Configure Kestrel to listen on the specified hostname and port from environment
 builder.WebHost.ConfigureKestrel((context, options) =>
@@ -221,6 +231,7 @@ app.UseScalarInDevelopment();
 
 // Add global exception handler (must be early in pipeline)
 app.UseExceptionHandler();
+app.UseSerilogRequestLogging();
 
 app.UseCors("AllowFrontend");
 

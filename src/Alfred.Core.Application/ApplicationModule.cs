@@ -4,9 +4,11 @@ using Alfred.Core.Application.Brands;
 using Alfred.Core.Application.Categories;
 using Alfred.Core.Application.Commodities;
 using Alfred.Core.Application.Common.Behaviors;
+using Alfred.Core.Application.Common.Events;
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Application.Units;
+using Alfred.Core.Domain.Common.Events;
 
 using FluentValidation;
 
@@ -42,6 +44,9 @@ public static class ApplicationModule
         services.AddScoped<ICommodityService, CommodityService>();
         services.AddScoped<IUnitService, UnitService>();
         services.AddScoped<IFileService, FileService>();
+
+        // Domain event dispatcher (Domain port -> Application adapter)
+        services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
 
         return services;
     }

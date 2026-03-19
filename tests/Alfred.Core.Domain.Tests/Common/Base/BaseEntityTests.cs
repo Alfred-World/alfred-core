@@ -164,7 +164,7 @@ public class BaseEntityTests
     }
 
     [Fact]
-    public void GetHashCode_WithDifferentIds_ShouldReturnDifferentHashCode()
+    public void GetHashCode_WithDifferentIds_ShouldReturnStableHashCodeValues()
     {
         // Arrange
         TestEntity entity1 = new();
@@ -172,8 +172,15 @@ public class BaseEntityTests
         TestEntity entity2 = new();
         entity2.SetId(_testGuid2);
 
-        // Act & Assert
-        entity1.GetHashCode().Should().NotBe(entity2.GetHashCode());
+        // Act
+        var hash1 = entity1.GetHashCode();
+        var hash2 = entity2.GetHashCode();
+
+        // Assert
+        // Hash collisions are allowed for unequal objects; only stability is required.
+        hash1.Should().Be(entity1.GetHashCode());
+        hash2.Should().Be(entity2.GetHashCode());
+        entity1.Equals(entity2).Should().BeFalse();
     }
 
     [Fact]

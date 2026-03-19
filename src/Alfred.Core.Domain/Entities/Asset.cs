@@ -1,4 +1,5 @@
 using Alfred.Core.Domain.Common.Base;
+using Alfred.Core.Domain.Common.Events;
 using Alfred.Core.Domain.Common.Interfaces;
 using Alfred.Core.Domain.Enums;
 
@@ -32,7 +33,7 @@ public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificat
         decimal initialCost, DateTime? warrantyExpiryDate, string specs, AssetStatus status = AssetStatus.Active,
         string? location = null)
     {
-        return new Asset
+        var asset = new Asset
         {
             Name = name,
             CategoryId = categoryId,
@@ -45,6 +46,9 @@ public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificat
             Location = location,
             CreatedAt = DateTime.UtcNow
         };
+
+        asset.AddDomainEvent(new AssetCreatedDomainEvent(asset.Id));
+        return asset;
     }
 
     public void Update(string name, CategoryId? categoryId, BrandId? brandId, DateTime? purchaseDate,
@@ -61,5 +65,6 @@ public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificat
         Status = status;
         Location = location;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new AssetUpdatedDomainEvent(Id));
     }
 }

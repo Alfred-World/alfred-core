@@ -25,7 +25,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Asset", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("BrandId")
@@ -93,7 +92,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.AssetLog", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("AssetId")
@@ -148,7 +146,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Attachment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("ContentType")
@@ -198,7 +195,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Brand", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -211,6 +207,7 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("character varying(250)");
 
                     b.Property<string>("LogoUrl")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -226,6 +223,7 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Website")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
@@ -252,7 +250,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Code")
@@ -301,7 +298,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Commodity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("AssetClass")
@@ -343,7 +339,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.InvestmentTransaction", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("CommodityId")
@@ -424,7 +419,6 @@ namespace Alfred.Core.Infrastructure.Migrations
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Unit", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("BaseUnitId")

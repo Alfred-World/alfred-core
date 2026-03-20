@@ -1,4 +1,5 @@
 using Alfred.Core.Infrastructure.Common.Extensions;
+using Alfred.Core.Infrastructure.Providers.Ai.Groq;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,9 @@ public static class InfrastructureModule
         services.AddDatabase();
         services.AddRepositories();
         services.AddInfrastructureServices();
+
+        // AI provider — swap this line to change providers (e.g. AddOpenAiProvider())
+        services.AddGroqAiProvider();
 
         return services;
     }

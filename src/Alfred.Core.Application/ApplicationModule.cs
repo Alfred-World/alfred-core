@@ -1,3 +1,5 @@
+using Alfred.Core.Application.AiFunctions;
+using Alfred.Core.Application.AiFunctions.Functions;
 using Alfred.Core.Application.Assets;
 using Alfred.Core.Application.Attachments;
 using Alfred.Core.Application.Brands;
@@ -8,6 +10,7 @@ using Alfred.Core.Application.Common.Events;
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Application.Units;
+using Alfred.Core.Domain.Abstractions.Services.Ai;
 using Alfred.Core.Domain.Common.Events;
 
 using FluentValidation;
@@ -47,6 +50,11 @@ public static class ApplicationModule
 
         // Domain event dispatcher (Domain port -> Application adapter)
         services.AddScoped<IDomainEventDispatcher, MediatRDomainEventDispatcher>();
+
+        // AI Function Calling
+        services.AddScoped<IAiFunctionCallService, AiFunctionCallService>();
+        services.AddScoped<CreateBrandsFunction>();
+        services.AddScoped<CreateCategoriesFunction>();
 
         return services;
     }

@@ -2,6 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
 using Alfred.Core.Application;
+using Alfred.Core.Application.AiFunctions;
 using Alfred.Core.Infrastructure;
 using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
@@ -211,6 +212,9 @@ if (app.Environment.IsProduction())
     logger.LogInformation("Running data seeders...");
     await RunDataSeedersAsync(app.Services, logger);
 }
+
+// Register AI functions into the registry
+app.Services.RegisterAiFunctions();
 
 // Configure the HTTP request pipeline
 

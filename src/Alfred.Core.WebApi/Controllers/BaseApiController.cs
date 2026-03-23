@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.WebApi.Contracts.Common;
@@ -22,29 +24,58 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     /// <returns>User ID</returns>
     /// <exception cref="UnauthorizedAccessException">If user ID is not found in token</exception>
-    protected long GetCurrentUserId()
+    protected Guid GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                           ?? User.FindFirst("sub")?.Value;
 
-        if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
+        var userId = TryParseUserId(userIdClaim);
+
+        if (!userId.HasValue)
         {
             throw new UnauthorizedAccessException("User ID not found in token");
         }
 
-        return userId;
+        return userId.Value;
     }
 
     /// <summary>
     /// Try to get the current authenticated user's ID from JWT claims
     /// </summary>
     /// <returns>User ID if found and valid, null otherwise</returns>
-    protected long? TryGetCurrentUserId()
+    protected Guid? TryGetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                           ?? User.FindFirst("sub")?.Value;
 
-        return long.TryParse(userIdClaim, out var userId) ? userId : null;
+        return TryParseUserId(userIdClaim);
+    }
+
+    private static Guid? TryParseUserId(string? rawUserId)
+    {
+        if (string.IsNullOrWhiteSpace(rawUserId))
+        {
+            return null;
+        }
+
+        if (Guid.TryParse(rawUserId, out var guidUserId) && guidUserId != Guid.Empty)
+        {
+            return guidUserId;
+        }
+
+        if (!long.TryParse(rawUserId, out var legacyUserId) || legacyUserId <= 0)
+        {
+            return null;
+        }
+
+        return MapLegacyInt64ToGuid(legacyUserId);
+    }
+
+    private static Guid MapLegacyInt64ToGuid(long userId)
+    {
+        var raw = Encoding.UTF8.GetBytes($"legacy-user:{userId}");
+        var hash = MD5.HashData(raw);
+        return new Guid(hash);
     }
 
     /// <summary>

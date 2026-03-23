@@ -4,7 +4,8 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Unit : BaseEntity<UnitId>, IHasCreationTime, IHasModificationTime
+public sealed class Unit : BaseEntity<UnitId>, IHasCreationTime, IHasModificationTime, IHasDeletionTime, IHasCreator,
+    IHasModifier, IHasDeleter
 {
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
@@ -17,6 +18,11 @@ public sealed class Unit : BaseEntity<UnitId>, IHasCreationTime, IHasModificatio
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public Guid? CreatedById { get; set; }
+    public Guid? UpdatedById { get; set; }
+    public Guid? DeletedById { get; set; }
 
     // Navigation
     public Unit? BaseUnit { get; private set; }
@@ -47,7 +53,8 @@ public sealed class Unit : BaseEntity<UnitId>, IHasCreationTime, IHasModificatio
             ConversionRate = conversionRate,
             Status = status,
             Description = description,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsDeleted = false
         };
     }
 

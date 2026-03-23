@@ -33,7 +33,9 @@ public sealed class GroqKeyRotationManager : IAiKeyRotationManager
     public string? GetNextKey()
     {
         if (_apiKeys.Length == 0)
+        {
             return null;
+        }
 
         var totalKeys = _apiKeys.Length;
 
@@ -42,7 +44,10 @@ public sealed class GroqKeyRotationManager : IAiKeyRotationManager
         {
             var index = Interlocked.Increment(ref _currentIndex) % totalKeys;
             // Handle negative modulo edge case after int overflow
-            if (index < 0) index += totalKeys;
+            if (index < 0)
+            {
+                index += totalKeys;
+            }
 
             var key = _apiKeys[index];
             var state = _keyStates.GetOrAdd(key, _ => new KeyState());

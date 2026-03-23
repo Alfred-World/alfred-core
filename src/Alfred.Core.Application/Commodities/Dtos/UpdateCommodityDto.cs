@@ -1,8 +1,10 @@
+using Alfred.Core.Domain.Enums;
+
 namespace Alfred.Core.Application.Commodities.Dtos;
 
 public sealed record UpdateCommodityDto(
     string Name,
-    string AssetClass,
+    CommodityAssetClass AssetClass,
     Guid? DefaultUnitId,
     string? Description
 );

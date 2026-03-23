@@ -230,6 +230,32 @@ public static class EfFilterBinder<T>
                 return Expression.Constant(null, targetType);
             }
 
+            // Special handling for Guid or strongly-typed ID structs backed by Guid (e.g., MemberId, ProductId)
+            if (constant.Value is string guidCandidate)
+            {
+                if (underlyingTargetType == typeof(Guid))
+                {
+                    if (Guid.TryParse(guidCandidate, out var directGuid))
+                    {
+                        return Expression.Constant(directGuid, targetType);
+                    }
+
+                    throw new InvalidOperationException(
+                        $"Cannot convert '{guidCandidate}' to Guid. Use a valid UUID format.");
+                }
+
+                // Detect strongly-typed ID: value type with a single constructor taking a Guid
+                if (underlyingTargetType.IsValueType && underlyingTargetType != typeof(Guid))
+                {
+                    var ctor = underlyingTargetType.GetConstructor([typeof(Guid)]);
+                    if (ctor != null && Guid.TryParse(guidCandidate, out var idGuid))
+                    {
+                        var typedId = ctor.Invoke([idGuid]);
+                        return Expression.Constant(typedId, targetType);
+                    }
+                }
+            }
+
             // Special handling for DateOnly
             if (underlyingTargetType == typeof(DateOnly) && constant.Value is string dateString)
             {

@@ -1,4 +1,5 @@
 using Alfred.Core.Application.Assets.Dtos;
+using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.WebApi.Contracts.Assets;
 
@@ -11,7 +12,7 @@ public sealed record CreateAssetRequest
     public decimal InitialCost { get; init; }
     public DateTime? WarrantyExpiryDate { get; init; }
     public string Specs { get; init; } = "{}";
-    public string? Status { get; init; }
+    public AssetStatus Status { get; init; } = AssetStatus.Active;
     public string? Location { get; init; }
 
     public CreateAssetDto ToDto()

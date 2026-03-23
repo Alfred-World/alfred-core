@@ -4,7 +4,6 @@ using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
-using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Application.Commodities;
 
@@ -48,7 +47,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<CommodityDto> CreateCommodityAsync(CreateCommodityDto dto,
         CancellationToken cancellationToken = default)
     {
-        var assetClass = ParseAssetClass(dto.AssetClass);
+        var assetClass = dto.AssetClass;
         var entity = Commodity.Create(
             dto.Code,
             dto.Name,
@@ -71,7 +70,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             throw new KeyNotFoundException($"Commodity with ID {id} not found.");
         }
 
-        var assetClass = ParseAssetClass(dto.AssetClass);
+        var assetClass = dto.AssetClass;
         entity.Update(
             dto.Name,
             assetClass,
@@ -133,15 +132,9 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             throw new KeyNotFoundException($"Commodity with ID {commodityId} not found.");
         }
 
-        if (!Enum.TryParse<InvestmentTransactionType>(dto.TransactionType, true, out var transactionType))
-        {
-            throw new InvalidOperationException(
-                $"Invalid transaction type '{dto.TransactionType}'. Valid values: {string.Join(", ", Enum.GetNames<InvestmentTransactionType>())}");
-        }
-
         var entity = InvestmentTransaction.Create(
             commodityId,
-            transactionType,
+            dto.TransactionType,
             dto.TransactionDate,
             dto.Quantity,
             (UnitId)dto.UnitId,
@@ -170,20 +163,4 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     }
 
     #endregion
-
-    private static CommodityAssetClass ParseAssetClass(string? assetClass)
-    {
-        if (string.IsNullOrWhiteSpace(assetClass))
-        {
-            return CommodityAssetClass.Metal;
-        }
-
-        if (!Enum.TryParse<CommodityAssetClass>(assetClass, true, out var parsed))
-        {
-            throw new InvalidOperationException(
-                $"Invalid asset class '{assetClass}'. Valid values: {string.Join(", ", Enum.GetNames<CommodityAssetClass>())}");
-        }
-
-        return parsed;
-    }
 }

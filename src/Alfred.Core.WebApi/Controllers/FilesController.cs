@@ -1,8 +1,11 @@
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Files.Dtos;
+using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Contracts.Files;
+using Alfred.Core.WebApi.Filters;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
@@ -12,6 +15,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// Files are uploaded directly from client to R2 — the server only generates signed URLs.
 /// </summary>
 [Route("api/v{version:apiVersion}/files")]
+[Authorize]
 public sealed class FilesController : BaseApiController
 {
     private readonly IFileService _fileService;
@@ -26,6 +30,7 @@ public sealed class FilesController : BaseApiController
     /// Flow: FE calls this → gets presigned URL → FE PUTs file directly to R2.
     /// </summary>
     [HttpPost("upload-url")]
+    [RequirePermission(PermissionCodes.File.Create)]
     [ProducesResponseType(typeof(ApiResponse<UploadUrlResultDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateUploadUrl(
@@ -51,6 +56,7 @@ public sealed class FilesController : BaseApiController
     /// Generate a presigned URL for downloading/viewing a file from R2.
     /// </summary>
     [HttpPost("download-url")]
+    [RequirePermission(PermissionCodes.File.Read)]
     [ProducesResponseType(typeof(ApiResponse<DownloadUrlResultDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GenerateDownloadUrl(
@@ -72,6 +78,7 @@ public sealed class FilesController : BaseApiController
     /// Delete a file from R2 storage.
     /// </summary>
     [HttpDelete]
+    [RequirePermission(PermissionCodes.File.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFile(
@@ -94,6 +101,7 @@ public sealed class FilesController : BaseApiController
     /// Accepts multipart/form-data with a 'file' field and optional 'folder' field.
     /// </summary>
     [HttpPost("upload")]
+    [RequirePermission(PermissionCodes.File.Create)]
     [RequestSizeLimit(52_428_800)] // 50 MB
     [ProducesResponseType(typeof(ApiResponse<FileUploadResultDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

@@ -35,8 +35,8 @@ public static class GroqAiProviderExtensions
 
         // Parse default models (with backward comp for single GROQ_DEFAULT_MODEL)
         var defaultModelsRaw = Environment.GetEnvironmentVariable("GROQ_DEFAULT_MODELS")
-            ?? Environment.GetEnvironmentVariable("GROQ_DEFAULT_MODEL")
-            ?? "";
+                               ?? Environment.GetEnvironmentVariable("GROQ_DEFAULT_MODEL")
+                               ?? "";
         var defaultModels = defaultModelsRaw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(m => !string.IsNullOrWhiteSpace(m))
@@ -44,8 +44,8 @@ public static class GroqAiProviderExtensions
 
         // Parse vision models (with backward comp for single GROQ_VISION_MODEL)
         var visionModelsRaw = Environment.GetEnvironmentVariable("GROQ_VISION_MODELS")
-            ?? Environment.GetEnvironmentVariable("GROQ_VISION_MODEL")
-            ?? "";
+                              ?? Environment.GetEnvironmentVariable("GROQ_VISION_MODEL")
+                              ?? "";
         var visionModels = visionModelsRaw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Where(m => !string.IsNullOrWhiteSpace(m))
@@ -60,19 +60,29 @@ public static class GroqAiProviderExtensions
 
         var baseUrl = Environment.GetEnvironmentVariable("GROQ_BASE_URL");
         if (!string.IsNullOrWhiteSpace(baseUrl))
+        {
             options.BaseUrl = baseUrl;
+        }
 
         if (int.TryParse(Environment.GetEnvironmentVariable("GROQ_KEY_COOLDOWN_MINUTES"), out var keyCooldown))
+        {
             options.KeyCooldownMinutes = keyCooldown;
+        }
 
         if (int.TryParse(Environment.GetEnvironmentVariable("GROQ_MODEL_COOLDOWN_MINUTES"), out var modelCooldown))
+        {
             options.ModelCooldownMinutes = modelCooldown;
+        }
 
         if (int.TryParse(Environment.GetEnvironmentVariable("GROQ_MAX_RETRIES"), out var maxRetries))
+        {
             options.MaxRetries = maxRetries;
+        }
 
         if (int.TryParse(Environment.GetEnvironmentVariable("GROQ_TIMEOUT_SECONDS"), out var timeout))
+        {
             options.TimeoutSeconds = timeout;
+        }
 
         options.Validate();
 

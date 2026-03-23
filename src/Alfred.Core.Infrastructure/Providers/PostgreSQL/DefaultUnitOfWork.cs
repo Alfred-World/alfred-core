@@ -1,5 +1,6 @@
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Common.Events;
+using Alfred.Core.Domain.Common.Interfaces;
 using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Repositories;
 
@@ -15,7 +16,18 @@ public class DefaultUnitOfWork : IUnitOfWork
 {
     private readonly IDbContext _context;
     private readonly IDomainEventDispatcher? _domainEventDispatcher;
+    private readonly ICurrentUser? _currentUser;
 
+    private IAccessRoleRepository? _accessRoles;
+    private IAccessPermissionRepository? _accessPermissions;
+    private IReferralCommissionSettingRepository? _referralCommissionSettings;
+    private IReferralCommissionSettingHistoryRepository? _referralCommissionSettingHistories;
+    private IProductRepository? _products;
+    private IProductVariantRepository? _productVariants;
+    private IMemberRepository? _members;
+    private IReplicatedUserRepository? _replicatedUsers;
+    private IAccountCloneRepository? _accountClones;
+    private IAccountOrderRepository? _accountOrders;
     private IAssetRepository? _assets;
     private IAssetLogRepository? _assetLogs;
     private IAttachmentRepository? _attachments;
@@ -25,11 +37,45 @@ public class DefaultUnitOfWork : IUnitOfWork
     private IInvestmentTransactionRepository? _investmentTransactions;
     private IUnitRepository? _units;
 
-    public DefaultUnitOfWork(IDbContext context, IDomainEventDispatcher? domainEventDispatcher = null)
+    public DefaultUnitOfWork(
+        IDbContext context,
+        IDomainEventDispatcher? domainEventDispatcher = null,
+        ICurrentUser? currentUser = null)
     {
         _context = context;
         _domainEventDispatcher = domainEventDispatcher;
+        _currentUser = currentUser;
     }
+
+    public IAccessRoleRepository AccessRoles =>
+        _accessRoles ??= new AccessRoleRepository(_context);
+
+    public IAccessPermissionRepository AccessPermissions =>
+        _accessPermissions ??= new AccessPermissionRepository(_context);
+
+    public IReferralCommissionSettingRepository ReferralCommissionSettings =>
+        _referralCommissionSettings ??= new ReferralCommissionSettingRepository(_context);
+
+    public IReferralCommissionSettingHistoryRepository ReferralCommissionSettingHistories =>
+        _referralCommissionSettingHistories ??= new ReferralCommissionSettingHistoryRepository(_context);
+
+    public IProductRepository Products =>
+        _products ??= new ProductRepository(_context);
+
+    public IProductVariantRepository ProductVariants =>
+        _productVariants ??= new ProductVariantRepository(_context);
+
+    public IMemberRepository Members =>
+        _members ??= new MemberRepository(_context);
+
+    public IReplicatedUserRepository ReplicatedUsers =>
+        _replicatedUsers ??= new ReplicatedUserRepository(_context);
+
+    public IAccountCloneRepository AccountClones =>
+        _accountClones ??= new AccountCloneRepository(_context);
+
+    public IAccountOrderRepository AccountOrders =>
+        _accountOrders ??= new AccountOrderRepository(_context);
 
     public IAssetRepository Assets =>
         _assets ??= new AssetRepository(_context);
@@ -59,6 +105,8 @@ public class DefaultUnitOfWork : IUnitOfWork
     {
         if (_context is DbContext dbContext)
         {
+            ApplyAuditFields(dbContext);
+
             var entitiesWithEvents = dbContext.ChangeTracker
                 .Entries<IHasDomainEvents>()
                 .Where(entry => entry.Entity.DomainEvents.Count > 0)
@@ -85,6 +133,77 @@ public class DefaultUnitOfWork : IUnitOfWork
         }
 
         throw new InvalidOperationException("DbContext is not available");
+    }
+
+    private void ApplyAuditFields(DbContext dbContext)
+    {
+        var now = DateTime.UtcNow;
+        var currentUserId = _currentUser?.UserId;
+
+        foreach (var entry in dbContext.ChangeTracker.Entries())
+        {
+            if (entry.Entity is not object)
+            {
+                continue;
+            }
+
+            if (entry.State == EntityState.Added)
+            {
+                if (entry.Entity is IHasCreationTime creationTime && creationTime.CreatedAt == default)
+                {
+                    creationTime.CreatedAt = now;
+                }
+
+                if (entry.Entity is IHasCreator creator && creator.CreatedById == null)
+                {
+                    creator.CreatedById = currentUserId;
+                }
+
+                continue;
+            }
+
+            if (entry.State == EntityState.Modified)
+            {
+                if (entry.Entity is IHasDeletionTime deletionTime && deletionTime.IsDeleted)
+                {
+                    if (deletionTime.DeletedAt == null)
+                    {
+                        deletionTime.DeletedAt = now;
+                    }
+
+                    if (entry.Entity is IHasDeleter deleter && deleter.DeletedById == null)
+                    {
+                        deleter.DeletedById = currentUserId;
+                    }
+
+                    continue;
+                }
+
+                if (entry.Entity is IHasModificationTime modificationTime)
+                {
+                    modificationTime.UpdatedAt = now;
+                }
+
+                if (entry.Entity is IHasModifier modifier)
+                {
+                    modifier.UpdatedById = currentUserId;
+                }
+
+                continue;
+            }
+
+            if (entry.State == EntityState.Deleted && entry.Entity is IHasDeletionTime softDeleteEntity)
+            {
+                entry.State = EntityState.Modified;
+                softDeleteEntity.IsDeleted = true;
+                softDeleteEntity.DeletedAt = now;
+
+                if (entry.Entity is IHasDeleter deleter)
+                {
+                    deleter.DeletedById = currentUserId;
+                }
+            }
+        }
     }
 
     public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action,

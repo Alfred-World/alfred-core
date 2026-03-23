@@ -1,8 +1,11 @@
 using Alfred.Core.Application.Commodities;
 using Alfred.Core.Application.Commodities.Dtos;
+using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.Commodities;
 using Alfred.Core.WebApi.Contracts.Common;
+using Alfred.Core.WebApi.Filters;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
@@ -11,6 +14,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// Manages commodities (investment assets) and their transactions.
 /// </summary>
 [Route("api/v{version:apiVersion}/commodities")]
+[Authorize]
 public sealed class CommoditiesController : BaseApiController
 {
     private readonly ICommodityService _commodityService;
@@ -26,6 +30,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Get paginated list of commodities with optional DSL filtering and sorting.
     /// </summary>
     [HttpGet]
+    [RequirePermission(PermissionCodes.Commodity.Read)]
     [ProducesResponseType(typeof(ApiPagedResponse<CommodityDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetCommodities(
@@ -40,6 +45,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Get a single commodity by ID.
     /// </summary>
     [HttpGet("{id:guid}")]
+    [RequirePermission(PermissionCodes.Commodity.Read)]
     [ProducesResponseType(typeof(ApiResponse<CommodityDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCommodityById(Guid id, CancellationToken cancellationToken)
@@ -57,6 +63,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Create a new commodity.
     /// </summary>
     [HttpPost]
+    [RequirePermission(PermissionCodes.Commodity.Create)]
     [ProducesResponseType(typeof(ApiResponse<CommodityDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCommodity(
@@ -71,6 +78,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Update an existing commodity.
     /// </summary>
     [HttpPut("{id:guid}")]
+    [RequirePermission(PermissionCodes.Commodity.Update)]
     [ProducesResponseType(typeof(ApiResponse<CommodityDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
@@ -87,6 +95,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Delete a commodity by ID.
     /// </summary>
     [HttpDelete("{id:guid}")]
+    [RequirePermission(PermissionCodes.Commodity.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCommodity(Guid id, CancellationToken cancellationToken)
@@ -103,6 +112,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Get paginated list of investment transactions for a commodity.
     /// </summary>
     [HttpGet("{commodityId:guid}/transactions")]
+    [RequirePermission(PermissionCodes.InvestmentTransaction.Read)]
     [ProducesResponseType(typeof(ApiPagedResponse<InvestmentTransactionDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetTransactions(
@@ -119,6 +129,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Get a single investment transaction by ID.
     /// </summary>
     [HttpGet("{commodityId:guid}/transactions/{transactionId:guid}")]
+    [RequirePermission(PermissionCodes.InvestmentTransaction.Read)]
     [ProducesResponseType(typeof(ApiResponse<InvestmentTransactionDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTransactionById(Guid commodityId, Guid transactionId,
@@ -137,6 +148,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Create a new investment transaction for a commodity.
     /// </summary>
     [HttpPost("{commodityId:guid}/transactions")]
+    [RequirePermission(PermissionCodes.InvestmentTransaction.Create)]
     [ProducesResponseType(typeof(ApiResponse<InvestmentTransactionDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateTransaction(
@@ -152,6 +164,7 @@ public sealed class CommoditiesController : BaseApiController
     /// Delete an investment transaction by ID.
     /// </summary>
     [HttpDelete("{commodityId:guid}/transactions/{transactionId:guid}")]
+    [RequirePermission(PermissionCodes.InvestmentTransaction.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTransaction(Guid commodityId, Guid transactionId,

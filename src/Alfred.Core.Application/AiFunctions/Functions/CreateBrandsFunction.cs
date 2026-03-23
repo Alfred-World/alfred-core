@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Alfred.Core.Application.Brands;
 using Alfred.Core.Application.Brands.Dtos;
@@ -127,7 +126,7 @@ public sealed class CreateBrandsFunction : IAiFunction
                     brand.SupportPhone,
                     brand.Description,
                     brand.LogoUrl,
-                    CategoryIds: null);
+                    null);
 
                 var result = await _brandService.CreateBrandAsync(dto, cancellationToken);
 

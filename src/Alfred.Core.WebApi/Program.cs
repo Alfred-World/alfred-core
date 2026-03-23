@@ -1,4 +1,6 @@
+using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Alfred.Core.Application;
@@ -15,10 +17,11 @@ using Asp.Versioning;
 
 using FluentValidation;
 
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 using Serilog;
 
@@ -31,6 +34,10 @@ AppConfiguration appConfig = new();
 MtlsConfiguration mtlsConfig = new();
 
 var builder = WebApplication.CreateBuilder(args);
+
+IList<JsonWebKey>? cachedSigningKeys = null;
+var keysLastFetched = DateTime.MinValue;
+var keysCacheDuration = TimeSpan.FromHours(1);
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -159,35 +166,99 @@ builder.Services.AddCors(options =>
 // Add Application layer
 builder.Services.AddApplication();
 
+// Required for resolving current user claims in infrastructure services.
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient("GithubApi", client =>
+{
+    client.BaseAddress = new Uri("https://api.github.com/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("alfred-core", "1.0"));
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+});
+
 // Add Infrastructure layer (Database)
 builder.Services.AddInfrastructure();
 
-// Add Cookie Authentication for SSO
-var ssoCookieDomain = Environment.GetEnvironmentVariable("SSO_COOKIE_DOMAIN");
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+// Add JWT Bearer authentication (token is validated by core as defense-in-depth).
+var authAuthority = Environment.GetEnvironmentVariable("AUTH_AUTHORITY") ?? "http://localhost:8100";
+var authValidIssuer = Environment.GetEnvironmentVariable("AUTH_VALID_ISSUER") ?? authAuthority;
+var jwksUrl = $"{authAuthority.TrimEnd('/')}/.well-known/jwks.json";
+
+builder.Services.AddAuthentication(options =>
     {
-        options.Cookie.Name = "AlfredSession";
-        // Cookie domain is NOT set explicitly because:
-        // 1. Request comes to localhost (via YARP reverse proxy)
-        // 2. ASP.NET refuses to set cookie for different domain than request host
-        // Instead, we rely on ForwardedHeaders middleware to detect the correct host
-        // and the cookie will be set for that host (gateway.test when behind YARP)
-        // 
-        // For cross-subdomain sharing in production (e.g., *.alfred.com),
-        // configure ForwardedHeaders properly and consider using cookie path/domain options
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.None; // Allow cross-origin cookie setting
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Required for SameSite=None
-        options.ExpireTimeSpan = TimeSpan.FromDays(14);
-        options.SlidingExpiration = true;
-        // For API-based auth, return 401 instead of redirect
-        options.Events.OnRedirectToLogin = context =>
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.Authority = null;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Task.CompletedTask;
+            ValidateIssuer = true,
+            ValidIssuer = authValidIssuer,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero,
+            IssuerSigningKeyResolver = (_, _, _, _) =>
+            {
+                if (cachedSigningKeys != null && DateTime.UtcNow - keysLastFetched < keysCacheDuration)
+                {
+                    return cachedSigningKeys;
+                }
+
+                try
+                {
+                    using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                    var response = httpClient.GetStringAsync(jwksUrl).GetAwaiter().GetResult();
+                    var jwks = new JsonWebKeySet(response);
+                    cachedSigningKeys = jwks.Keys.ToList();
+                    keysLastFetched = DateTime.UtcNow;
+
+                    return cachedSigningKeys;
+                }
+                catch
+                {
+                    return cachedSigningKeys ?? Enumerable.Empty<SecurityKey>();
+                }
+            }
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                if (context.Response.HasStarted)
+                {
+                    return;
+                }
+
+                context.HandleResponse();
+                await WriteAuthErrorAsync(
+                    context.Response,
+                    StatusCodes.Status401Unauthorized,
+                    "You are not authorized to access this resource. Please provide a valid token.",
+                    "UNAUTHORIZED");
+            },
+            OnForbidden = async context =>
+            {
+                if (context.Response.HasStarted)
+                {
+                    return;
+                }
+
+                await WriteAuthErrorAsync(
+                    context.Response,
+                    StatusCodes.Status403Forbidden,
+                    "You don't have permission to access this resource.",
+                    "FORBIDDEN");
+            }
         };
     });
+
+builder.Services.AddAuthorization();
 
 // Add Health Checks
 builder.Services.AddHealthChecks();
@@ -255,6 +326,27 @@ app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();
+
+static Task WriteAuthErrorAsync(HttpResponse response, int statusCode, string message, string code)
+{
+    response.StatusCode = statusCode;
+    response.ContentType = "application/json";
+
+    var payload = JsonSerializer.Serialize(new
+    {
+        success = false,
+        errors = new[]
+        {
+            new
+            {
+                message,
+                code
+            }
+        }
+    });
+
+    return response.WriteAsync(payload);
+}
 
 // <summary>
 // Run database migrations automatically

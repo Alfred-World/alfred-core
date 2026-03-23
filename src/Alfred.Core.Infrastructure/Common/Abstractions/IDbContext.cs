@@ -19,6 +19,8 @@ public interface IDbContext
     DbSet<Commodity> Commodities { get; }
     DbSet<InvestmentTransaction> InvestmentTransactions { get; }
     DbSet<MarketPrice> MarketPrices { get; }
+    DbSet<ReferralCommissionSetting> ReferralCommissionSettings { get; }
+    DbSet<ReferralCommissionSettingHistory> ReferralCommissionSettingHistories { get; }
     DbSet<Attachment> Attachments { get; }
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

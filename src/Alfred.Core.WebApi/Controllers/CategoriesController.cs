@@ -1,10 +1,13 @@
 using Alfred.Core.Application.Categories;
 using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Application.Common.Settings;
+using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Enums;
 using Alfred.Core.WebApi.Contracts.Categories;
 using Alfred.Core.WebApi.Contracts.Common;
+using Alfred.Core.WebApi.Filters;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
@@ -13,6 +16,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// Manages categories with hierarchical tree support and dynamic form schemas.
 /// </summary>
 [Route("api/v{version:apiVersion}/categories")]
+[Authorize]
 public sealed class CategoriesController : BaseApiController
 {
     private readonly ICategoryService _categoryService;
@@ -26,6 +30,7 @@ public sealed class CategoriesController : BaseApiController
     /// Get paginated list of categories with optional DSL filtering and sorting.
     /// </summary>
     [HttpGet]
+    [RequirePermission(PermissionCodes.Category.Read)]
     [ProducesResponseType(typeof(ApiPagedResponse<CategoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetCategories(
@@ -40,6 +45,7 @@ public sealed class CategoriesController : BaseApiController
     /// Get root-level categories (flat, with hasChildren flag), optionally filtered by type.
     /// </summary>
     [HttpGet("tree")]
+    [RequirePermission(PermissionCodes.Category.Read)]
     [ProducesResponseType(typeof(ApiPagedResponse<CategoryTreeNodeDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCategoryTree(
         [FromQuery] CategoryType? type,
@@ -56,6 +62,7 @@ public sealed class CategoriesController : BaseApiController
     /// Get direct children of a category by parent ID.
     /// </summary>
     [HttpGet("{parentId:guid}/children")]
+    [RequirePermission(PermissionCodes.Category.Read)]
     [ProducesResponseType(typeof(ApiResponse<List<CategoryTreeNodeDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetChildren(Guid parentId, CancellationToken cancellationToken)
     {
@@ -67,6 +74,7 @@ public sealed class CategoriesController : BaseApiController
     /// Get a single category by ID.
     /// </summary>
     [HttpGet("{id:guid}")]
+    [RequirePermission(PermissionCodes.Category.Read)]
     [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCategoryById(Guid id, CancellationToken cancellationToken)
@@ -84,6 +92,7 @@ public sealed class CategoriesController : BaseApiController
     /// Create a new category.
     /// </summary>
     [HttpPost]
+    [RequirePermission(PermissionCodes.Category.Create)]
     [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCategory(
@@ -98,6 +107,7 @@ public sealed class CategoriesController : BaseApiController
     /// Update an existing category.
     /// </summary>
     [HttpPut("{id:guid}")]
+    [RequirePermission(PermissionCodes.Category.Update)]
     [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
@@ -114,6 +124,7 @@ public sealed class CategoriesController : BaseApiController
     /// Delete a category by ID.
     /// </summary>
     [HttpDelete("{id:guid}")]
+    [RequirePermission(PermissionCodes.Category.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken cancellationToken)
@@ -126,6 +137,7 @@ public sealed class CategoriesController : BaseApiController
     /// Get the count of categories grouped by type.
     /// </summary>
     [HttpGet("counts-by-type")]
+    [RequirePermission(PermissionCodes.Category.Read)]
     [ProducesResponseType(typeof(ApiResponse<List<CategoryCountByTypeDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCategoryCountsByType(CancellationToken cancellationToken)
     {

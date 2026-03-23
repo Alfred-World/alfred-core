@@ -1,7 +1,10 @@
 using Alfred.Core.Application.Attachments;
 using Alfred.Core.Application.Attachments.Dtos;
+using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.Common;
+using Alfred.Core.WebApi.Filters;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
@@ -11,6 +14,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// All download URLs returned are time-limited presigned URLs (never raw R2 paths).
 /// </summary>
 [Route("api/v{version:apiVersion}/attachments")]
+[Authorize]
 public sealed class AttachmentsController : BaseApiController
 {
     private readonly IAttachmentService _attachmentService;
@@ -24,6 +28,7 @@ public sealed class AttachmentsController : BaseApiController
     /// Upload a file and attach it to a target entity.
     /// </summary>
     [HttpPost]
+    [RequirePermission(PermissionCodes.Attachment.Create)]
     [RequestSizeLimit(52_428_800)] // 50 MB
     [ProducesResponseType(typeof(ApiResponse<AttachmentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
@@ -67,6 +72,7 @@ public sealed class AttachmentsController : BaseApiController
     /// List all attachments for a target entity. URLs are presigned (time-limited).
     /// </summary>
     [HttpGet]
+    [RequirePermission(PermissionCodes.Attachment.Read)]
     [ProducesResponseType(typeof(ApiResponse<List<AttachmentDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetByTarget(
         [FromQuery] Guid targetId,
@@ -83,6 +89,7 @@ public sealed class AttachmentsController : BaseApiController
     /// Delete an attachment (removes DB record and R2 object).
     /// </summary>
     [HttpDelete("{id:guid}")]
+    [RequirePermission(PermissionCodes.Attachment.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)

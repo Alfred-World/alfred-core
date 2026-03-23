@@ -1,7 +1,9 @@
+using Alfred.Core.Domain.Enums;
+
 namespace Alfred.Core.Application.Commodities.Dtos;
 
 public sealed record CreateInvestmentTransactionDto(
-    string TransactionType,
+    InvestmentTransactionType TransactionType,
     DateTimeOffset TransactionDate,
     decimal Quantity,
     Guid UnitId,

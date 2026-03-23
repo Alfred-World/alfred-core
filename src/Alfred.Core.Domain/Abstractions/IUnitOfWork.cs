@@ -5,6 +5,16 @@ using Alfred.Core.Domain.Abstractions;
 /// </summary>
 public interface IUnitOfWork : IDisposable
 {
+    IAccessRoleRepository AccessRoles { get; }
+    IAccessPermissionRepository AccessPermissions { get; }
+    IReferralCommissionSettingRepository ReferralCommissionSettings { get; }
+    IReferralCommissionSettingHistoryRepository ReferralCommissionSettingHistories { get; }
+    IProductRepository Products { get; }
+    IProductVariantRepository ProductVariants { get; }
+    IMemberRepository Members { get; }
+    IReplicatedUserRepository ReplicatedUsers { get; }
+    IAccountCloneRepository AccountClones { get; }
+    IAccountOrderRepository AccountOrders { get; }
     IAssetRepository Assets { get; }
     IAssetLogRepository AssetLogs { get; }
     IAttachmentRepository Attachments { get; }

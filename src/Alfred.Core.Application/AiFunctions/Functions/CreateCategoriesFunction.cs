@@ -49,7 +49,8 @@ public sealed class CreateCategoriesFunction : IAiFunction
             categories = new
             {
                 type = "array",
-                description = "List of category paths to create (e.g., [\"Electronics/Phones\", \"Electronics/Tablets\"])",
+                description =
+                    "List of category paths to create (e.g., [\"Electronics/Phones\", \"Electronics/Tablets\"])",
                 items = new
                 {
                     type = "object",
@@ -58,7 +59,8 @@ public sealed class CreateCategoriesFunction : IAiFunction
                         path = new
                         {
                             type = "string",
-                            description = "Category path like 'a/1' where 'a' is parent and '1' is name. Single level like 'a' is also allowed."
+                            description =
+                                "Category path like 'a/1' where 'a' is parent and '1' is name. Single level like 'a' is also allowed."
                         },
                         type = new
                         {
@@ -80,7 +82,7 @@ public sealed class CreateCategoriesFunction : IAiFunction
         try
         {
             var input = JsonSerializer.Deserialize<CreateCategoriesInput>(argumentsJson, JsonOptions)
-                ?? throw new ArgumentException("Invalid category input");
+                        ?? throw new ArgumentException("Invalid category input");
 
             if (input.Categories is not { Count: > 0 })
             {
@@ -95,7 +97,10 @@ public sealed class CreateCategoriesFunction : IAiFunction
             foreach (var catItem in input.Categories)
             {
                 var parts = catItem.Path.Split('/', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 0) continue;
+                if (parts.Length == 0)
+                {
+                    continue;
+                }
 
                 // If 2-level path, first part is parent
                 if (parts.Length >= 2)
@@ -107,18 +112,18 @@ public sealed class CreateCategoriesFunction : IAiFunction
                         {
                             // Parse type; default to Asset
                             var typeStr = catItem.Type ?? "Asset";
-                            var type = Enum.TryParse<CategoryType>(typeStr, ignoreCase: true, out var parsedType)
+                            var type = Enum.TryParse<CategoryType>(typeStr, true, out var parsedType)
                                 ? parsedType
                                 : CategoryType.Asset;
 
                             var parentCode = GenerateSlug(parentName);
                             var parentDto = new CreateCategoryDto(
-                                Code: parentCode,
-                                Name: parentName,
-                                Icon: null,
-                                Type: type,
-                                ParentId: null,
-                                FormSchema: "[]");
+                                parentCode,
+                                parentName,
+                                null,
+                                type,
+                                null,
+                                "[]");
 
                             var parentResult = await _categoryService.CreateCategoryAsync(parentDto, cancellationToken);
                             categoryCache[parentName] = parentResult.Id;
@@ -141,7 +146,10 @@ public sealed class CreateCategoriesFunction : IAiFunction
                 try
                 {
                     var parts = catItem.Path.Split('/', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 0) continue;
+                    if (parts.Length == 0)
+                    {
+                        continue;
+                    }
 
                     var categoryName = parts[^1]; // Last part is the category name
                     Guid? parentId = null;
@@ -166,18 +174,18 @@ public sealed class CreateCategoriesFunction : IAiFunction
 
                     // Parse type; default to Asset
                     var typeStr = catItem.Type ?? "Asset";
-                    var type = Enum.TryParse<CategoryType>(typeStr, ignoreCase: true, out var parsedType)
+                    var type = Enum.TryParse<CategoryType>(typeStr, true, out var parsedType)
                         ? parsedType
                         : CategoryType.Asset;
 
                     var categoryCode = GenerateSlug(categoryName);
                     var dto = new CreateCategoryDto(
-                        Code: categoryCode,
-                        Name: categoryName,
-                        Icon: null,
-                        Type: type,
-                        ParentId: parentId,
-                        FormSchema: "[]");
+                        categoryCode,
+                        categoryName,
+                        null,
+                        type,
+                        parentId,
+                        "[]");
 
                     var result = await _categoryService.CreateCategoryAsync(dto, cancellationToken);
                     _logger.LogInformation("Category created: {CategoryName} (Id={CategoryId})",
@@ -199,7 +207,8 @@ public sealed class CreateCategoriesFunction : IAiFunction
                     $"Failed to create any categories. Errors: {string.Join(", ", failedCategories)}");
             }
 
-            var message = $"Successfully created {createdCategories.Count} category(ies): {string.Join(", ", createdCategories)}";
+            var message =
+                $"Successfully created {createdCategories.Count} category(ies): {string.Join(", ", createdCategories)}";
             if (failedCategories.Count > 0)
             {
                 message += $". Failed: {string.Join(", ", failedCategories)}";
@@ -225,7 +234,9 @@ public sealed class CreateCategoriesFunction : IAiFunction
     private static string GenerateSlug(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
+        {
             return "CATEGORY";
+        }
 
         // Normalize Vietnamese characters (remove diacritics)
         var normalized = RemoveVietnameseDiacritics(input.Trim());
@@ -255,7 +266,9 @@ public sealed class CreateCategoriesFunction : IAiFunction
 
         // Collapse multiple underscores
         while (result.Contains("__"))
+        {
             result = result.Replace("__", "_");
+        }
 
         return string.IsNullOrEmpty(result) ? "CATEGORY" : result;
     }
@@ -267,7 +280,9 @@ public sealed class CreateCategoriesFunction : IAiFunction
     private static string RemoveVietnameseDiacritics(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return input;
+        }
 
         // Vietnamese diacritic mappings
         var diacriticMap = new Dictionary<char, char>
@@ -349,9 +364,7 @@ public sealed class CreateCategoriesFunction : IAiFunction
     );
 
     private record CategoryPathItem(
-        [property: JsonPropertyName("path")]
-        string Path,
-        [property: JsonPropertyName("type")]
-        string? Type = null
+        [property: JsonPropertyName("path")] string Path,
+        [property: JsonPropertyName("type")] string? Type = null
     );
 }

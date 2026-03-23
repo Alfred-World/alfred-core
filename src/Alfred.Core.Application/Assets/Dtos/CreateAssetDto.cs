@@ -1,3 +1,5 @@
+using Alfred.Core.Domain.Enums;
+
 namespace Alfred.Core.Application.Assets.Dtos;
 
 public sealed record CreateAssetDto(
@@ -8,6 +10,6 @@ public sealed record CreateAssetDto(
     decimal InitialCost,
     DateTime? WarrantyExpiryDate,
     string? Specs,
-    string? Status,
+    AssetStatus Status,
     string? Location
 );

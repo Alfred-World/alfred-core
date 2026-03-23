@@ -1,8 +1,11 @@
 using Alfred.Core.Application.AiFunctions;
 using Alfred.Core.Domain.Abstractions.Services.Ai;
+using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.AiChat;
 using Alfred.Core.WebApi.Contracts.Common;
+using Alfred.Core.WebApi.Filters;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
@@ -12,6 +15,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// and receives either a text reply or a list of executed function results.
 /// </summary>
 [Route("api/v{version:apiVersion}/ai/chat")]
+[Authorize]
 public sealed class AiChatController : BaseApiController
 {
     private readonly IAiFunctionCallService _aiFunctionCallService;
@@ -26,6 +30,7 @@ public sealed class AiChatController : BaseApiController
     /// The frontend manages conversation context in-memory and sends it along with each request.
     /// </summary>
     [HttpPost]
+    [RequirePermission(PermissionCodes.AiChat.Send)]
     [ProducesResponseType(typeof(ApiResponse<ChatResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendMessage(

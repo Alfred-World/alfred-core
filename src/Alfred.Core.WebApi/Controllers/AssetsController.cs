@@ -1,8 +1,11 @@
 using Alfred.Core.Application.Assets;
 using Alfred.Core.Application.Assets.Dtos;
+using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.Assets;
 using Alfred.Core.WebApi.Contracts.Common;
+using Alfred.Core.WebApi.Filters;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
@@ -11,6 +14,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// Manages physical assets and their operational logs.
 /// </summary>
 [Route("api/v{version:apiVersion}/assets")]
+[Authorize]
 public sealed class AssetsController : BaseApiController
 {
     private readonly IAssetService _assetService;
@@ -26,6 +30,7 @@ public sealed class AssetsController : BaseApiController
     /// Get paginated list of assets with optional DSL filtering and sorting.
     /// </summary>
     [HttpGet]
+    [RequirePermission(PermissionCodes.Asset.Read)]
     [ProducesResponseType(typeof(ApiPagedResponse<AssetDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAssets(
@@ -40,6 +45,7 @@ public sealed class AssetsController : BaseApiController
     /// Get a single asset by ID.
     /// </summary>
     [HttpGet("{id:guid}")]
+    [RequirePermission(PermissionCodes.Asset.Read)]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAssetById(Guid id, CancellationToken cancellationToken)
@@ -57,6 +63,7 @@ public sealed class AssetsController : BaseApiController
     /// Create a new asset.
     /// </summary>
     [HttpPost]
+    [RequirePermission(PermissionCodes.Asset.Create)]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAsset(
@@ -71,6 +78,7 @@ public sealed class AssetsController : BaseApiController
     /// Update an existing asset.
     /// </summary>
     [HttpPut("{id:guid}")]
+    [RequirePermission(PermissionCodes.Asset.Update)]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
@@ -87,6 +95,7 @@ public sealed class AssetsController : BaseApiController
     /// Delete an asset by ID.
     /// </summary>
     [HttpDelete("{id:guid}")]
+    [RequirePermission(PermissionCodes.Asset.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAsset(Guid id, CancellationToken cancellationToken)
@@ -103,6 +112,7 @@ public sealed class AssetsController : BaseApiController
     /// Get paginated operational logs for a specific asset.
     /// </summary>
     [HttpGet("{assetId:guid}/logs")]
+    [RequirePermission(PermissionCodes.AssetLog.Read)]
     [ProducesResponseType(typeof(ApiPagedResponse<AssetLogDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAssetLogs(
@@ -119,6 +129,7 @@ public sealed class AssetsController : BaseApiController
     /// Get a single asset log entry by ID.
     /// </summary>
     [HttpGet("{assetId:guid}/logs/{logId:guid}")]
+    [RequirePermission(PermissionCodes.AssetLog.Read)]
     [ProducesResponseType(typeof(ApiResponse<AssetLogDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAssetLogById(
@@ -139,6 +150,7 @@ public sealed class AssetsController : BaseApiController
     /// Record a new operational log (Refill, Repair, Maintain) for an asset.
     /// </summary>
     [HttpPost("{assetId:guid}/logs")]
+    [RequirePermission(PermissionCodes.AssetLog.Create)]
     [ProducesResponseType(typeof(ApiResponse<AssetLogDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
@@ -155,6 +167,7 @@ public sealed class AssetsController : BaseApiController
     /// Delete an asset log entry.
     /// </summary>
     [HttpDelete("{assetId:guid}/logs/{logId:guid}")]
+    [RequirePermission(PermissionCodes.AssetLog.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAssetLog(

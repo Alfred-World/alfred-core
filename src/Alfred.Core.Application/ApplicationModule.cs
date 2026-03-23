@@ -1,3 +1,5 @@
+using Alfred.Core.Application.AccessControl;
+using Alfred.Core.Application.AccountSales;
 using Alfred.Core.Application.AiFunctions;
 using Alfred.Core.Application.AiFunctions.Functions;
 using Alfred.Core.Application.Assets;
@@ -10,7 +12,7 @@ using Alfred.Core.Application.Common.Events;
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Application.Units;
-using Alfred.Core.Domain.Abstractions.Services.Ai;
+using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Domain.Common.Events;
 
 using FluentValidation;
@@ -40,6 +42,11 @@ public static class ApplicationModule
         services.AddScoped<IFilterParser, PrattFilterParser>();
 
         // Register application services
+        services.AddScoped<IAccessRoleService, AccessRoleService>();
+        services.AddScoped<IAccessPermissionService, AccessPermissionService>();
+        services.AddScoped<IAccessUserService, AccessUserService>();
+        services.AddScoped<IAccountSalesService, AccountSalesService>();
+        services.AddScoped<IIdentityUserReplicationService, IdentityUserReplicationService>();
         services.AddScoped<IAssetService, AssetService>();
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IBrandService, BrandService>();

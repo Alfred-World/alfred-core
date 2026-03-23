@@ -1,10 +1,11 @@
 using Alfred.Core.Application.Commodities.Dtos;
+using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.WebApi.Contracts.Commodities;
 
 public sealed record CreateInvestmentTransactionRequest
 {
-    public string TransactionType { get; init; } = null!;
+    public InvestmentTransactionType TransactionType { get; init; }
     public DateTimeOffset TransactionDate { get; init; }
     public decimal Quantity { get; init; }
     public Guid UnitId { get; init; }

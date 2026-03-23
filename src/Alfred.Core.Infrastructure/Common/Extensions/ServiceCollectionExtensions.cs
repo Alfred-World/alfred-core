@@ -1,6 +1,7 @@
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
+using Alfred.Core.Infrastructure.Common.Identity;
 using Alfred.Core.Infrastructure.Common.Options;
 using Alfred.Core.Infrastructure.Common.Seeding;
 using Alfred.Core.Infrastructure.Persistence;
@@ -24,6 +25,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+        services.AddScoped<IAccessRoleRepository, AccessRoleRepository>();
+        services.AddScoped<IAccessPermissionRepository, AccessPermissionRepository>();
+        services.AddScoped<IReferralCommissionSettingRepository, ReferralCommissionSettingRepository>();
+        services.AddScoped<IReferralCommissionSettingHistoryRepository, ReferralCommissionSettingHistoryRepository>();
         services.AddScoped<IAssetRepository, AssetRepository>();
         services.AddScoped<IAssetLogRepository, AssetLogRepository>();
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
@@ -31,6 +36,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICommodityRepository, CommodityRepository>();
         services.AddScoped<IInvestmentTransactionRepository, InvestmentTransactionRepository>();
+        services.AddScoped<IReplicatedUserRepository, ReplicatedUserRepository>();
         services.AddScoped<IUnitRepository, UnitRepository>();
 
         return services;
@@ -38,6 +44,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        services.AddScoped<ICurrentUser, CurrentUserService>();
+
         // Query Executor — keeps EF materialisation methods out of the Application layer
         services.AddScoped<IAsyncQueryExecutor, EfQueryExecutor>();
 
@@ -50,6 +58,7 @@ public static class ServiceCollectionExtensions
 
         // Other Services
         services.AddScoped<IAuthorizationCodeService, AuthorizationCodeService>();
+        services.AddHostedService<IdentityUserReplicationStreamWorker>();
 
         // Health Checks — registered before the orchestrator so it can enumerate them
         services.AddScoped<IHealthCheck, DatabaseHealthCheck>();
@@ -200,5 +209,4 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
 }

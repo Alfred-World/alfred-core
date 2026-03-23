@@ -4,7 +4,8 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Category : BaseEntity<CategoryId>, IHasCreationTime
+public sealed class Category : BaseEntity<CategoryId>, IHasCreationTime, IHasModificationTime, IHasDeletionTime,
+    IHasCreator, IHasModifier, IHasDeleter
 {
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
@@ -14,6 +15,12 @@ public sealed class Category : BaseEntity<CategoryId>, IHasCreationTime
     public string FormSchema { get; private set; } = "[]";
 
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public Guid? CreatedById { get; set; }
+    public Guid? UpdatedById { get; set; }
+    public Guid? DeletedById { get; set; }
 
     // Navigation
     public Category? Parent { get; private set; }
@@ -36,7 +43,8 @@ public sealed class Category : BaseEntity<CategoryId>, IHasCreationTime
             Type = type,
             ParentId = parentId,
             FormSchema = formSchema ?? "[]",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsDeleted = false
         };
     }
 

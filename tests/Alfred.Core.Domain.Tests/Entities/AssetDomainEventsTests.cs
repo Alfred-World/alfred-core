@@ -11,15 +11,15 @@ public class AssetDomainEventsTests
     {
         // Act
         var asset = Asset.Create(
-            name: "Laptop",
-            categoryId: null,
-            brandId: null,
-            purchaseDate: DateTime.UtcNow,
-            initialCost: 1000m,
-            warrantyExpiryDate: DateTime.UtcNow.AddYears(1),
-            specs: "{}",
-            status: AssetStatus.Active,
-            location: "HCM"
+            "Laptop",
+            null,
+            null,
+            DateTime.UtcNow,
+            1000m,
+            DateTime.UtcNow.AddYears(1),
+            "{}",
+            AssetStatus.Active,
+            "HCM"
         );
 
         // Assert
@@ -31,29 +31,29 @@ public class AssetDomainEventsTests
     {
         // Arrange
         var asset = Asset.Create(
-            name: "Laptop",
-            categoryId: null,
-            brandId: null,
-            purchaseDate: DateTime.UtcNow,
-            initialCost: 1000m,
-            warrantyExpiryDate: DateTime.UtcNow.AddYears(1),
-            specs: "{}",
-            status: AssetStatus.Active,
-            location: "HCM"
+            "Laptop",
+            null,
+            null,
+            DateTime.UtcNow,
+            1000m,
+            DateTime.UtcNow.AddYears(1),
+            "{}",
+            AssetStatus.Active,
+            "HCM"
         );
         asset.ClearDomainEvents();
 
         // Act
         asset.Update(
-            name: "Laptop Pro",
-            categoryId: null,
-            brandId: null,
-            purchaseDate: DateTime.UtcNow,
-            initialCost: 1200m,
-            warrantyExpiryDate: DateTime.UtcNow.AddYears(2),
-            specs: "{}",
-            status: AssetStatus.Active,
-            location: "HN"
+            "Laptop Pro",
+            null,
+            null,
+            DateTime.UtcNow,
+            1200m,
+            DateTime.UtcNow.AddYears(2),
+            "{}",
+            AssetStatus.Active,
+            "HN"
         );
 
         // Assert

@@ -1,7 +1,9 @@
+using Alfred.Core.Domain.Enums;
+
 namespace Alfred.Core.Application.Assets.Dtos;
 
 public sealed record CreateAssetLogDto(
-    string EventType,
+    AssetLogEventType EventType,
     Guid? BrandId,
     DateTimeOffset PerformedAt,
     decimal Cost,

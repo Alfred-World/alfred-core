@@ -4,7 +4,8 @@ using Alfred.Core.Domain.ValueObjects;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Brand : BaseEntity<BrandId>, IHasCreationTime, IHasModificationTime
+public sealed class Brand : BaseEntity<BrandId>, IHasCreationTime, IHasModificationTime, IHasDeletionTime, IHasCreator,
+    IHasModifier, IHasDeleter
 {
     public string Name { get; private set; } = null!;
     public Url Website { get; private set; } = Url.Empty();
@@ -14,6 +15,11 @@ public sealed class Brand : BaseEntity<BrandId>, IHasCreationTime, IHasModificat
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public Guid? CreatedById { get; set; }
+    public Guid? UpdatedById { get; set; }
+    public Guid? DeletedById { get; set; }
 
     // Navigation
     public ICollection<BrandCategory> BrandCategories { get; private set; } = new List<BrandCategory>();
@@ -37,7 +43,8 @@ public sealed class Brand : BaseEntity<BrandId>, IHasCreationTime, IHasModificat
             SupportPhone = supportPhone,
             Description = description,
             LogoUrl = Url.Create(logoUrl),
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsDeleted = false
         };
     }
 

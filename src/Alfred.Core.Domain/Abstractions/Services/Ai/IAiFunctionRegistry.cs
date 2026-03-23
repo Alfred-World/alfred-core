@@ -63,9 +63,13 @@ public sealed class AiFunctionResult
     public object? Data { get; init; }
     public string? Error { get; init; }
 
-    public static AiFunctionResult Success(string message, object? data = null) =>
-        new() { IsSuccess = true, Message = message, Data = data };
+    public static AiFunctionResult Success(string message, object? data = null)
+    {
+        return new AiFunctionResult { IsSuccess = true, Message = message, Data = data };
+    }
 
-    public static AiFunctionResult Failure(string error) =>
-        new() { IsSuccess = false, Error = error };
+    public static AiFunctionResult Failure(string error)
+    {
+        return new AiFunctionResult { IsSuccess = false, Error = error };
+    }
 }

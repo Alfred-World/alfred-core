@@ -102,7 +102,8 @@ public sealed class GroqAiClient : IAiClient
 
                         _logger.LogWarning(
                             "Model {Model} exhausted (key attempt {KeyAttempt}/{KeyMax}, model attempt {ModelAttempt}/{ModelMax}). Rotating. Error: {Error}",
-                            model, retries + 1, _options.MaxRetries, modelAttempts + 1, _options.DefaultModels.Length, response.Error);
+                            model, retries + 1, _options.MaxRetries, modelAttempts + 1, _options.DefaultModels.Length,
+                            response.Error);
 
                         modelAttempts++;
                         continue;
@@ -131,13 +132,13 @@ public sealed class GroqAiClient : IAiClient
                 }
                 catch (TaskCanceledException)
                 {
-                    _logger.LogWarning("Request timed out with key ...{KeySuffix} and model {Model}", 
+                    _logger.LogWarning("Request timed out with key ...{KeySuffix} and model {Model}",
                         apiKey[^8..], model);
                     modelAttempts++;
                 }
                 catch (HttpRequestException ex)
                 {
-                    _logger.LogError(ex, "HTTP error with key ...{KeySuffix} and model {Model}", 
+                    _logger.LogError(ex, "HTTP error with key ...{KeySuffix} and model {Model}",
                         apiKey[^8..], model);
                     modelAttempts++;
                 }
@@ -329,7 +330,9 @@ public sealed class GroqAiClient : IAiClient
             if (doc.RootElement.TryGetProperty("error", out var error))
             {
                 if (error.TryGetProperty("message", out var msg))
+                {
                     return msg.GetString() ?? responseBody;
+                }
             }
         }
         catch
@@ -346,7 +349,9 @@ public sealed class GroqAiClient : IAiClient
     private static bool IsModelExhaustionError(string? error)
     {
         if (string.IsNullOrEmpty(error))
+        {
             return false;
+        }
 
         var lowerError = error.ToLowerInvariant();
         return lowerError.Contains("tokens") ||
@@ -361,7 +366,9 @@ public sealed class GroqAiClient : IAiClient
     private static bool IsKeyExhaustionError(string? error)
     {
         if (string.IsNullOrEmpty(error))
+        {
             return false;
+        }
 
         var lowerError = error.ToLowerInvariant();
         return lowerError.Contains("rate_limit") ||

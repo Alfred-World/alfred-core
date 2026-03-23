@@ -1,10 +1,11 @@
 using Alfred.Core.Application.Assets.Dtos;
+using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.WebApi.Contracts.Assets;
 
 public sealed record CreateAssetLogRequest
 {
-    public string EventType { get; init; } = null!;
+    public AssetLogEventType EventType { get; init; }
     public Guid? BrandId { get; init; }
     public DateTimeOffset PerformedAt { get; init; } = DateTimeOffset.UtcNow;
     public decimal Cost { get; init; }

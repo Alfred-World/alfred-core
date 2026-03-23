@@ -22,5 +22,36 @@ public sealed class CommodityIdConverter() : ValueConverter<CommodityId, Guid>(i
 public sealed class InvestmentTransactionIdConverter()
     : ValueConverter<InvestmentTransactionId, Guid>(id => id.Value, g => new InvestmentTransactionId(g));
 
+public sealed class ProductIdConverter()
+    : ValueConverter<ProductId, Guid>(id => id.Value, g => new ProductId(g));
+
+public sealed class ProductVariantIdConverter()
+    : ValueConverter<ProductVariantId, Guid>(id => id.Value, g => new ProductVariantId(g));
+
+public sealed class MemberIdConverter()
+    : ValueConverter<MemberId, Guid>(id => id.Value, g => new MemberId(g));
+
+public sealed class AccountCloneIdConverter()
+    : ValueConverter<AccountCloneId, Guid>(id => id.Value, g => new AccountCloneId(g));
+
+public sealed class AccountOrderIdConverter()
+    : ValueConverter<AccountOrderId, Guid>(id => id.Value, g => new AccountOrderId(g));
+
+public sealed class AccessRoleIdConverter()
+    : ValueConverter<AccessRoleId, Guid>(id => id.Value, g => new AccessRoleId(g));
+
+public sealed class AccessPermissionIdConverter()
+    : ValueConverter<AccessPermissionId, Guid>(id => id.Value, g => new AccessPermissionId(g));
+
+public sealed class ReplicatedUserIdConverter()
+    : ValueConverter<ReplicatedUserId, Guid>(id => id.Value, g => new ReplicatedUserId(g));
+
+public sealed class ReferralCommissionSettingIdConverter()
+    : ValueConverter<ReferralCommissionSettingId, Guid>(id => id.Value, g => new ReferralCommissionSettingId(g));
+
+public sealed class ReferralCommissionSettingHistoryIdConverter()
+    : ValueConverter<ReferralCommissionSettingHistoryId, Guid>(id => id.Value,
+        g => new ReferralCommissionSettingHistoryId(g));
+
 public sealed class UrlConverter()
     : ValueConverter<Url, string>(u => u.Value, s => Url.Create(s));

@@ -37,7 +37,9 @@ public sealed class GroqModelRotationManager
     public string GetNextDefaultModel()
     {
         if (_defaultModels.Length == 0)
+        {
             return _defaultModels[0]; // Fallback to first if somehow empty
+        }
 
         var totalModels = _defaultModels.Length;
 
@@ -45,7 +47,10 @@ public sealed class GroqModelRotationManager
         for (var attempt = 0; attempt < totalModels; attempt++)
         {
             var index = Interlocked.Increment(ref _defaultModelIndex) % totalModels;
-            if (index < 0) index += totalModels; // Handle negative modulo edge case
+            if (index < 0)
+            {
+                index += totalModels; // Handle negative modulo edge case
+            }
 
             var model = _defaultModels[index];
             var state = _modelStates.GetOrAdd(model, _ => new ModelState());
@@ -76,14 +81,19 @@ public sealed class GroqModelRotationManager
     public string GetNextVisionModel()
     {
         if (_visionModels.Length == 0)
+        {
             return _visionModels[0]; // Fallback
+        }
 
         var totalModels = _visionModels.Length;
 
         for (var attempt = 0; attempt < totalModels; attempt++)
         {
             var index = Interlocked.Increment(ref _visionModelIndex) % totalModels;
-            if (index < 0) index += totalModels;
+            if (index < 0)
+            {
+                index += totalModels;
+            }
 
             var model = _visionModels[index];
             var state = _modelStates.GetOrAdd(model, _ => new ModelState());

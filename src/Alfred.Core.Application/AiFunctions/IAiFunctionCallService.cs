@@ -49,11 +49,15 @@ public sealed class AiFunctionCallResult
     public IReadOnlyList<FunctionExecutionResult>? ExecutedFunctions { get; init; }
     public string? Error { get; init; }
 
-    public static AiFunctionCallResult Success(string message, IReadOnlyList<FunctionExecutionResult>? functions = null) =>
-        new() { IsSuccess = true, Message = message, ExecutedFunctions = functions };
+    public static AiFunctionCallResult Success(string message, IReadOnlyList<FunctionExecutionResult>? functions = null)
+    {
+        return new AiFunctionCallResult { IsSuccess = true, Message = message, ExecutedFunctions = functions };
+    }
 
-    public static AiFunctionCallResult Failure(string error) =>
-        new() { IsSuccess = false, Error = error };
+    public static AiFunctionCallResult Failure(string error)
+    {
+        return new AiFunctionCallResult { IsSuccess = false, Error = error };
+    }
 }
 
 /// <summary>

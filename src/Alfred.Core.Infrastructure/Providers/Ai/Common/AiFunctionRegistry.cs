@@ -13,7 +13,8 @@ namespace Alfred.Core.Infrastructure.Providers.Ai.Common;
 /// </summary>
 public sealed class AiFunctionRegistry : IAiFunctionRegistry
 {
-    private readonly ConcurrentDictionary<string, (AiFunctionDefinition Definition, Func<IServiceProvider, IAiFunction> Factory)>
+    private readonly ConcurrentDictionary<string, (AiFunctionDefinition Definition, Func<IServiceProvider, IAiFunction>
+            Factory)>
         _functions = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly ILogger<AiFunctionRegistry> _logger;
@@ -49,7 +50,9 @@ public sealed class AiFunctionRegistry : IAiFunctionRegistry
     public IAiFunction? GetFunction(string functionName, IServiceProvider serviceProvider)
     {
         if (!_functions.TryGetValue(functionName, out var entry))
+        {
             return null;
+        }
 
         return entry.Factory(serviceProvider);
     }

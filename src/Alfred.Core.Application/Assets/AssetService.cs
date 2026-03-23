@@ -4,7 +4,6 @@ using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
-using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Application.Assets;
 
@@ -41,7 +40,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     public async Task<AssetDto> CreateAssetAsync(CreateAssetDto dto, CancellationToken cancellationToken = default)
     {
-        var status = ParseStatus(dto.Status);
+        var status = dto.Status;
         var entity = Asset.Create(
             dto.Name,
             dto.CategoryId.HasValue ? (CategoryId?)dto.CategoryId.Value : null,
@@ -68,7 +67,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             throw new KeyNotFoundException($"Asset with ID {id} not found.");
         }
 
-        var status = ParseStatus(dto.Status);
+        var status = dto.Status;
         entity.Update(
             dto.Name,
             dto.CategoryId.HasValue ? (CategoryId?)dto.CategoryId.Value : null,
@@ -134,15 +133,9 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             throw new KeyNotFoundException($"Asset with ID {assetId} not found.");
         }
 
-        if (!Enum.TryParse<AssetLogEventType>(dto.EventType, true, out var eventType))
-        {
-            throw new InvalidOperationException(
-                $"Invalid event type '{dto.EventType}'. Valid values: {string.Join(", ", Enum.GetNames<AssetLogEventType>())}");
-        }
-
         var entity = AssetLog.Create(
             assetId,
-            eventType,
+            dto.EventType,
             dto.BrandId.HasValue ? (BrandId?)dto.BrandId.Value : null,
             dto.PerformedAt,
             dto.Cost,
@@ -170,20 +163,4 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     }
 
     #endregion
-
-    private static AssetStatus ParseStatus(string? status)
-    {
-        if (string.IsNullOrWhiteSpace(status))
-        {
-            return AssetStatus.Active;
-        }
-
-        if (!Enum.TryParse<AssetStatus>(status, true, out var parsed))
-        {
-            throw new InvalidOperationException(
-                $"Invalid asset status '{status}'. Valid values: {string.Join(", ", Enum.GetNames<AssetStatus>())}");
-        }
-
-        return parsed;
-    }
 }

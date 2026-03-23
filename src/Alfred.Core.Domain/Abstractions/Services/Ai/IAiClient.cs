@@ -21,29 +21,41 @@ public sealed class AiMessage
     public required string Role { get; init; }
     public required IReadOnlyList<AiContentPart> Content { get; init; }
 
-    public static AiMessage System(string text) => new()
+    public static AiMessage System(string text)
     {
-        Role = "system",
-        Content = [AiContentPart.Text(text)]
-    };
+        return new AiMessage
+        {
+            Role = "system",
+            Content = [AiContentPart.Text(text)]
+        };
+    }
 
-    public static AiMessage User(string text) => new()
+    public static AiMessage User(string text)
     {
-        Role = "user",
-        Content = [AiContentPart.Text(text)]
-    };
+        return new AiMessage
+        {
+            Role = "user",
+            Content = [AiContentPart.Text(text)]
+        };
+    }
 
-    public static AiMessage UserWithImage(string text, string base64Image, string mimeType = "image/jpeg") => new()
+    public static AiMessage UserWithImage(string text, string base64Image, string mimeType = "image/jpeg")
     {
-        Role = "user",
-        Content = [AiContentPart.Text(text), AiContentPart.Image(base64Image, mimeType)]
-    };
+        return new AiMessage
+        {
+            Role = "user",
+            Content = [AiContentPart.Text(text), AiContentPart.Image(base64Image, mimeType)]
+        };
+    }
 
-    public static AiMessage Assistant(string text) => new()
+    public static AiMessage Assistant(string text)
     {
-        Role = "assistant",
-        Content = [AiContentPart.Text(text)]
-    };
+        return new AiMessage
+        {
+            Role = "assistant",
+            Content = [AiContentPart.Text(text)]
+        };
+    }
 }
 
 /// <summary>
@@ -55,13 +67,19 @@ public sealed class AiContentPart
     public string? TextValue { get; init; }
     public AiImageUrl? ImageUrl { get; init; }
 
-    public static AiContentPart Text(string text) => new() { Type = "text", TextValue = text };
-
-    public static AiContentPart Image(string base64Data, string mimeType = "image/jpeg") => new()
+    public static AiContentPart Text(string text)
     {
-        Type = "image_url",
-        ImageUrl = new AiImageUrl { Url = $"data:{mimeType};base64,{base64Data}" }
-    };
+        return new AiContentPart { Type = "text", TextValue = text };
+    }
+
+    public static AiContentPart Image(string base64Data, string mimeType = "image/jpeg")
+    {
+        return new AiContentPart
+        {
+            Type = "image_url",
+            ImageUrl = new AiImageUrl { Url = $"data:{mimeType};base64,{base64Data}" }
+        };
+    }
 }
 
 public sealed class AiImageUrl

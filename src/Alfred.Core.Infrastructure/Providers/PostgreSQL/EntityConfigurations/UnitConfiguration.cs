@@ -19,6 +19,7 @@ internal sealed class UnitConfiguration : IEntityTypeConfiguration<Unit>
             .HasMaxLength(50);
 
         builder.HasIndex(x => x.Code)
+            .HasFilter("\"IsDeleted\" = false")
             .IsUnique();
 
         builder.Property(x => x.Name)
@@ -58,5 +59,17 @@ internal sealed class UnitConfiguration : IEntityTypeConfiguration<Unit>
 
         builder.Property(x => x.UpdatedAt)
             .HasColumnType("timestamp with time zone");
+
+        builder.Property(x => x.IsDeleted)
+            .HasDefaultValue(false);
+
+        builder.Property(x => x.DeletedAt)
+            .HasColumnType("timestamp with time zone");
+
+        builder.Property(x => x.CreatedById);
+
+        builder.Property(x => x.UpdatedById);
+
+        builder.Property(x => x.DeletedById);
     }
 }

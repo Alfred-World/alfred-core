@@ -35,5 +35,17 @@ internal sealed class BrandConfiguration : IEntityTypeConfiguration<Brand>
 
         builder.Property(x => x.UpdatedAt)
             .HasColumnType("timestamp with time zone");
+
+        builder.Property(x => x.IsDeleted)
+            .HasDefaultValue(false);
+
+        builder.Property(x => x.DeletedAt)
+            .HasColumnType("timestamp with time zone");
+
+        builder.Property(x => x.CreatedById);
+
+        builder.Property(x => x.UpdatedById);
+
+        builder.Property(x => x.DeletedById);
     }
 }

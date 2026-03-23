@@ -24,6 +24,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 using Serilog;
+using Serilog.Events;
 
 // Load environment variables from .env file
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
@@ -306,7 +307,12 @@ app.UseScalarInDevelopment();
 
 // Add global exception handler (must be early in pipeline)
 app.UseExceptionHandler();
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(options =>
+{
+    // Suppress health check pings from request logs
+    options.GetLevel = (ctx, _, _) =>
+        ctx.Request.Path.StartsWithSegments("/health") ? LogEventLevel.Verbose : LogEventLevel.Information;
+});
 
 app.UseCors("AllowFrontend");
 

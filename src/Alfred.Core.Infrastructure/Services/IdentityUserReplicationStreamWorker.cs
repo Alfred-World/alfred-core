@@ -197,15 +197,16 @@ public sealed class IdentityUserReplicationStreamWorker : BackgroundService
     {
         userId = Guid.Empty;
 
-        if (fields.TryGetValue("userId", out var rawUserId) && TryParseUserId(rawUserId, out userId))
-        {
-            return true;
-        }
-
+        // Prefer the authoritative identity Guid sent as "userGuid" over the legacy int64 "userId" field.
         if (fields.TryGetValue("userGuid", out var rawUserGuid) && Guid.TryParse(rawUserGuid, out var guidUserId)
                                                                 && guidUserId != Guid.Empty)
         {
             userId = guidUserId;
+            return true;
+        }
+
+        if (fields.TryGetValue("userId", out var rawUserId) && TryParseUserId(rawUserId, out userId))
+        {
             return true;
         }
 

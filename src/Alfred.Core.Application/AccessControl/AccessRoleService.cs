@@ -118,7 +118,11 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         }
 
         var validIds = await ResolvePermissionIdsAsync(permissionIds, cancellationToken);
-        role.SyncPermissions(validIds);
+        var mergedPermissionIds = role.RolePermissions
+            .Select(x => x.PermissionId)
+            .Union(validIds)
+            .ToList();
+        role.SyncPermissions(mergedPermissionIds);
 
         _unitOfWork.AccessRoles.Update(role);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

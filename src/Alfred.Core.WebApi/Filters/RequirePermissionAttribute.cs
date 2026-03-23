@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using System.Text.Json;
 
+using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Infrastructure.Common.Abstractions;
@@ -50,15 +52,29 @@ public sealed class RequirePermissionAttribute : Attribute, IAsyncAuthorizationF
             return;
         }
 
-        var dbContext = context.HttpContext.RequestServices.GetRequiredService<IDbContext>();
+        var cache = context.HttpContext.RequestServices.GetRequiredService<ICacheProvider>();
+        var cacheKey = $"core:perm:user:{userId.Value}";
+        var cachedJson = await cache.GetAsync(cacheKey, context.HttpContext.RequestAborted);
 
-        var userPermissions = await dbContext.Set<AccessUserRole>()
-            .AsNoTracking()
-            .Where(ur => ur.UserId == (ReplicatedUserId)userId.Value)
-            .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission.Code))
-            .Select(code => code.ToLower())
-            .Distinct()
-            .ToListAsync(context.HttpContext.RequestAborted);
+        List<string> userPermissions;
+        if (cachedJson is not null)
+        {
+            userPermissions = JsonSerializer.Deserialize<List<string>>(cachedJson) ?? [];
+        }
+        else
+        {
+            var dbContext = context.HttpContext.RequestServices.GetRequiredService<IDbContext>();
+            userPermissions = await dbContext.Set<AccessUserRole>()
+                .AsNoTracking()
+                .Where(ur => ur.UserId == (ReplicatedUserId)userId.Value)
+                .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission.Code))
+                .Select(code => code.ToLower())
+                .Distinct()
+                .ToListAsync(context.HttpContext.RequestAborted);
+
+            await cache.SetAsync(cacheKey, JsonSerializer.Serialize(userPermissions),
+                TimeSpan.FromMinutes(5), context.HttpContext.RequestAborted);
+        }
 
         var hasPermission = HasPermission(userPermissions);
 

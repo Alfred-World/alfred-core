@@ -15,6 +15,7 @@ public interface IUnitOfWork : IDisposable
     IReplicatedUserRepository ReplicatedUsers { get; }
     IAccountCloneRepository AccountClones { get; }
     IAccountOrderRepository AccountOrders { get; }
+    ISourceAccountRepository SourceAccounts { get; }
     IAssetRepository Assets { get; }
     IAssetLogRepository AssetLogs { get; }
     IAttachmentRepository Attachments { get; }

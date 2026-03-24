@@ -106,6 +106,10 @@ public static class PermissionCodes
         public const string OrderRead = "account-sales:order:read";
         public const string OrderSell = "account-sales:order:sell";
         public const string OrderReplace = "account-sales:order:replace";
+        public const string SourceAccountRead = "account-sales:source-account:read";
+        public const string SourceAccountCreate = "account-sales:source-account:create";
+        public const string SourceAccountUpdate = "account-sales:source-account:update";
+        public const string SourceAccountDelete = "account-sales:source-account:delete";
     }
 
     public static class AiChat

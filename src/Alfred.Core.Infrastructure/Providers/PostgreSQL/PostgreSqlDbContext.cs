@@ -42,6 +42,7 @@ public class PostgreSqlDbContext : DbContext, IDbContext
     public DbSet<InvestmentTransaction> InvestmentTransactions => Set<InvestmentTransaction>();
     public DbSet<MarketPrice> MarketPrices => Set<MarketPrice>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<SourceAccount> SourceAccounts => Set<SourceAccount>();
     private readonly PostgreSqlOptions _options;
 
     public PostgreSqlDbContext(PostgreSqlOptions options)
@@ -71,6 +72,7 @@ public class PostgreSqlDbContext : DbContext, IDbContext
         configurationBuilder.Properties<AttachmentId>().HaveConversion<AttachmentIdConverter>();
         configurationBuilder.Properties<CommodityId>().HaveConversion<CommodityIdConverter>();
         configurationBuilder.Properties<InvestmentTransactionId>().HaveConversion<InvestmentTransactionIdConverter>();
+        configurationBuilder.Properties<SourceAccountId>().HaveConversion<SourceAccountIdConverter>();
         configurationBuilder.Properties<Url>().HaveConversion<UrlConverter>();
     }
 

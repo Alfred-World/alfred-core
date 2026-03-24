@@ -28,6 +28,7 @@ public class DefaultUnitOfWork : IUnitOfWork
     private IReplicatedUserRepository? _replicatedUsers;
     private IAccountCloneRepository? _accountClones;
     private IAccountOrderRepository? _accountOrders;
+    private ISourceAccountRepository? _sourceAccounts;
     private IAssetRepository? _assets;
     private IAssetLogRepository? _assetLogs;
     private IAttachmentRepository? _attachments;
@@ -76,6 +77,9 @@ public class DefaultUnitOfWork : IUnitOfWork
 
     public IAccountOrderRepository AccountOrders =>
         _accountOrders ??= new AccountOrderRepository(_context);
+
+    public ISourceAccountRepository SourceAccounts =>
+        _sourceAccounts ??= new SourceAccountRepository(_context);
 
     public IAssetRepository Assets =>
         _assets ??= new AssetRepository(_context);

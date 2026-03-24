@@ -10,9 +10,11 @@ public sealed record CreateAccountCloneRequest
     public string Password { get; init; } = null!;
     public string? TwoFaSecret { get; init; }
     public string? ExtraInfo { get; init; }
+    public Guid? SourceAccountId { get; init; }
 
     public CreateAccountCloneDto ToDto()
     {
-        return new CreateAccountCloneDto(ProductId, ExternalAccountId, Username, Password, TwoFaSecret, ExtraInfo);
+        return new CreateAccountCloneDto(ProductId, ExternalAccountId, Username, Password, TwoFaSecret, ExtraInfo,
+            SourceAccountId);
     }
 }

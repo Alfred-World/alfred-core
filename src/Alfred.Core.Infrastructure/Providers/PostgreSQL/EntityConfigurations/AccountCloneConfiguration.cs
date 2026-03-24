@@ -53,8 +53,12 @@ internal sealed class AccountCloneConfiguration : IEntityTypeConfiguration<Accou
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(x => x.SourceAccountId)
+            .IsRequired(false);
+
         builder.HasIndex(x => new { x.ProductId, x.Status });
         builder.HasIndex(x => new { x.ProductId, x.Username }).IsUnique();
         builder.HasIndex(x => x.ExternalAccountId);
+        builder.HasIndex(x => x.SourceAccountId);
     }
 }

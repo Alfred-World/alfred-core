@@ -53,5 +53,8 @@ public sealed class ReferralCommissionSettingHistoryIdConverter()
     : ValueConverter<ReferralCommissionSettingHistoryId, Guid>(id => id.Value,
         g => new ReferralCommissionSettingHistoryId(g));
 
+public sealed class SourceAccountIdConverter()
+    : ValueConverter<SourceAccountId, Guid>(id => id.Value, g => new SourceAccountId(g));
+
 public sealed class UrlConverter()
     : ValueConverter<Url, string>(u => u.Value, s => Url.Create(s));

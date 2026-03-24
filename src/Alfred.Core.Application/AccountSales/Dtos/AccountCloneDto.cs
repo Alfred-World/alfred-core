@@ -5,6 +5,7 @@ namespace Alfred.Core.Application.AccountSales.Dtos;
 public sealed record AccountCloneDto(
     Guid Id,
     ProductSummaryDto Product,
+    SourceAccountSummaryDto? SourceAccount,
     string ExternalAccountId,
     string Username,
     string Password,

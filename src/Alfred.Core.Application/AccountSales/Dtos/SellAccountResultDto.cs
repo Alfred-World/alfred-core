@@ -5,6 +5,5 @@ public sealed record SellAccountResultDto(
     string Username,
     string Password,
     string? TwoFaSecret,
-    string? OtpCode,
     string? ExtraInfo
 );

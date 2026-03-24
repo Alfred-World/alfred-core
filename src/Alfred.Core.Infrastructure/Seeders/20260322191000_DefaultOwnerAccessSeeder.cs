@@ -110,6 +110,14 @@ public sealed class DefaultOwnerAccessSeeder : BaseDataSeeder
         (PermissionCodes.AccountSales.OrderRead, "Read Orders", "View account orders."),
         (PermissionCodes.AccountSales.OrderSell, "Sell Orders", "Create account sales orders."),
         (PermissionCodes.AccountSales.OrderReplace, "Replace Orders", "Replace orders under warranty."),
+        (PermissionCodes.AccountSales.SourceAccountRead, "Read Source Accounts",
+            "View and search source accounts in account-sales module."),
+        (PermissionCodes.AccountSales.SourceAccountCreate, "Create Source Accounts",
+            "Create source accounts in account-sales module."),
+        (PermissionCodes.AccountSales.SourceAccountUpdate, "Update Source Accounts",
+            "Edit source accounts in account-sales module."),
+        (PermissionCodes.AccountSales.SourceAccountDelete, "Delete Source Accounts",
+            "Delete source accounts in account-sales module."),
 
         (PermissionCodes.AiChat.Send, "Use AI Chat", "Send prompts to AI assistant.")
     ];

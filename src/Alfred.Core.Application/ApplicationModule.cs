@@ -46,6 +46,7 @@ public static class ApplicationModule
         services.AddScoped<IAccessPermissionService, AccessPermissionService>();
         services.AddScoped<IAccessUserService, AccessUserService>();
         services.AddScoped<IAccountSalesService, AccountSalesService>();
+        services.AddScoped<ISourceAccountService, SourceAccountService>();
         services.AddScoped<IIdentityUserReplicationService, IdentityUserReplicationService>();
         services.AddScoped<IAssetService, AssetService>();
         services.AddScoped<IAttachmentService, AttachmentService>();

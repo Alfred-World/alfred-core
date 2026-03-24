@@ -7,6 +7,7 @@ namespace Alfred.Core.Domain.Entities;
 public sealed class AccountClone : BaseEntity<AccountCloneId>, IHasCreationTime
 {
     public ProductId ProductId { get; private set; }
+    public SourceAccountId? SourceAccountId { get; private set; }
     public string ExternalAccountId { get; private set; } = string.Empty;
     public string Username { get; private set; } = null!;
     public string Password { get; private set; } = null!;
@@ -18,6 +19,7 @@ public sealed class AccountClone : BaseEntity<AccountCloneId>, IHasCreationTime
     public DateTime? SoldAt { get; private set; }
 
     public Product? Product { get; private set; }
+    public SourceAccount? SourceAccount { get; private set; }
 
     private AccountClone()
     {
@@ -25,7 +27,7 @@ public sealed class AccountClone : BaseEntity<AccountCloneId>, IHasCreationTime
     }
 
     public static AccountClone Create(ProductId productId, string username, string password, string? twoFaSecret,
-        string? extraInfo, string externalAccountId)
+        string? extraInfo, string externalAccountId, SourceAccountId? sourceAccountId = null)
     {
         if (string.IsNullOrWhiteSpace(username))
         {
@@ -45,6 +47,7 @@ public sealed class AccountClone : BaseEntity<AccountCloneId>, IHasCreationTime
         return new AccountClone
         {
             ProductId = productId,
+            SourceAccountId = sourceAccountId,
             ExternalAccountId = externalAccountId.Trim(),
             Username = username.Trim(),
             Password = password,
@@ -53,6 +56,11 @@ public sealed class AccountClone : BaseEntity<AccountCloneId>, IHasCreationTime
             Status = AccountCloneStatus.Init,
             CreatedAt = DateTime.UtcNow
         };
+    }
+
+    public void LinkToSourceAccount(SourceAccountId? sourceAccountId)
+    {
+        SourceAccountId = sourceAccountId;
     }
 
     public void MarkVerified()

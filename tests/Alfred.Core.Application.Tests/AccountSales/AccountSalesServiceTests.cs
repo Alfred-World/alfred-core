@@ -159,8 +159,6 @@ public sealed class AccountSalesServiceTests
         // Assert
         Assert.Equal("cursor.user", result.Username);
         Assert.Equal("pass@123", result.Password);
-        Assert.False(string.IsNullOrWhiteSpace(result.OtpCode));
-        Assert.Equal(6, result.OtpCode?.Length);
         Assert.Equal("Sold", readyClone.Status.ToString());
 
         clonesRepo.Verify(x => x.Update(It.IsAny<AccountClone>()), Times.Once);

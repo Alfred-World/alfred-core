@@ -4,7 +4,6 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
 using Alfred.Core.Application.AccountSales.Dtos;
-using Alfred.Core.Application.AccountSales.Internal;
 using Alfred.Core.Application.AccountSales.Shared;
 using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Querying.Core;
@@ -30,7 +29,8 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
     public async Task<PageResult<ProductDto>> GetProductsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(_unitOfWork.Products, query, ProductFieldMap.Instance, null, [p => p.Variants], p => p.ToDto(),
+        return await GetPagedAsync(_unitOfWork.Products, query, ProductFieldMap.Instance, null, [p => p.Variants],
+            p => p.ToDto(),
             cancellationToken);
     }
 
@@ -151,7 +151,7 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
             query,
             AccountCloneFieldMap.Instance,
             null,
-            [c => c.Product!],
+            [c => c.Product!, c => c.SourceAccount!],
             c => c.ToDto(),
             cancellationToken);
     }
@@ -176,12 +176,13 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
         }
 
         var entity = AccountClone.Create((ProductId)dto.ProductId, username, dto.Password, dto.TwoFaSecret,
-            dto.ExtraInfo, externalAccountId);
+            dto.ExtraInfo, externalAccountId,
+            dto.SourceAccountId.HasValue ? (SourceAccountId)dto.SourceAccountId.Value : null);
         await _unitOfWork.AccountClones.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var loaded = await _executor.FirstOrDefaultAsync(
-            _unitOfWork.AccountClones.GetQueryable([x => x.Product!]).Where(x => x.Id == entity.Id),
+            _unitOfWork.AccountClones.GetQueryable([x => x.Product!, x => x.SourceAccount!]).Where(x => x.Id == entity.Id),
             cancellationToken);
 
         return (loaded ?? entity).ToDto();
@@ -206,11 +207,16 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
             dto.ExtraInfo,
             dto.ExternalAccountId);
 
+        if (dto.SourceAccountId.HasValue)
+        {
+            entity.LinkToSourceAccount((SourceAccountId)dto.SourceAccountId.Value);
+        }
+
         _unitOfWork.AccountClones.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var loaded = await _executor.FirstOrDefaultAsync(
-            _unitOfWork.AccountClones.GetQueryable([x => x.Product!]).Where(x => x.Id == entity.Id),
+            _unitOfWork.AccountClones.GetQueryable([x => x.Product!, x => x.SourceAccount!]).Where(x => x.Id == entity.Id),
             cancellationToken);
 
         return (loaded ?? entity).ToDto();
@@ -227,7 +233,8 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
             cancellationToken);
     }
 
-    public async Task<AccountCloneDto> UpdateAccountCloneStatusAsync(Guid accountCloneId, UpdateAccountCloneStatusDto dto,
+    public async Task<AccountCloneDto> UpdateAccountCloneStatusAsync(Guid accountCloneId,
+        UpdateAccountCloneStatusDto dto,
         CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.AccountClones.GetByIdAsync((AccountCloneId)accountCloneId, cancellationToken);
@@ -242,7 +249,7 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var loaded = await _executor.FirstOrDefaultAsync(
-            _unitOfWork.AccountClones.GetQueryable([x => x.Product!]).Where(x => x.Id == entity.Id),
+            _unitOfWork.AccountClones.GetQueryable([x => x.Product!, x => x.SourceAccount!]).Where(x => x.Id == entity.Id),
             cancellationToken);
 
         return (loaded ?? entity).ToDto();
@@ -471,7 +478,8 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
 
             if (readyAccount.Status != AccountCloneStatus.Verified)
             {
-                throw new InvalidOperationException("Selected account clone is not in verified status and cannot be sold.");
+                throw new InvalidOperationException(
+                    "Selected account clone is not in verified status and cannot be sold.");
             }
 
             var now = DateTime.UtcNow;
@@ -497,7 +505,10 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
 
             var loadedOrder = await _executor.FirstOrDefaultAsync(
                 _unitOfWork.AccountOrders
-                    .GetQueryable([o => o.Member!, o => o.ReferrerMember!, o => o.Product!, o => o.ProductVariant!, o => o.AccountClone!])
+                    .GetQueryable([
+                        o => o.Member!, o => o.ReferrerMember!, o => o.Product!, o => o.ProductVariant!,
+                        o => o.AccountClone!
+                    ])
                     .Where(o => o.Id == order.Id),
                 ct);
 
@@ -507,7 +518,6 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
                 readyAccount.Username,
                 readyAccount.Password,
                 readyAccount.TwoFaSecret,
-                TotpCodeGenerator.GenerateCode(readyAccount.TwoFaSecret, DateTimeOffset.UtcNow),
                 readyAccount.ExtraInfo);
         }, cancellationToken);
 
@@ -523,7 +533,10 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
         {
             var order = await _executor.FirstOrDefaultAsync(
                 _unitOfWork.AccountOrders
-                    .GetQueryable([o => o.Product!, o => o.ProductVariant!, o => o.AccountClone!, o => o.Member!, o => o.ReferrerMember!])
+                    .GetQueryable([
+                        o => o.Product!, o => o.ProductVariant!, o => o.AccountClone!, o => o.Member!,
+                        o => o.ReferrerMember!
+                    ])
                     .Where(o => o.Id == (AccountOrderId)orderId),
                 ct);
 
@@ -574,7 +587,8 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
 
             if (replacement.Id == oldAccount.Id)
             {
-                throw new InvalidOperationException("Replacement account clone must be different from current sold account.");
+                throw new InvalidOperationException(
+                    "Replacement account clone must be different from current sold account.");
             }
 
             oldAccount.MarkInWarranty();
@@ -590,7 +604,10 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
 
             var loadedOrder = await _executor.FirstOrDefaultAsync(
                 _unitOfWork.AccountOrders
-                    .GetQueryable([o => o.Member!, o => o.ReferrerMember!, o => o.Product!, o => o.ProductVariant!, o => o.AccountClone!])
+                    .GetQueryable([
+                        o => o.Member!, o => o.ReferrerMember!, o => o.Product!, o => o.ProductVariant!,
+                        o => o.AccountClone!
+                    ])
                     .Where(o => o.Id == order.Id),
                 ct);
 
@@ -600,7 +617,6 @@ public sealed class AccountSalesService : BaseApplicationService, IAccountSalesS
                 replacement.Username,
                 replacement.Password,
                 replacement.TwoFaSecret,
-                TotpCodeGenerator.GenerateCode(replacement.TwoFaSecret, DateTimeOffset.UtcNow),
                 replacement.ExtraInfo);
         }, cancellationToken);
 

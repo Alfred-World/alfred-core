@@ -22,6 +22,7 @@ public interface IDbContext
     DbSet<ReferralCommissionSetting> ReferralCommissionSettings { get; }
     DbSet<ReferralCommissionSettingHistory> ReferralCommissionSettingHistories { get; }
     DbSet<Attachment> Attachments { get; }
+    DbSet<SourceAccount> SourceAccounts { get; }
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     DatabaseFacade Database { get; }

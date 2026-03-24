@@ -51,6 +51,12 @@ public static class AccountSalesMappingExtensions
                 accountClone.ProductId.Value,
                 accountClone.Product?.Name ?? string.Empty,
                 accountClone.Product?.ProductType ?? AccountProductType.Other),
+            accountClone.SourceAccount != null
+                ? new SourceAccountSummaryDto(
+                    accountClone.SourceAccount.Id.Value,
+                    accountClone.SourceAccount.AccountType,
+                    accountClone.SourceAccount.Username)
+                : null,
             accountClone.ExternalAccountId,
             accountClone.Username,
             accountClone.Password,
@@ -93,5 +99,22 @@ public static class AccountSalesMappingExtensions
             CreatedAt = accountOrder.CreatedAt,
             UpdatedAt = accountOrder.UpdatedAt
         };
+    }
+
+    public static SourceAccountDto ToDto(this SourceAccount sourceAccount)
+    {
+        return new SourceAccountDto(
+            sourceAccount.Id.Value,
+            sourceAccount.AccountType,
+            sourceAccount.Username,
+            sourceAccount.Password,
+            sourceAccount.TwoFaSecret,
+            sourceAccount.RecoveryEmail,
+            sourceAccount.RecoveryPhone,
+            sourceAccount.Notes,
+            sourceAccount.IsActive,
+            sourceAccount.Clones.Count,
+            sourceAccount.CreatedAt,
+            sourceAccount.UpdatedAt);
     }
 }

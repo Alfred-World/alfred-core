@@ -6,5 +6,6 @@ public sealed record CreateAccountCloneDto(
     string Username,
     string Password,
     string? TwoFaSecret,
-    string? ExtraInfo
+    string? ExtraInfo,
+    Guid? SourceAccountId = null
 );

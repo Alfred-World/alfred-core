@@ -9,16 +9,30 @@ public sealed partial class AccountSalesService
         CancellationToken cancellationToken = default)
     {
         var commission = await _unitOfWork.Commissions.GetByMemberIdAsync(memberId, cancellationToken);
-        if (commission is null)
+
+        var member = await _unitOfWork.Members.GetByIdAsync(memberId, cancellationToken);
+        if (member is null)
         {
             return null;
         }
 
-        var member = await _unitOfWork.Members.GetByIdAsync(memberId, cancellationToken);
+        if (commission is null)
+        {
+            return new CommissionDto(
+                default,
+                memberId,
+                member.DisplayName,
+                0m,
+                0m,
+                0m,
+                DateTime.MinValue,
+                null);
+        }
+
         return new CommissionDto(
             commission.Id,
             commission.MemberId,
-            member?.DisplayName,
+            member.DisplayName,
             commission.AvailableBalance,
             commission.TotalEarned,
             commission.TotalPaidOut,

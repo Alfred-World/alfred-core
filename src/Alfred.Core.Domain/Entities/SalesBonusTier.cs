@@ -1,4 +1,5 @@
 using Alfred.Core.Domain.Common.Base;
+using Alfred.Core.Domain.Common.Events;
 using Alfred.Core.Domain.Common.Interfaces;
 
 namespace Alfred.Core.Domain.Entities;
@@ -34,10 +35,21 @@ public sealed class SalesBonusTier : BaseEntity<SalesBonusTierId>, IHasCreationT
 
     public void Update(int orderThreshold, decimal bonusAmount, bool isActive)
     {
-        OrderThreshold = Math.Max(1, orderThreshold);
-        BonusAmount = Math.Max(0m, decimal.Round(bonusAmount, 2, MidpointRounding.AwayFromZero));
+        var newThreshold = Math.Max(1, orderThreshold);
+        var newAmount = Math.Max(0m, decimal.Round(bonusAmount, 2, MidpointRounding.AwayFromZero));
+
+        var thresholdChanged = newThreshold != OrderThreshold;
+        var amountChanged = newAmount != BonusAmount;
+
+        OrderThreshold = newThreshold;
+        BonusAmount = newAmount;
         IsActive = isActive;
         UpdatedAt = DateTime.UtcNow;
+
+        if (thresholdChanged || amountChanged)
+        {
+            AddDomainEvent(new SalesBonusTierUpdatedDomainEvent(Id, OrderThreshold, BonusAmount));
+        }
     }
 
     public void Deactivate()

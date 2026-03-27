@@ -71,4 +71,14 @@ public sealed class MemberMonthlySalesSummary : BaseEntity<MemberMonthlySalesSum
             TotalBonusEarned - Math.Max(0m, decimal.Round(bonusAmount, 2, MidpointRounding.AwayFromZero)));
         UpdatedAt = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Apply a positive or negative delta to TotalBonusEarned when the admin updates a tier's BonusAmount
+    /// and there are Pending transactions that need their snapshot values resynced.
+    /// </summary>
+    public void AdjustTotalBonusEarned(decimal delta)
+    {
+        TotalBonusEarned = Math.Max(0m, decimal.Round(TotalBonusEarned + delta, 2, MidpointRounding.AwayFromZero));
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

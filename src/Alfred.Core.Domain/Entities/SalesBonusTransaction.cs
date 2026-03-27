@@ -67,4 +67,19 @@ public sealed class SalesBonusTransaction : BaseEntity<SalesBonusTransactionId>,
         Status = SalesBonusTransactionStatus.Cancelled;
         Note = note;
     }
+
+    /// <summary>
+    /// Update the frozen snapshot values for a Pending transaction when the admin changes the tier config.
+    /// Only Pending transactions are eligible; Paid/Cancelled ones remain immutable.
+    /// </summary>
+    public void UpdatePendingSnapshot(int orderThreshold, decimal bonusAmount)
+    {
+        if (Status != SalesBonusTransactionStatus.Pending)
+        {
+            throw new InvalidOperationException("Only pending transactions can have their snapshot updated.");
+        }
+
+        OrderThresholdSnapshot = Math.Max(1, orderThreshold);
+        BonusAmountSnapshot = Math.Max(0m, decimal.Round(bonusAmount, 2, MidpointRounding.AwayFromZero));
+    }
 }

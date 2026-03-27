@@ -96,7 +96,7 @@ public sealed class AttachmentsController : BaseApiController
     {
         try
         {
-            await _attachmentService.DeleteAttachmentAsync(id, cancellationToken);
+            await _attachmentService.DeleteAttachmentAsync((AttachmentId)id, cancellationToken);
             return OkResponse("Attachment deleted successfully");
         }
         catch (KeyNotFoundException ex)

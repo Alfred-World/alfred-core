@@ -14,6 +14,6 @@ public sealed record CreateCategoryRequest
 
     public CreateCategoryDto ToDto()
     {
-        return new CreateCategoryDto(Code, Name, Icon, Type, ParentId, FormSchema);
+        return new CreateCategoryDto(Code, Name, Icon, Type, (CategoryId?)ParentId, FormSchema);
     }
 }

@@ -93,6 +93,8 @@ public sealed class DefaultOwnerAccessSeeder : BaseDataSeeder
             "View and search members in account-sales module."),
         (PermissionCodes.AccountSales.MemberCreate, "Create Account-Sales Members",
             "Create members in account-sales module."),
+        (PermissionCodes.AccountSales.MemberUpdate, "Update Account-Sales Members",
+            "Edit members in account-sales module."),
         (PermissionCodes.AccountSales.AccountCloneRead, "Read Account Clones", "View account clones."),
         (PermissionCodes.AccountSales.AccountCloneCreate, "Create Account Clones", "Create account clones."),
         (PermissionCodes.AccountSales.AccountCloneReview, "Review Account Clones", "Review account clone requests."),

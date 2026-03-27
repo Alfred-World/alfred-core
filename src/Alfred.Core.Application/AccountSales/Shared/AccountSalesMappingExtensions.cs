@@ -9,7 +9,7 @@ public static class AccountSalesMappingExtensions
     public static ProductDto ToDto(this Product product)
     {
         return new ProductDto(
-            product.Id.Value,
+            product.Id,
             product.Name,
             product.ProductType,
             product.Variants
@@ -24,7 +24,7 @@ public static class AccountSalesMappingExtensions
     public static ProductVariantDto ToDto(this ProductVariant variant)
     {
         return new ProductVariantDto(
-            variant.Id.Value,
+            variant.Id,
             variant.Name,
             variant.Price,
             variant.WarrantyDays,
@@ -35,7 +35,7 @@ public static class AccountSalesMappingExtensions
     public static MemberDto ToDto(this Member member)
     {
         return new MemberDto(
-            member.Id.Value,
+            member.Id,
             member.DisplayName,
             member.Source,
             member.SourceId,
@@ -46,14 +46,14 @@ public static class AccountSalesMappingExtensions
     public static AccountCloneDto ToDto(this AccountClone accountClone)
     {
         return new AccountCloneDto(
-            accountClone.Id.Value,
+            accountClone.Id,
             new ProductSummaryDto(
-                accountClone.ProductId.Value,
+                accountClone.ProductId,
                 accountClone.Product?.Name ?? string.Empty,
                 accountClone.Product?.ProductType ?? AccountProductType.Other),
             accountClone.SourceAccount != null
                 ? new SourceAccountSummaryDto(
-                    accountClone.SourceAccount.Id.Value,
+                    accountClone.SourceAccount.Id,
                     accountClone.SourceAccount.AccountType,
                     accountClone.SourceAccount.Username)
                 : null,
@@ -72,30 +72,33 @@ public static class AccountSalesMappingExtensions
     {
         return new AccountOrderDto
         {
-            Id = accountOrder.Id.Value,
+            Id = accountOrder.Id,
             OrderCode = accountOrder.OrderCode,
-            SoldByUserId = accountOrder.SoldByUserId?.Value,
+            SoldByUserId = accountOrder.SoldByUserId,
             SoldByUser = null,
-            MemberId = accountOrder.MemberId.Value,
+            MemberId = accountOrder.MemberId,
             MemberDisplayName = accountOrder.Member?.DisplayName,
             MemberSourceId = accountOrder.Member?.SourceId,
-            ReferrerMemberId = accountOrder.ReferrerMemberId?.Value,
+            ReferrerMemberId = accountOrder.ReferrerMemberId,
             ReferrerMember = accountOrder.ReferrerMember?.ToDto(),
-            ProductId = accountOrder.ProductId.Value,
+            ProductId = accountOrder.ProductId,
             ProductName = accountOrder.Product?.Name ?? string.Empty,
-            ProductVariantId = accountOrder.ProductVariantId.Value,
+            ProductVariantId = accountOrder.ProductVariantId,
             ProductVariantNameSnapshot = accountOrder.ProductVariantNameSnapshot,
             UnitPriceSnapshot = accountOrder.UnitPriceSnapshot,
             WarrantyDaysSnapshot = accountOrder.WarrantyDaysSnapshot,
             ReferralCommissionPercentSnapshot = accountOrder.ReferralCommissionPercentSnapshot,
             ReferralCommissionAmountSnapshot = accountOrder.ReferralCommissionAmountSnapshot,
-            AccountCloneId = accountOrder.AccountCloneId.Value,
-            WarrantySourceAccountCloneId = accountOrder.WarrantySourceAccountCloneId?.Value,
+            AccountCloneId = accountOrder.AccountCloneId,
+            WarrantySourceAccountCloneId = accountOrder.WarrantySourceAccountCloneId,
             PurchaseDate = accountOrder.PurchaseDate,
             WarrantyExpiry = accountOrder.WarrantyExpiry,
             OrderNote = accountOrder.OrderNote,
             WarrantyIssueNote = accountOrder.WarrantyIssueNote,
             Status = accountOrder.Status,
+            PaymentStatus = accountOrder.PaymentStatus,
+            IsTrial = accountOrder.IsTrial,
+            RefundAmount = accountOrder.RefundAmount,
             CreatedAt = accountOrder.CreatedAt,
             UpdatedAt = accountOrder.UpdatedAt
         };
@@ -104,7 +107,7 @@ public static class AccountSalesMappingExtensions
     public static SourceAccountDto ToDto(this SourceAccount sourceAccount)
     {
         return new SourceAccountDto(
-            sourceAccount.Id.Value,
+            sourceAccount.Id,
             sourceAccount.AccountType,
             sourceAccount.Username,
             sourceAccount.Password,
@@ -116,5 +119,50 @@ public static class AccountSalesMappingExtensions
             sourceAccount.Clones.Count,
             sourceAccount.CreatedAt,
             sourceAccount.UpdatedAt);
+    }
+
+    public static SalesBonusTierDto ToDto(this SalesBonusTier tier)
+    {
+        return new SalesBonusTierDto(
+            tier.Id,
+            tier.OrderThreshold,
+            tier.BonusAmount,
+            tier.IsActive,
+            tier.CreatedAt,
+            tier.UpdatedAt);
+    }
+
+    public static MemberMonthlySalesSummaryDto ToDto(this MemberMonthlySalesSummary summary)
+    {
+        return new MemberMonthlySalesSummaryDto(
+            summary.Id,
+            summary.SoldByMemberId,
+            summary.SoldByMember?.DisplayName,
+            summary.Year,
+            summary.Month,
+            summary.OrderCount,
+            summary.HighestTierReachedId,
+            summary.HighestTierReached?.OrderThreshold,
+            summary.TotalBonusEarned,
+            summary.CreatedAt,
+            summary.UpdatedAt);
+    }
+
+    public static SalesBonusTransactionDto ToDto(this SalesBonusTransaction transaction)
+    {
+        return new SalesBonusTransactionDto(
+            transaction.Id,
+            transaction.SoldByMemberId,
+            transaction.SoldByMember?.DisplayName,
+            transaction.SalesBonusTierId,
+            transaction.Year,
+            transaction.Month,
+            transaction.OrderCountAtTrigger,
+            transaction.OrderThresholdSnapshot,
+            transaction.BonusAmountSnapshot,
+            transaction.Status,
+            transaction.ProcessedByUserId,
+            transaction.Note,
+            transaction.CreatedAt);
     }
 }

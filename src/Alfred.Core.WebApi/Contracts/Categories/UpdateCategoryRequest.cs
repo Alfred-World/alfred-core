@@ -13,6 +13,6 @@ public sealed record UpdateCategoryRequest
 
     public UpdateCategoryDto ToDto()
     {
-        return new UpdateCategoryDto(Name, Icon, Type, ParentId, FormSchema);
+        return new UpdateCategoryDto(Name, Icon, Type, (CategoryId?)ParentId, FormSchema);
     }
 }

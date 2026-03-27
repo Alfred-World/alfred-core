@@ -17,7 +17,7 @@ public sealed record UpdateAssetRequest
 
     public UpdateAssetDto ToDto()
     {
-        return new UpdateAssetDto(Name, CategoryId, BrandId, PurchaseDate, InitialCost, WarrantyExpiryDate, Specs,
-            Status, Location);
+        return new UpdateAssetDto(Name, (CategoryId?)CategoryId, (BrandId?)BrandId, PurchaseDate, InitialCost,
+            WarrantyExpiryDate, Specs, Status, Location);
     }
 }

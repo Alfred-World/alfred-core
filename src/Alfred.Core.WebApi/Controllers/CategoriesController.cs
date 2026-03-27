@@ -66,7 +66,7 @@ public sealed class CategoriesController : BaseApiController
     [ProducesResponseType(typeof(ApiResponse<List<CategoryTreeNodeDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetChildren(Guid parentId, CancellationToken cancellationToken)
     {
-        var result = await _categoryService.GetChildrenAsync(parentId, cancellationToken);
+        var result = await _categoryService.GetChildrenAsync((CategoryId)parentId, cancellationToken);
         return OkResponse(result);
     }
 
@@ -79,7 +79,7 @@ public sealed class CategoriesController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCategoryById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _categoryService.GetCategoryByIdAsync(id, cancellationToken);
+        var result = await _categoryService.GetCategoryByIdAsync((CategoryId)id, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Category not found");
@@ -116,7 +116,7 @@ public sealed class CategoriesController : BaseApiController
         [FromBody] UpdateCategoryRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _categoryService.UpdateCategoryAsync(id, request.ToDto(), cancellationToken);
+        var result = await _categoryService.UpdateCategoryAsync((CategoryId)id, request.ToDto(), cancellationToken);
         return OkResponse(result);
     }
 
@@ -129,7 +129,7 @@ public sealed class CategoriesController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken cancellationToken)
     {
-        await _categoryService.DeleteCategoryAsync(id, cancellationToken);
+        await _categoryService.DeleteCategoryAsync((CategoryId)id, cancellationToken);
         return OkResponse("Category deleted successfully");
     }
 

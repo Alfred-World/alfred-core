@@ -6,5 +6,5 @@ public sealed record UpdateBrandDto(
     string? SupportPhone,
     string? Description,
     string? LogoUrl,
-    List<Guid>? CategoryIds
+    List<CategoryId>? CategoryIds
 );

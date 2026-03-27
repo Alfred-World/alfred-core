@@ -10,28 +10,29 @@ public interface ICommodityService
     Task<PageResult<CommodityDto>> GetAllCommoditiesAsync(QueryRequest query,
         CancellationToken cancellationToken = default);
 
-    Task<CommodityDto?> GetCommodityByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<CommodityDto?> GetCommodityByIdAsync(CommodityId id, CancellationToken cancellationToken = default);
 
     Task<CommodityDto> CreateCommodityAsync(CreateCommodityDto dto, CancellationToken cancellationToken = default);
 
-    Task<CommodityDto> UpdateCommodityAsync(Guid id, UpdateCommodityDto dto,
+    Task<CommodityDto> UpdateCommodityAsync(CommodityId id, UpdateCommodityDto dto,
         CancellationToken cancellationToken = default);
 
-    Task DeleteCommodityAsync(Guid id, CancellationToken cancellationToken = default);
+    Task DeleteCommodityAsync(CommodityId id, CancellationToken cancellationToken = default);
 
     #endregion
 
     #region Investment Transactions
 
-    Task<PageResult<InvestmentTransactionDto>> GetTransactionsAsync(Guid commodityId, QueryRequest query,
+    Task<PageResult<InvestmentTransactionDto>> GetTransactionsAsync(CommodityId commodityId, QueryRequest query,
         CancellationToken cancellationToken = default);
 
-    Task<InvestmentTransactionDto?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken = default);
-
-    Task<InvestmentTransactionDto> CreateTransactionAsync(Guid commodityId, CreateInvestmentTransactionDto dto,
+    Task<InvestmentTransactionDto?> GetTransactionByIdAsync(InvestmentTransactionId id,
         CancellationToken cancellationToken = default);
 
-    Task DeleteTransactionAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<InvestmentTransactionDto> CreateTransactionAsync(CommodityId commodityId, CreateInvestmentTransactionDto dto,
+        CancellationToken cancellationToken = default);
+
+    Task DeleteTransactionAsync(InvestmentTransactionId id, CancellationToken cancellationToken = default);
 
     #endregion
 }

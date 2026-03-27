@@ -37,7 +37,7 @@ public sealed class AccessRolesController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRoleById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _roleService.GetRoleByIdAsync(id, cancellationToken);
+        var result = await _roleService.GetRoleByIdAsync((AccessRoleId)id, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Role not found");
@@ -62,7 +62,7 @@ public sealed class AccessRolesController : BaseApiController
     public async Task<IActionResult> UpdateRole(Guid id, [FromBody] UpdateAccessRoleRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _roleService.UpdateRoleAsync(id, request.ToDto(), cancellationToken);
+        var result = await _roleService.UpdateRoleAsync((AccessRoleId)id, request.ToDto(), cancellationToken);
         return OkResponse(result);
     }
 
@@ -71,7 +71,7 @@ public sealed class AccessRolesController : BaseApiController
     [ProducesResponseType(typeof(ApiResponse<AccessRoleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteRole(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _roleService.DeleteRoleAsync(id, cancellationToken);
+        var result = await _roleService.DeleteRoleAsync((AccessRoleId)id, cancellationToken);
         return OkResponse(result);
     }
 
@@ -81,7 +81,10 @@ public sealed class AccessRolesController : BaseApiController
     public async Task<IActionResult> AddPermissions(Guid id, [FromBody] List<Guid> permissionIds,
         CancellationToken cancellationToken)
     {
-        var result = await _roleService.AddPermissionsToRoleAsync(id, permissionIds, cancellationToken);
+        var result = await _roleService.AddPermissionsToRoleAsync(
+            (AccessRoleId)id,
+            permissionIds.Select(x => (AccessPermissionId)x).ToList(),
+            cancellationToken);
         return OkResponse(result);
     }
 
@@ -91,7 +94,10 @@ public sealed class AccessRolesController : BaseApiController
     public async Task<IActionResult> RemovePermissions(Guid id, [FromBody] List<Guid> permissionIds,
         CancellationToken cancellationToken)
     {
-        var result = await _roleService.RemovePermissionsFromRoleAsync(id, permissionIds, cancellationToken);
+        var result = await _roleService.RemovePermissionsFromRoleAsync(
+            (AccessRoleId)id,
+            permissionIds.Select(x => (AccessPermissionId)x).ToList(),
+            cancellationToken);
         return OkResponse(result);
     }
 }

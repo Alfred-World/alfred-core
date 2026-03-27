@@ -43,6 +43,12 @@ public class PostgreSqlDbContext : DbContext, IDbContext
     public DbSet<MarketPrice> MarketPrices => Set<MarketPrice>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
     public DbSet<SourceAccount> SourceAccounts => Set<SourceAccount>();
+    public DbSet<Commission> Commissions => Set<Commission>();
+    public DbSet<CommissionTransaction> CommissionTransactions => Set<CommissionTransaction>();
+    public DbSet<OrderAttachment> OrderAttachments => Set<OrderAttachment>();
+    public DbSet<SalesBonusTier> SalesBonusTiers => Set<SalesBonusTier>();
+    public DbSet<MemberMonthlySalesSummary> MemberMonthlySalesSummaries => Set<MemberMonthlySalesSummary>();
+    public DbSet<SalesBonusTransaction> SalesBonusTransactions => Set<SalesBonusTransaction>();
     private readonly PostgreSqlOptions _options;
 
     public PostgreSqlDbContext(PostgreSqlOptions options)
@@ -73,6 +79,13 @@ public class PostgreSqlDbContext : DbContext, IDbContext
         configurationBuilder.Properties<CommodityId>().HaveConversion<CommodityIdConverter>();
         configurationBuilder.Properties<InvestmentTransactionId>().HaveConversion<InvestmentTransactionIdConverter>();
         configurationBuilder.Properties<SourceAccountId>().HaveConversion<SourceAccountIdConverter>();
+        configurationBuilder.Properties<CommissionId>().HaveConversion<CommissionIdConverter>();
+        configurationBuilder.Properties<CommissionTransactionId>().HaveConversion<CommissionTransactionIdConverter>();
+        configurationBuilder.Properties<OrderAttachmentId>().HaveConversion<OrderAttachmentIdConverter>();
+        configurationBuilder.Properties<SalesBonusTierId>().HaveConversion<SalesBonusTierIdConverter>();
+        configurationBuilder.Properties<MemberMonthlySalesSummaryId>()
+            .HaveConversion<MemberMonthlySalesSummaryIdConverter>();
+        configurationBuilder.Properties<SalesBonusTransactionId>().HaveConversion<SalesBonusTransactionIdConverter>();
         configurationBuilder.Properties<Url>().HaveConversion<UrlConverter>();
     }
 

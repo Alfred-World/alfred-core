@@ -49,7 +49,7 @@ public sealed class UnitsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUnitById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _unitService.GetUnitByIdAsync(id, cancellationToken);
+        var result = await _unitService.GetUnitByIdAsync((UnitId)id, cancellationToken);
 
         if (result is null)
         {
@@ -87,7 +87,7 @@ public sealed class UnitsController : BaseApiController
         [FromBody] UpdateUnitRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _unitService.UpdateUnitAsync(id, request.ToDto(), cancellationToken);
+        var result = await _unitService.UpdateUnitAsync((UnitId)id, request.ToDto(), cancellationToken);
         return OkResponse(result);
     }
 
@@ -100,7 +100,7 @@ public sealed class UnitsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteUnit(Guid id, CancellationToken cancellationToken)
     {
-        await _unitService.DeleteUnitAsync(id, cancellationToken);
+        await _unitService.DeleteUnitAsync((UnitId)id, cancellationToken);
         return OkResponse("Unit deleted successfully");
     }
 
@@ -155,7 +155,7 @@ public sealed class UnitsController : BaseApiController
         [FromQuery] decimal value,
         CancellationToken cancellationToken)
     {
-        var result = await _unitService.ConvertAsync(fromUnitId, toUnitId, value, cancellationToken);
+        var result = await _unitService.ConvertAsync((UnitId)fromUnitId, (UnitId)toUnitId, value, cancellationToken);
         return OkResponse(result);
     }
 }

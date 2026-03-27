@@ -16,6 +16,7 @@ public sealed record CreateUnitRequest
 
     public CreateUnitDto ToDto()
     {
-        return new CreateUnitDto(Code, Name, Symbol, Category, BaseUnitId, ConversionRate, Status, Description);
+        return new CreateUnitDto(Code, Name, Symbol, Category, (UnitId?)BaseUnitId, ConversionRate, Status,
+            Description);
     }
 }

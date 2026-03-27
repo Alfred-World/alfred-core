@@ -4,8 +4,8 @@ namespace Alfred.Core.Application.Assets.Dtos;
 
 public sealed record UpdateAssetDto(
     string Name,
-    Guid? CategoryId,
-    Guid? BrandId,
+    CategoryId? CategoryId,
+    BrandId? BrandId,
     DateTime? PurchaseDate,
     decimal InitialCost,
     DateTime? WarrantyExpiryDate,

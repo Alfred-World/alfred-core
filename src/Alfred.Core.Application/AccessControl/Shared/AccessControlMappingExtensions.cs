@@ -8,7 +8,7 @@ public static class AccessControlMappingExtensions
     public static AccessPermissionDto ToDto(this AccessPermission entity)
     {
         return new AccessPermissionDto(
-            entity.Id.Value,
+            entity.Id,
             entity.Code,
             entity.Name,
             entity.Resource,
@@ -23,7 +23,7 @@ public static class AccessControlMappingExtensions
     {
         return new AccessRoleDto
         {
-            Id = entity.Id.Value,
+            Id = entity.Id,
             Name = entity.Name,
             NormalizedName = entity.NormalizedName,
             Icon = entity.Icon,

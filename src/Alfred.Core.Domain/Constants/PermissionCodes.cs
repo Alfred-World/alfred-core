@@ -93,6 +93,7 @@ public static class PermissionCodes
         public const string ProductUpdate = "account-sales:product:update";
         public const string MemberRead = "account-sales:member:read";
         public const string MemberCreate = "account-sales:member:create";
+        public const string MemberUpdate = "account-sales:member:update";
         public const string AccountCloneRead = "account-sales:account-clone:read";
         public const string AccountCloneCreate = "account-sales:account-clone:create";
         public const string AccountCloneReview = "account-sales:account-clone:review";
@@ -110,6 +111,20 @@ public static class PermissionCodes
         public const string SourceAccountCreate = "account-sales:source-account:create";
         public const string SourceAccountUpdate = "account-sales:source-account:update";
         public const string SourceAccountDelete = "account-sales:source-account:delete";
+        public const string OrderPaymentConfirm = "account-sales:order:payment:confirm";
+        public const string OrderRefund = "account-sales:order:refund";
+        public const string CommissionRead = "account-sales:commission:read";
+        public const string CommissionPayout = "account-sales:commission:payout";
+        public const string CommissionTransactionRead = "account-sales:commission:transaction:read";
+        public const string BonusTierRead = "account-sales:bonus-tier:read";
+        public const string BonusTierCreate = "account-sales:bonus-tier:create";
+        public const string BonusTierUpdate = "account-sales:bonus-tier:update";
+        public const string BonusTierDelete = "account-sales:bonus-tier:delete";
+        public const string BonusSummaryRead = "account-sales:bonus-summary:read";
+        public const string BonusSummaryProgressRead = "account-sales:bonus-summary:progress:read";
+        public const string BonusTransactionRead = "account-sales:bonus-transaction:read";
+        public const string BonusTransactionPay = "account-sales:bonus-transaction:pay";
+        public const string BonusTransactionCancel = "account-sales:bonus-transaction:cancel";
     }
 
     public static class AiChat

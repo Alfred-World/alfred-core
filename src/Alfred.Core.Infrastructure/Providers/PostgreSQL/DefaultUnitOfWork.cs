@@ -29,6 +29,12 @@ public class DefaultUnitOfWork : IUnitOfWork
     private IAccountCloneRepository? _accountClones;
     private IAccountOrderRepository? _accountOrders;
     private ISourceAccountRepository? _sourceAccounts;
+    private ICommissionRepository? _commissions;
+    private ICommissionTransactionRepository? _commissionTransactions;
+    private IOrderAttachmentRepository? _orderAttachments;
+    private ISalesBonusTierRepository? _salesBonusTiers;
+    private IMemberMonthlySalesSummaryRepository? _memberMonthlySalesSummaries;
+    private ISalesBonusTransactionRepository? _salesBonusTransactions;
     private IAssetRepository? _assets;
     private IAssetLogRepository? _assetLogs;
     private IAttachmentRepository? _attachments;
@@ -80,6 +86,24 @@ public class DefaultUnitOfWork : IUnitOfWork
 
     public ISourceAccountRepository SourceAccounts =>
         _sourceAccounts ??= new SourceAccountRepository(_context);
+
+    public ICommissionRepository Commissions =>
+        _commissions ??= new CommissionRepository(_context);
+
+    public ICommissionTransactionRepository CommissionTransactions =>
+        _commissionTransactions ??= new CommissionTransactionRepository(_context);
+
+    public IOrderAttachmentRepository OrderAttachments =>
+        _orderAttachments ??= new OrderAttachmentRepository(_context);
+
+    public ISalesBonusTierRepository SalesBonusTiers =>
+        _salesBonusTiers ??= new SalesBonusTierRepository(_context);
+
+    public IMemberMonthlySalesSummaryRepository MemberMonthlySalesSummaries =>
+        _memberMonthlySalesSummaries ??= new MemberMonthlySalesSummaryRepository(_context);
+
+    public ISalesBonusTransactionRepository SalesBonusTransactions =>
+        _salesBonusTransactions ??= new SalesBonusTransactionRepository(_context);
 
     public IAssetRepository Assets =>
         _assets ??= new AssetRepository(_context);

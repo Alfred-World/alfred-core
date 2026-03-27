@@ -10,6 +10,6 @@ public sealed record ReplaceAccountOrderRequest
 
     public ReplaceAccountOrderDto ToDto()
     {
-        return new ReplaceAccountOrderDto(ReplacementAccountCloneId, OrderNote, WarrantyIssueNote);
+        return new ReplaceAccountOrderDto((AccountCloneId)ReplacementAccountCloneId, OrderNote, WarrantyIssueNote);
     }
 }

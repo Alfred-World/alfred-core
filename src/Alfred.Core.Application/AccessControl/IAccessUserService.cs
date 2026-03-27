@@ -7,9 +7,9 @@ public interface IAccessUserService
 {
     Task<PageResult<AccessUserDto>> GetAllUsersAsync(QueryRequest query, CancellationToken cancellationToken = default);
 
-    Task<AccessUserDto> AddRolesToUserAsync(Guid userId, IEnumerable<Guid> roleIds,
+    Task<AccessUserDto> AddRolesToUserAsync(ReplicatedUserId userId, IEnumerable<AccessRoleId> roleIds,
         CancellationToken cancellationToken = default);
 
-    Task<AccessUserDto> RemoveRolesFromUserAsync(Guid userId, IEnumerable<Guid> roleIds,
+    Task<AccessUserDto> RemoveRolesFromUserAsync(ReplicatedUserId userId, IEnumerable<AccessRoleId> roleIds,
         CancellationToken cancellationToken = default);
 }

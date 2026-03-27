@@ -13,6 +13,7 @@ public sealed record UpdateAccountCloneRequest
 
     public UpdateAccountCloneDto ToDto()
     {
-        return new UpdateAccountCloneDto(ExternalAccountId, Username, Password, TwoFaSecret, ExtraInfo, SourceAccountId);
+        return new UpdateAccountCloneDto(ExternalAccountId, Username, Password, TwoFaSecret, ExtraInfo,
+            (SourceAccountId?)SourceAccountId);
     }
 }

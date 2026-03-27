@@ -13,6 +13,6 @@ public sealed record CreateCommodityRequest
 
     public CreateCommodityDto ToDto()
     {
-        return new CreateCommodityDto(Code, Name, AssetClass, DefaultUnitId, Description);
+        return new CreateCommodityDto(Code, Name, AssetClass, (UnitId?)DefaultUnitId, Description);
     }
 }

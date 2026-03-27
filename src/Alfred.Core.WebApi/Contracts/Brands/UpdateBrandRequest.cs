@@ -13,6 +13,7 @@ public sealed record UpdateBrandRequest
 
     public UpdateBrandDto ToDto()
     {
-        return new UpdateBrandDto(Name, Website, SupportPhone, Description, LogoUrl, CategoryIds);
+        return new UpdateBrandDto(Name, Website, SupportPhone, Description, LogoUrl,
+            CategoryIds?.Select(x => (CategoryId)x).ToList());
     }
 }

@@ -16,6 +16,7 @@ public sealed record CreateAssetLogRequest
 
     public CreateAssetLogDto ToDto()
     {
-        return new CreateAssetLogDto(EventType, BrandId, PerformedAt, Cost, Quantity, Note, FinanceTxnId, NextDueDate);
+        return new CreateAssetLogDto(EventType, (BrandId?)BrandId, PerformedAt, Cost, Quantity, Note, FinanceTxnId,
+            NextDueDate);
     }
 }

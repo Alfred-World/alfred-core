@@ -31,5 +31,5 @@ public interface IAttachmentService
     /// <summary>
     /// Delete an attachment record and the underlying R2 object.
     /// </summary>
-    Task DeleteAttachmentAsync(Guid attachmentId, CancellationToken cancellationToken = default);
+    Task DeleteAttachmentAsync(AttachmentId attachmentId, CancellationToken cancellationToken = default);
 }

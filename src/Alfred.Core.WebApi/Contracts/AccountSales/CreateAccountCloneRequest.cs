@@ -14,7 +14,8 @@ public sealed record CreateAccountCloneRequest
 
     public CreateAccountCloneDto ToDto()
     {
-        return new CreateAccountCloneDto(ProductId, ExternalAccountId, Username, Password, TwoFaSecret, ExtraInfo,
-            SourceAccountId);
+        return new CreateAccountCloneDto((ProductId)ProductId, ExternalAccountId, Username, Password, TwoFaSecret,
+            ExtraInfo,
+            (SourceAccountId?)SourceAccountId);
     }
 }

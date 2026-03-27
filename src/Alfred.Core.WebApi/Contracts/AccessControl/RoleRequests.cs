@@ -11,7 +11,8 @@ public sealed record CreateAccessRoleRequest(
 {
     public CreateAccessRoleDto ToDto()
     {
-        return new CreateAccessRoleDto(Name, Icon, IsImmutable, IsSystem, Permissions);
+        return new CreateAccessRoleDto(Name, Icon, IsImmutable, IsSystem,
+            Permissions?.Select(x => (AccessPermissionId)x).ToList());
     }
 }
 
@@ -24,6 +25,7 @@ public sealed record UpdateAccessRoleRequest(
 {
     public UpdateAccessRoleDto ToDto()
     {
-        return new UpdateAccessRoleDto(Name, Icon, IsImmutable, IsSystem, Permissions);
+        return new UpdateAccessRoleDto(Name, Icon, IsImmutable, IsSystem,
+            Permissions?.Select(x => (AccessPermissionId)x).ToList());
     }
 }

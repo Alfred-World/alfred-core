@@ -10,10 +10,11 @@ public sealed record CreateAccountOrderRequest
     public Guid AccountCloneId { get; init; }
     public Guid? ReferrerMemberId { get; init; }
     public string? OrderNote { get; init; }
+    public bool IsTrial { get; init; }
 
     public CreateAccountOrderDto ToDto()
     {
-        return new CreateAccountOrderDto(MemberId, ProductId, ProductVariantId, AccountCloneId, ReferrerMemberId,
-            OrderNote);
+        return new CreateAccountOrderDto((MemberId)MemberId, (ProductId)ProductId, (ProductVariantId)ProductVariantId,
+            (AccountCloneId)AccountCloneId, (MemberId?)ReferrerMemberId, OrderNote, IsTrial);
     }
 }

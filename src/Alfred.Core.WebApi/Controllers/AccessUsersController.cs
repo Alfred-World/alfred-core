@@ -36,7 +36,10 @@ public sealed class AccessUsersController : BaseApiController
     public async Task<IActionResult> AddRoles(Guid id, [FromBody] List<Guid> roleIds,
         CancellationToken cancellationToken)
     {
-        var result = await _userService.AddRolesToUserAsync(id, roleIds, cancellationToken);
+        var result = await _userService.AddRolesToUserAsync(
+            (ReplicatedUserId)id,
+            roleIds.Select(x => (AccessRoleId)x).ToList(),
+            cancellationToken);
         return OkResponse(result);
     }
 
@@ -46,7 +49,10 @@ public sealed class AccessUsersController : BaseApiController
     public async Task<IActionResult> RemoveRoles(Guid id, [FromBody] List<Guid> roleIds,
         CancellationToken cancellationToken)
     {
-        var result = await _userService.RemoveRolesFromUserAsync(id, roleIds, cancellationToken);
+        var result = await _userService.RemoveRolesFromUserAsync(
+            (ReplicatedUserId)id,
+            roleIds.Select(x => (AccessRoleId)x).ToList(),
+            cancellationToken);
         return OkResponse(result);
     }
 }

@@ -17,7 +17,7 @@ public sealed record CreateAssetRequest
 
     public CreateAssetDto ToDto()
     {
-        return new CreateAssetDto(Name, CategoryId, BrandId, PurchaseDate, InitialCost, WarrantyExpiryDate, Specs,
-            Status, Location);
+        return new CreateAssetDto(Name, (CategoryId?)CategoryId, (BrandId?)BrandId, PurchaseDate, InitialCost,
+            WarrantyExpiryDate, Specs, Status, Location);
     }
 }

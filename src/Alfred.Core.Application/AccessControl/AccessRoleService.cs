@@ -29,9 +29,9 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
             cancellationToken);
     }
 
-    public async Task<AccessRoleDto?> GetRoleByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<AccessRoleDto?> GetRoleByIdAsync(AccessRoleId id, CancellationToken cancellationToken = default)
     {
-        var role = await _unitOfWork.AccessRoles.GetByIdAsync((AccessRoleId)id, cancellationToken);
+        var role = await _unitOfWork.AccessRoles.GetByIdAsync(id, cancellationToken);
         return role?.ToDto();
     }
 
@@ -58,10 +58,10 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         return (created ?? role).ToDto();
     }
 
-    public async Task<AccessRoleDto> UpdateRoleAsync(Guid id, UpdateAccessRoleDto dto,
+    public async Task<AccessRoleDto> UpdateRoleAsync(AccessRoleId id, UpdateAccessRoleDto dto,
         CancellationToken cancellationToken = default)
     {
-        var role = await _unitOfWork.AccessRoles.GetByIdAsync((AccessRoleId)id, cancellationToken)
+        var role = await _unitOfWork.AccessRoles.GetByIdAsync(id, cancellationToken)
                    ?? throw new KeyNotFoundException($"Role with ID {id} not found.");
 
         if (role.IsImmutable)
@@ -84,9 +84,9 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         return (updated ?? role).ToDto();
     }
 
-    public async Task<AccessRoleDto> DeleteRoleAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<AccessRoleDto> DeleteRoleAsync(AccessRoleId id, CancellationToken cancellationToken = default)
     {
-        var role = await _unitOfWork.AccessRoles.GetByIdAsync((AccessRoleId)id, cancellationToken)
+        var role = await _unitOfWork.AccessRoles.GetByIdAsync(id, cancellationToken)
                    ?? throw new KeyNotFoundException($"Role with ID {id} not found.");
 
         if (role.IsImmutable)
@@ -106,10 +106,11 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         return dto;
     }
 
-    public async Task<AccessRoleDto> AddPermissionsToRoleAsync(Guid roleId, IEnumerable<Guid> permissionIds,
+    public async Task<AccessRoleDto> AddPermissionsToRoleAsync(AccessRoleId roleId,
+        IEnumerable<AccessPermissionId> permissionIds,
         CancellationToken cancellationToken = default)
     {
-        var role = await _unitOfWork.AccessRoles.GetByIdAsync((AccessRoleId)roleId, cancellationToken)
+        var role = await _unitOfWork.AccessRoles.GetByIdAsync(roleId, cancellationToken)
                    ?? throw new KeyNotFoundException($"Role with ID {roleId} not found.");
 
         if (role.IsImmutable)
@@ -131,10 +132,10 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         return (updated ?? role).ToDto();
     }
 
-    public async Task<AccessRoleDto> RemovePermissionsFromRoleAsync(Guid roleId,
-        IEnumerable<Guid> permissionIds, CancellationToken cancellationToken = default)
+    public async Task<AccessRoleDto> RemovePermissionsFromRoleAsync(AccessRoleId roleId,
+        IEnumerable<AccessPermissionId> permissionIds, CancellationToken cancellationToken = default)
     {
-        var role = await _unitOfWork.AccessRoles.GetByIdAsync((AccessRoleId)roleId, cancellationToken)
+        var role = await _unitOfWork.AccessRoles.GetByIdAsync(roleId, cancellationToken)
                    ?? throw new KeyNotFoundException($"Role with ID {roleId} not found.");
 
         if (role.IsImmutable)
@@ -142,7 +143,7 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
             throw new InvalidOperationException("Cannot modify immutable role.");
         }
 
-        var removeSet = permissionIds.Select(x => (AccessPermissionId)x).ToHashSet();
+        var removeSet = permissionIds.ToHashSet();
         var keep = role.RolePermissions
             .Select(x => x.PermissionId)
             .Where(x => !removeSet.Contains(x))
@@ -157,10 +158,10 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         return (updated ?? role).ToDto();
     }
 
-    private async Task<List<AccessPermissionId>> ResolvePermissionIdsAsync(IEnumerable<Guid> ids,
+    private async Task<List<AccessPermissionId>> ResolvePermissionIdsAsync(IEnumerable<AccessPermissionId> ids,
         CancellationToken cancellationToken)
     {
-        var typedIds = ids.Select(x => (AccessPermissionId)x).Distinct().ToList();
+        var typedIds = ids.Distinct().ToList();
         if (typedIds.Count == 0)
         {
             return [];

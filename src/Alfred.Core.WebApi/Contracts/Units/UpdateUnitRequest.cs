@@ -15,6 +15,6 @@ public sealed record UpdateUnitRequest
 
     public UpdateUnitDto ToDto()
     {
-        return new UpdateUnitDto(Name, Symbol, Category, BaseUnitId, ConversionRate, Status, Description);
+        return new UpdateUnitDto(Name, Symbol, Category, (UnitId?)BaseUnitId, ConversionRate, Status, Description);
     }
 }

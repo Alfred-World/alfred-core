@@ -6,7 +6,7 @@ public sealed record CreateInvestmentTransactionDto(
     InvestmentTransactionType TransactionType,
     DateTimeOffset TransactionDate,
     decimal Quantity,
-    Guid UnitId,
+    UnitId UnitId,
     decimal PricePerUnit,
     decimal TotalAmount,
     decimal FeeAmount,

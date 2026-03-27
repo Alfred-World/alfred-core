@@ -5,11 +5,11 @@ namespace Alfred.Core.Application.Brands;
 
 public interface IBrandService
 {
-    Task<PageResult<BrandDto>> GetAllBrandsAsync(QueryRequest query, Guid? categoryId = null,
+    Task<PageResult<BrandDto>> GetAllBrandsAsync(QueryRequest query, CategoryId? categoryId = null,
         CancellationToken cancellationToken = default);
 
-    Task<BrandDto?> GetBrandByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<BrandDto?> GetBrandByIdAsync(BrandId id, CancellationToken cancellationToken = default);
     Task<BrandDto> CreateBrandAsync(CreateBrandDto dto, CancellationToken cancellationToken = default);
-    Task<BrandDto> UpdateBrandAsync(Guid id, UpdateBrandDto dto, CancellationToken cancellationToken = default);
-    Task DeleteBrandAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<BrandDto> UpdateBrandAsync(BrandId id, UpdateBrandDto dto, CancellationToken cancellationToken = default);
+    Task DeleteBrandAsync(BrandId id, CancellationToken cancellationToken = default);
 }

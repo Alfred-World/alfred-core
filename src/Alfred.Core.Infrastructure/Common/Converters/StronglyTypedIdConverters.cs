@@ -56,5 +56,23 @@ public sealed class ReferralCommissionSettingHistoryIdConverter()
 public sealed class SourceAccountIdConverter()
     : ValueConverter<SourceAccountId, Guid>(id => id.Value, g => new SourceAccountId(g));
 
+public sealed class CommissionIdConverter()
+    : ValueConverter<CommissionId, Guid>(id => id.Value, g => new CommissionId(g));
+
+public sealed class CommissionTransactionIdConverter()
+    : ValueConverter<CommissionTransactionId, Guid>(id => id.Value, g => new CommissionTransactionId(g));
+
+public sealed class OrderAttachmentIdConverter()
+    : ValueConverter<OrderAttachmentId, Guid>(id => id.Value, g => new OrderAttachmentId(g));
+
+public sealed class SalesBonusTierIdConverter()
+    : ValueConverter<SalesBonusTierId, Guid>(id => id.Value, g => new SalesBonusTierId(g));
+
+public sealed class MemberMonthlySalesSummaryIdConverter()
+    : ValueConverter<MemberMonthlySalesSummaryId, Guid>(id => id.Value, g => new MemberMonthlySalesSummaryId(g));
+
+public sealed class SalesBonusTransactionIdConverter()
+    : ValueConverter<SalesBonusTransactionId, Guid>(id => id.Value, g => new SalesBonusTransactionId(g));
+
 public sealed class UrlConverter()
     : ValueConverter<Url, string>(u => u.Value, s => Url.Create(s));

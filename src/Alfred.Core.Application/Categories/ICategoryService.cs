@@ -12,13 +12,15 @@ public interface ICategoryService
     Task<PageResult<CategoryTreeNodeDto>> GetCategoryTreeAsync(CategoryType? type = null, int page = 1,
         int pageSize = 0, CancellationToken cancellationToken = default);
 
-    Task<List<CategoryTreeNodeDto>> GetChildrenAsync(Guid parentId, CancellationToken cancellationToken = default);
-    Task<CategoryDto?> GetCategoryByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<List<CategoryTreeNodeDto>>
+        GetChildrenAsync(CategoryId parentId, CancellationToken cancellationToken = default);
+
+    Task<CategoryDto?> GetCategoryByIdAsync(CategoryId id, CancellationToken cancellationToken = default);
     Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto dto, CancellationToken cancellationToken = default);
 
-    Task<CategoryDto> UpdateCategoryAsync(Guid id, UpdateCategoryDto dto,
+    Task<CategoryDto> UpdateCategoryAsync(CategoryId id, UpdateCategoryDto dto,
         CancellationToken cancellationToken = default);
 
-    Task DeleteCategoryAsync(Guid id, CancellationToken cancellationToken = default);
+    Task DeleteCategoryAsync(CategoryId id, CancellationToken cancellationToken = default);
     Task<List<CategoryCountByTypeDto>> GetCategoryCountsByTypeAsync(CancellationToken cancellationToken = default);
 }

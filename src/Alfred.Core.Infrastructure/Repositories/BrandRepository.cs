@@ -13,11 +13,11 @@ public sealed class BrandRepository : BaseRepository<Brand, BrandId>, IBrandRepo
     {
     }
 
-    public async Task<Brand?> GetByIdWithCategoriesAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Brand?> GetByIdWithCategoriesAsync(BrandId id, CancellationToken cancellationToken = default)
     {
         return await DbSet
             .Include(b => b.BrandCategories)
             .ThenInclude(bc => bc.Category)
-            .FirstOrDefaultAsync(b => b.Id == (BrandId)id, cancellationToken);
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 }

@@ -37,7 +37,8 @@ public sealed class BrandsController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), categoryId, cancellationToken);
+            await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), (CategoryId?)categoryId,
+                cancellationToken);
         return OkPaginatedResponse(result);
     }
 
@@ -50,7 +51,7 @@ public sealed class BrandsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBrandById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _brandService.GetBrandByIdAsync(id, cancellationToken);
+        var result = await _brandService.GetBrandByIdAsync((BrandId)id, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Brand not found");
@@ -87,7 +88,7 @@ public sealed class BrandsController : BaseApiController
         [FromBody] UpdateBrandRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _brandService.UpdateBrandAsync(id, request.ToDto(), cancellationToken);
+        var result = await _brandService.UpdateBrandAsync((BrandId)id, request.ToDto(), cancellationToken);
         return OkResponse(result);
     }
 
@@ -100,7 +101,7 @@ public sealed class BrandsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteBrand(Guid id, CancellationToken cancellationToken)
     {
-        await _brandService.DeleteBrandAsync(id, cancellationToken);
+        await _brandService.DeleteBrandAsync((BrandId)id, cancellationToken);
         return OkResponse("Brand deleted successfully");
     }
 }

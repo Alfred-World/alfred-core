@@ -24,6 +24,9 @@ public sealed class AccountOrder : BaseEntity<AccountOrderId>, IHasCreationTime,
     public string? OrderNote { get; private set; }
     public string? WarrantyIssueNote { get; private set; }
     public AccountOrderStatus Status { get; private set; } = AccountOrderStatus.Active;
+    public PaymentStatus PaymentStatus { get; private set; } = PaymentStatus.Pending;
+    public bool IsTrial { get; private set; }
+    public decimal RefundAmount { get; private set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
@@ -48,7 +51,8 @@ public sealed class AccountOrder : BaseEntity<AccountOrderId>, IHasCreationTime,
         decimal referralCommissionPercentSnapshot,
         DateTime purchaseDateUtc,
         string? orderNote,
-        ReplicatedUserId? soldByUserId = null)
+        ReplicatedUserId? soldByUserId = null,
+        bool isTrial = false)
     {
         var normalizedPrice = Math.Max(0m, decimal.Round(unitPriceSnapshot, 2, MidpointRounding.AwayFromZero));
         var normalizedWarrantyDays = Math.Max(0, warrantyDaysSnapshot);
@@ -80,6 +84,9 @@ public sealed class AccountOrder : BaseEntity<AccountOrderId>, IHasCreationTime,
             WarrantyExpiry = purchaseDateUtc.AddDays(normalizedWarrantyDays),
             OrderNote = orderNote,
             Status = AccountOrderStatus.Active,
+            PaymentStatus = PaymentStatus.Pending,
+            IsTrial = isTrial,
+            RefundAmount = 0m,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -107,5 +114,43 @@ public sealed class AccountOrder : BaseEntity<AccountOrderId>, IHasCreationTime,
     {
         Status = AccountOrderStatus.Refunded;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void ConfirmPayment()
+    {
+        PaymentStatus = PaymentStatus.Paid;
+        IsTrial = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Apply a refund to this order. Returns the commission amount that should be clawed back.
+    /// </summary>
+    public decimal ApplyRefund(decimal refundAmount)
+    {
+        var normalizedRefund = Math.Max(0m, decimal.Round(refundAmount, 2, MidpointRounding.AwayFromZero));
+        var maxRefundable = UnitPriceSnapshot - RefundAmount;
+        normalizedRefund = Math.Min(normalizedRefund, maxRefundable);
+
+        RefundAmount += normalizedRefund;
+
+        if (RefundAmount >= UnitPriceSnapshot)
+        {
+            PaymentStatus = PaymentStatus.FullyRefunded;
+            Status = AccountOrderStatus.Refunded;
+        }
+        else
+        {
+            PaymentStatus = PaymentStatus.PartiallyRefunded;
+        }
+
+        // Calculate commission to claw back proportionally
+        var commissionClawback = ReferralCommissionAmountSnapshot > 0 && UnitPriceSnapshot > 0
+            ? decimal.Round(normalizedRefund * ReferralCommissionPercentSnapshot / 100m, 2,
+                MidpointRounding.AwayFromZero)
+            : 0m;
+
+        UpdatedAt = DateTime.UtcNow;
+        return commissionClawback;
     }
 }

@@ -76,7 +76,7 @@ public sealed class AttachmentService : IAttachmentService
         return result;
     }
 
-    public async Task DeleteAttachmentAsync(Guid attachmentId, CancellationToken cancellationToken = default)
+    public async Task DeleteAttachmentAsync(AttachmentId attachmentId, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Attachments.GetByIdAsync(attachmentId, cancellationToken);
 
@@ -104,7 +104,7 @@ public sealed class AttachmentService : IAttachmentService
     private static AttachmentDto ToDto(Attachment entity, string downloadUrl)
     {
         return new AttachmentDto(
-            entity.Id.Value,
+            entity.Id,
             entity.TargetId,
             entity.TargetType,
             entity.FileName,

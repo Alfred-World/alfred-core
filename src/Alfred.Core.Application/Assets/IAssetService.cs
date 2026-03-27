@@ -10,27 +10,27 @@ public interface IAssetService
     Task<PageResult<AssetDto>> GetAllAssetsAsync(QueryRequest query,
         CancellationToken cancellationToken = default);
 
-    Task<AssetDto?> GetAssetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<AssetDto?> GetAssetByIdAsync(AssetId id, CancellationToken cancellationToken = default);
 
     Task<AssetDto> CreateAssetAsync(CreateAssetDto dto, CancellationToken cancellationToken = default);
 
-    Task<AssetDto> UpdateAssetAsync(Guid id, UpdateAssetDto dto, CancellationToken cancellationToken = default);
+    Task<AssetDto> UpdateAssetAsync(AssetId id, UpdateAssetDto dto, CancellationToken cancellationToken = default);
 
-    Task DeleteAssetAsync(Guid id, CancellationToken cancellationToken = default);
+    Task DeleteAssetAsync(AssetId id, CancellationToken cancellationToken = default);
 
     #endregion
 
     #region Asset Logs
 
-    Task<PageResult<AssetLogDto>> GetAssetLogsAsync(Guid assetId, QueryRequest query,
+    Task<PageResult<AssetLogDto>> GetAssetLogsAsync(AssetId assetId, QueryRequest query,
         CancellationToken cancellationToken = default);
 
-    Task<AssetLogDto?> GetAssetLogByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<AssetLogDto?> GetAssetLogByIdAsync(AssetLogId id, CancellationToken cancellationToken = default);
 
-    Task<AssetLogDto> CreateAssetLogAsync(Guid assetId, CreateAssetLogDto dto,
+    Task<AssetLogDto> CreateAssetLogAsync(AssetId assetId, CreateAssetLogDto dto,
         CancellationToken cancellationToken = default);
 
-    Task DeleteAssetLogAsync(Guid id, CancellationToken cancellationToken = default);
+    Task DeleteAssetLogAsync(AssetLogId id, CancellationToken cancellationToken = default);
 
     #endregion
 }

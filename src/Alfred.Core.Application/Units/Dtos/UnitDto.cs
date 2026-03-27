@@ -24,7 +24,7 @@ public sealed record CreateUnitDto(
     string Name,
     string? Symbol,
     UnitCategory Category,
-    Guid? BaseUnitId,
+    UnitId? BaseUnitId,
     decimal ConversionRate,
     UnitStatus Status,
     string? Description
@@ -34,7 +34,7 @@ public sealed record UpdateUnitDto(
     string Name,
     string? Symbol,
     UnitCategory Category,
-    Guid? BaseUnitId,
+    UnitId? BaseUnitId,
     decimal ConversionRate,
     UnitStatus Status,
     string? Description

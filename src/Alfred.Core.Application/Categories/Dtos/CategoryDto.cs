@@ -20,7 +20,7 @@ public sealed record CreateCategoryDto(
     string Name,
     string? Icon,
     CategoryType Type,
-    Guid? ParentId,
+    CategoryId? ParentId,
     string FormSchema
 );
 
@@ -28,7 +28,7 @@ public sealed record UpdateCategoryDto(
     string Name,
     string? Icon,
     CategoryType Type,
-    Guid? ParentId,
+    CategoryId? ParentId,
     string FormSchema
 );
 

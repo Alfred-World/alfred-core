@@ -11,5 +11,5 @@ public enum AccountProductType
     Microsoft = 7,
     Apple = 8,
     Facebook = 9,
-    Amazon = 10,
+    Amazon = 10
 }

@@ -16,6 +16,12 @@ public interface IUnitOfWork : IDisposable
     IAccountCloneRepository AccountClones { get; }
     IAccountOrderRepository AccountOrders { get; }
     ISourceAccountRepository SourceAccounts { get; }
+    ICommissionRepository Commissions { get; }
+    ICommissionTransactionRepository CommissionTransactions { get; }
+    IOrderAttachmentRepository OrderAttachments { get; }
+    ISalesBonusTierRepository SalesBonusTiers { get; }
+    IMemberMonthlySalesSummaryRepository MemberMonthlySalesSummaries { get; }
+    ISalesBonusTransactionRepository SalesBonusTransactions { get; }
     IAssetRepository Assets { get; }
     IAssetLogRepository AssetLogs { get; }
     IAttachmentRepository Attachments { get; }

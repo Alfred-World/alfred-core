@@ -4,7 +4,7 @@ namespace Alfred.Core.Application.Assets.Dtos;
 
 public sealed record CreateAssetLogDto(
     AssetLogEventType EventType,
-    Guid? BrandId,
+    BrandId? BrandId,
     DateTimeOffset PerformedAt,
     decimal Cost,
     decimal Quantity,

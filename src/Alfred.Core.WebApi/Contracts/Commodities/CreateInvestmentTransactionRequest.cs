@@ -17,7 +17,8 @@ public sealed record CreateInvestmentTransactionRequest
 
     public CreateInvestmentTransactionDto ToDto()
     {
-        return new CreateInvestmentTransactionDto(TransactionType, TransactionDate, Quantity, UnitId, PricePerUnit,
+        return new CreateInvestmentTransactionDto(TransactionType, TransactionDate, Quantity, (UnitId)UnitId,
+            PricePerUnit,
             TotalAmount, FeeAmount,
             FinanceTxnId, Notes);
     }

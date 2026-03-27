@@ -5,5 +5,5 @@ public sealed record UpdateAccessRoleDto(
     string? Icon = null,
     bool IsImmutable = false,
     bool IsSystem = false,
-    List<Guid>? Permissions = null
+    List<AccessPermissionId>? Permissions = null
 );

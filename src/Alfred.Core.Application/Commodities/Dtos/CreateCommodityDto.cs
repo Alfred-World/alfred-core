@@ -6,6 +6,6 @@ public sealed record CreateCommodityDto(
     string Code,
     string Name,
     CommodityAssetClass AssetClass,
-    Guid? DefaultUnitId,
+    UnitId? DefaultUnitId,
     string? Description
 );

@@ -50,7 +50,7 @@ public sealed class AssetsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAssetById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _assetService.GetAssetByIdAsync(id, cancellationToken);
+        var result = await _assetService.GetAssetByIdAsync((AssetId)id, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Asset not found");
@@ -87,7 +87,7 @@ public sealed class AssetsController : BaseApiController
         [FromBody] UpdateAssetRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _assetService.UpdateAssetAsync(id, request.ToDto(), cancellationToken);
+        var result = await _assetService.UpdateAssetAsync((AssetId)id, request.ToDto(), cancellationToken);
         return OkResponse(result);
     }
 
@@ -100,7 +100,7 @@ public sealed class AssetsController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAsset(Guid id, CancellationToken cancellationToken)
     {
-        await _assetService.DeleteAssetAsync(id, cancellationToken);
+        await _assetService.DeleteAssetAsync((AssetId)id, cancellationToken);
         return OkResponse("Asset deleted successfully");
     }
 
@@ -121,7 +121,7 @@ public sealed class AssetsController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _assetService.GetAssetLogsAsync(assetId, queryRequest.ToQueryRequest(), cancellationToken);
+            await _assetService.GetAssetLogsAsync((AssetId)assetId, queryRequest.ToQueryRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 
@@ -137,7 +137,7 @@ public sealed class AssetsController : BaseApiController
         Guid logId,
         CancellationToken cancellationToken)
     {
-        var result = await _assetService.GetAssetLogByIdAsync(logId, cancellationToken);
+        var result = await _assetService.GetAssetLogByIdAsync((AssetLogId)logId, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Asset log not found");
@@ -159,7 +159,7 @@ public sealed class AssetsController : BaseApiController
         [FromBody] CreateAssetLogRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _assetService.CreateAssetLogAsync(assetId, request.ToDto(), cancellationToken);
+        var result = await _assetService.CreateAssetLogAsync((AssetId)assetId, request.ToDto(), cancellationToken);
         return CreatedResponse(result);
     }
 
@@ -175,7 +175,7 @@ public sealed class AssetsController : BaseApiController
         Guid logId,
         CancellationToken cancellationToken)
     {
-        await _assetService.DeleteAssetLogAsync(logId, cancellationToken);
+        await _assetService.DeleteAssetLogAsync((AssetLogId)logId, cancellationToken);
         return OkResponse("Asset log deleted successfully");
     }
 

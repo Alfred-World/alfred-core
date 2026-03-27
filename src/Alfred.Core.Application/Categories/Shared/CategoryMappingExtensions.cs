@@ -8,12 +8,12 @@ public static class CategoryMappingExtensions
     public static CategoryDto ToDto(this Category category)
     {
         return new CategoryDto(
-            category.Id.Value,
+            category.Id,
             category.Code,
             category.Name,
             category.Icon,
             category.Type,
-            category.ParentId?.Value,
+            category.ParentId,
             category.Parent?.Name,
             category.FormSchema,
             category.SubCategories.Count,
@@ -24,12 +24,12 @@ public static class CategoryMappingExtensions
     public static CategoryTreeNodeDto ToTreeNode(this Category category)
     {
         return new CategoryTreeNodeDto(
-            category.Id.Value,
+            category.Id,
             category.Code,
             category.Name,
             category.Icon,
             category.Type,
-            category.ParentId?.Value,
+            category.ParentId,
             category.SubCategories.Count,
             category.SubCategories.Count > 0
         );

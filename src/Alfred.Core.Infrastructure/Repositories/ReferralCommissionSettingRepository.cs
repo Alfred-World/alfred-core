@@ -17,6 +17,8 @@ public sealed class ReferralCommissionSettingRepository
     public async Task<ReferralCommissionSetting?> GetCurrentAsync(CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .Include(x => x.Histories.OrderByDescending(h => h.CreatedAt))
+            .ThenInclude(h => h.ChangedByUser)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }

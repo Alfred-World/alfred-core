@@ -34,11 +34,11 @@ public sealed class UnitService : BaseApplicationService, IUnitService
             cancellationToken);
     }
 
-    public async Task<UnitDto?> GetUnitByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<UnitDto?> GetUnitByIdAsync(UnitId id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.Units.GetQueryable([u => u.BaseUnit!, u => u.DerivedUnits])
-                .Where(u => u.Id == (UnitId)id),
+                .Where(u => u.Id == id),
             cancellationToken);
 
         return entity?.ToDto();
@@ -68,7 +68,7 @@ public sealed class UnitService : BaseApplicationService, IUnitService
             dto.Name,
             dto.Category,
             dto.Symbol,
-            dto.BaseUnitId.HasValue ? (UnitId?)dto.BaseUnitId.Value : null,
+            dto.BaseUnitId,
             dto.ConversionRate,
             dto.Status,
             dto.Description);
@@ -76,14 +76,14 @@ public sealed class UnitService : BaseApplicationService, IUnitService
         await _unitOfWork.Units.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetUnitByIdAsync(entity.Id.Value, cancellationToken))!;
+        return (await GetUnitByIdAsync(entity.Id, cancellationToken))!;
     }
 
-    public async Task<UnitDto> UpdateUnitAsync(Guid id, UpdateUnitDto dto,
+    public async Task<UnitDto> UpdateUnitAsync(UnitId id, UpdateUnitDto dto,
         CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
-            _unitOfWork.Units.GetQueryable().Where(u => u.Id == (UnitId)id),
+            _unitOfWork.Units.GetQueryable().Where(u => u.Id == id),
             cancellationToken);
 
         if (entity is null)
@@ -118,7 +118,7 @@ public sealed class UnitService : BaseApplicationService, IUnitService
             dto.Name,
             dto.Symbol,
             dto.Category,
-            dto.BaseUnitId.HasValue ? (UnitId?)dto.BaseUnitId.Value : null,
+            dto.BaseUnitId,
             dto.ConversionRate,
             dto.Status,
             dto.Description);
@@ -126,14 +126,14 @@ public sealed class UnitService : BaseApplicationService, IUnitService
         _unitOfWork.Units.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetUnitByIdAsync(entity.Id.Value, cancellationToken))!;
+        return (await GetUnitByIdAsync(entity.Id, cancellationToken))!;
     }
 
-    public async Task DeleteUnitAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteUnitAsync(UnitId id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.Units.GetQueryable([u => u.DerivedUnits])
-                .Where(u => u.Id == (UnitId)id),
+                .Where(u => u.Id == id),
             cancellationToken);
 
         if (entity is null)
@@ -178,17 +178,17 @@ public sealed class UnitService : BaseApplicationService, IUnitService
             cancellationToken);
     }
 
-    public async Task<ConvertResultDto> ConvertAsync(Guid fromUnitId, Guid toUnitId, decimal value,
+    public async Task<ConvertResultDto> ConvertAsync(UnitId fromUnitId, UnitId toUnitId, decimal value,
         CancellationToken cancellationToken = default)
     {
         var fromUnit = await _executor.FirstOrDefaultAsync(
             _unitOfWork.Units.GetQueryable([u => u.BaseUnit!])
-                .Where(u => u.Id == (UnitId)fromUnitId),
+                .Where(u => u.Id == fromUnitId),
             cancellationToken);
 
         var toUnit = await _executor.FirstOrDefaultAsync(
             _unitOfWork.Units.GetQueryable([u => u.BaseUnit!])
-                .Where(u => u.Id == (UnitId)toUnitId),
+                .Where(u => u.Id == toUnitId),
             cancellationToken);
 
         if (fromUnit is null)

@@ -29,13 +29,12 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
             cancellationToken);
     }
 
-    public async Task<AccessUserDto> AddRolesToUserAsync(Guid userId, IEnumerable<Guid> roleIds,
+    public async Task<AccessUserDto> AddRolesToUserAsync(ReplicatedUserId userId, IEnumerable<AccessRoleId> roleIds,
         CancellationToken cancellationToken = default)
     {
-        var typedUserId = (ReplicatedUserId)userId;
         var user = await _executor.FirstOrDefaultAsync(
             _unitOfWork.ReplicatedUsers.GetQueryable([x => x.UserRoles])
-                .Where(x => x.Id == typedUserId),
+                .Where(x => x.Id == userId),
             cancellationToken) ?? throw new KeyNotFoundException($"User with ID {userId} not found.");
 
         var resolvedRoleIds = await ResolveRoleIdsAsync(roleIds, cancellationToken);
@@ -53,16 +52,16 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
                ?? throw new KeyNotFoundException($"User with ID {userId} not found after update.");
     }
 
-    public async Task<AccessUserDto> RemoveRolesFromUserAsync(Guid userId, IEnumerable<Guid> roleIds,
+    public async Task<AccessUserDto> RemoveRolesFromUserAsync(ReplicatedUserId userId,
+        IEnumerable<AccessRoleId> roleIds,
         CancellationToken cancellationToken = default)
     {
-        var typedUserId = (ReplicatedUserId)userId;
         var user = await _executor.FirstOrDefaultAsync(
             _unitOfWork.ReplicatedUsers.GetQueryable([x => x.UserRoles])
-                .Where(x => x.Id == typedUserId),
+                .Where(x => x.Id == userId),
             cancellationToken) ?? throw new KeyNotFoundException($"User with ID {userId} not found.");
 
-        var removeRoleIds = roleIds.Select(x => (AccessRoleId)x).Distinct().ToHashSet();
+        var removeRoleIds = roleIds.Distinct().ToHashSet();
         if (removeRoleIds.Count > 0)
         {
             var linksToRemove = user.UserRoles.Where(x => removeRoleIds.Contains(x.RoleId)).ToList();
@@ -83,7 +82,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
     {
         return new AccessUserDto
         {
-            Id = user.Id.Value,
+            Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             FullName = user.FullName,
@@ -94,7 +93,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
                 .Where(ur => ur.Role != null)
                 .Select(ur => new AccessRoleDto
                 {
-                    Id = ur.Role.Id.Value,
+                    Id = ur.Role.Id,
                     Name = ur.Role.Name,
                     NormalizedName = ur.Role.NormalizedName,
                     Icon = ur.Role.Icon,
@@ -115,7 +114,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
             .Where(x => x.Id == userId)
             .Select(user => new AccessUserDto
             {
-                Id = user.Id.Value,
+                Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
                 FullName = user.FullName,
@@ -124,7 +123,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
                 UpdatedAt = user.UpdatedAt,
                 Roles = user.UserRoles.Select(ur => new AccessRoleDto
                 {
-                    Id = ur.Role.Id.Value,
+                    Id = ur.Role.Id,
                     Name = ur.Role.Name,
                     NormalizedName = ur.Role.NormalizedName,
                     Icon = ur.Role.Icon,
@@ -140,10 +139,10 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
         return await _executor.FirstOrDefaultAsync(_executor.AsNoTracking(userQuery), cancellationToken);
     }
 
-    private async Task<List<AccessRoleId>> ResolveRoleIdsAsync(IEnumerable<Guid> roleIds,
+    private async Task<List<AccessRoleId>> ResolveRoleIdsAsync(IEnumerable<AccessRoleId> roleIds,
         CancellationToken cancellationToken)
     {
-        var typedIds = roleIds.Select(x => (AccessRoleId)x).Distinct().ToList();
+        var typedIds = roleIds.Distinct().ToList();
         if (typedIds.Count == 0)
         {
             return [];

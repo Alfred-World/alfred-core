@@ -32,12 +32,12 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
             cancellationToken);
     }
 
-    public async Task<SourceAccountDto?> GetSourceAccountByIdAsync(Guid id,
+    public async Task<SourceAccountDto?> GetSourceAccountByIdAsync(SourceAccountId id,
         CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.SourceAccounts.GetQueryable([sa => sa.Clones])
-                .Where(sa => sa.Id == (SourceAccountId)id),
+                .Where(sa => sa.Id == id),
             cancellationToken);
 
         return entity?.ToDto();
@@ -61,12 +61,12 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
         return entity.ToDto();
     }
 
-    public async Task<SourceAccountDto> UpdateSourceAccountAsync(Guid id, UpdateSourceAccountDto dto,
+    public async Task<SourceAccountDto> UpdateSourceAccountAsync(SourceAccountId id, UpdateSourceAccountDto dto,
         CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.SourceAccounts.GetQueryable([sa => sa.Clones])
-                .Where(sa => sa.Id == (SourceAccountId)id),
+                .Where(sa => sa.Id == id),
             cancellationToken);
 
         if (entity is null)
@@ -88,12 +88,12 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
         return entity.ToDto();
     }
 
-    public async Task<SourceAccountDto> SetActiveStatusAsync(Guid id, bool isActive,
+    public async Task<SourceAccountDto> SetActiveStatusAsync(SourceAccountId id, bool isActive,
         CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.SourceAccounts.GetQueryable([sa => sa.Clones])
-                .Where(sa => sa.Id == (SourceAccountId)id),
+                .Where(sa => sa.Id == id),
             cancellationToken);
 
         if (entity is null)
@@ -115,11 +115,12 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
         return entity.ToDto();
     }
 
-    public async Task<SourceAccountDto> DeleteSourceAccountAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<SourceAccountDto> DeleteSourceAccountAsync(SourceAccountId id,
+        CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.SourceAccounts.GetQueryable()
-                .Where(sa => sa.Id == (SourceAccountId)id),
+                .Where(sa => sa.Id == id),
             cancellationToken);
 
         if (entity is null)

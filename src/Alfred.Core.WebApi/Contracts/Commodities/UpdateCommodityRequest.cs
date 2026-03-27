@@ -12,6 +12,6 @@ public sealed record UpdateCommodityRequest
 
     public UpdateCommodityDto ToDto()
     {
-        return new UpdateCommodityDto(Name, AssetClass, DefaultUnitId, Description);
+        return new UpdateCommodityDto(Name, AssetClass, (UnitId?)DefaultUnitId, Description);
     }
 }

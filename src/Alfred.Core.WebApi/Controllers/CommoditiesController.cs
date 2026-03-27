@@ -50,7 +50,7 @@ public sealed class CommoditiesController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCommodityById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _commodityService.GetCommodityByIdAsync(id, cancellationToken);
+        var result = await _commodityService.GetCommodityByIdAsync((CommodityId)id, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Commodity not found");
@@ -87,7 +87,7 @@ public sealed class CommoditiesController : BaseApiController
         [FromBody] UpdateCommodityRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _commodityService.UpdateCommodityAsync(id, request.ToDto(), cancellationToken);
+        var result = await _commodityService.UpdateCommodityAsync((CommodityId)id, request.ToDto(), cancellationToken);
         return OkResponse(result);
     }
 
@@ -100,7 +100,7 @@ public sealed class CommoditiesController : BaseApiController
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCommodity(Guid id, CancellationToken cancellationToken)
     {
-        await _commodityService.DeleteCommodityAsync(id, cancellationToken);
+        await _commodityService.DeleteCommodityAsync((CommodityId)id, cancellationToken);
         return OkResponse("Commodity deleted successfully");
     }
 
@@ -121,7 +121,8 @@ public sealed class CommoditiesController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _commodityService.GetTransactionsAsync(commodityId, queryRequest.ToQueryRequest(), cancellationToken);
+            await _commodityService.GetTransactionsAsync((CommodityId)commodityId, queryRequest.ToQueryRequest(),
+                cancellationToken);
         return OkPaginatedResponse(result);
     }
 
@@ -135,7 +136,8 @@ public sealed class CommoditiesController : BaseApiController
     public async Task<IActionResult> GetTransactionById(Guid commodityId, Guid transactionId,
         CancellationToken cancellationToken)
     {
-        var result = await _commodityService.GetTransactionByIdAsync(transactionId, cancellationToken);
+        var result =
+            await _commodityService.GetTransactionByIdAsync((InvestmentTransactionId)transactionId, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Transaction not found");
@@ -156,7 +158,9 @@ public sealed class CommoditiesController : BaseApiController
         [FromBody] CreateInvestmentTransactionRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await _commodityService.CreateTransactionAsync(commodityId, request.ToDto(), cancellationToken);
+        var result =
+            await _commodityService.CreateTransactionAsync((CommodityId)commodityId, request.ToDto(),
+                cancellationToken);
         return CreatedResponse(result);
     }
 
@@ -170,7 +174,7 @@ public sealed class CommoditiesController : BaseApiController
     public async Task<IActionResult> DeleteTransaction(Guid commodityId, Guid transactionId,
         CancellationToken cancellationToken)
     {
-        await _commodityService.DeleteTransactionAsync(transactionId, cancellationToken);
+        await _commodityService.DeleteTransactionAsync((InvestmentTransactionId)transactionId, cancellationToken);
         return OkResponse("Transaction deleted successfully");
     }
 

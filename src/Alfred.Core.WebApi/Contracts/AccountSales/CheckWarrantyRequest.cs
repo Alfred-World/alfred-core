@@ -9,6 +9,6 @@ public sealed record CheckWarrantyRequest
 
     public CheckWarrantyDto ToDto()
     {
-        return new CheckWarrantyDto(ProductId, Username);
+        return new CheckWarrantyDto((ProductId?)ProductId, Username);
     }
 }

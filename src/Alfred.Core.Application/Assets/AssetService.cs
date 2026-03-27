@@ -28,11 +28,11 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             a => a.ToDto(), cancellationToken);
     }
 
-    public async Task<AssetDto?> GetAssetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<AssetDto?> GetAssetByIdAsync(AssetId id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.Assets.GetQueryable([a => a.Category!, a => a.Brand!])
-                .Where(a => a.Id == (AssetId)id),
+                .Where(a => a.Id == id),
             cancellationToken);
 
         return entity?.ToDto();
@@ -43,8 +43,8 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         var status = dto.Status;
         var entity = Asset.Create(
             dto.Name,
-            dto.CategoryId.HasValue ? (CategoryId?)dto.CategoryId.Value : null,
-            dto.BrandId.HasValue ? (BrandId?)dto.BrandId.Value : null,
+            dto.CategoryId,
+            dto.BrandId,
             dto.PurchaseDate,
             dto.InitialCost,
             dto.WarrantyExpiryDate,
@@ -58,10 +58,10 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         return entity.ToDto();
     }
 
-    public async Task<AssetDto> UpdateAssetAsync(Guid id, UpdateAssetDto dto,
+    public async Task<AssetDto> UpdateAssetAsync(AssetId id, UpdateAssetDto dto,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.Assets.GetByIdAsync((AssetId)id, cancellationToken);
+        var entity = await _unitOfWork.Assets.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Asset with ID {id} not found.");
@@ -70,8 +70,8 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         var status = dto.Status;
         entity.Update(
             dto.Name,
-            dto.CategoryId.HasValue ? (CategoryId?)dto.CategoryId.Value : null,
-            dto.BrandId.HasValue ? (BrandId?)dto.BrandId.Value : null,
+            dto.CategoryId,
+            dto.BrandId,
             dto.PurchaseDate,
             dto.InitialCost,
             dto.WarrantyExpiryDate,
@@ -85,9 +85,9 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         return entity.ToDto();
     }
 
-    public async Task DeleteAssetAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAssetAsync(AssetId id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.Assets.GetByIdAsync((AssetId)id, cancellationToken);
+        var entity = await _unitOfWork.Assets.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Asset with ID {id} not found.");
@@ -101,7 +101,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     #region Asset Logs
 
-    public async Task<PageResult<AssetLogDto>> GetAssetLogsAsync(Guid assetId, QueryRequest query,
+    public async Task<PageResult<AssetLogDto>> GetAssetLogsAsync(AssetId assetId, QueryRequest query,
         CancellationToken cancellationToken = default)
     {
         // Pre-filter by assetId; combined with DSL filter inside GetPagedAsync
@@ -109,25 +109,25 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             _unitOfWork.AssetLogs,
             query,
             AssetLogFieldMap.Instance,
-            l => l.AssetId == (AssetId)assetId,
+            l => l.AssetId == assetId,
             l => l.ToDto(),
             cancellationToken);
     }
 
-    public async Task<AssetLogDto?> GetAssetLogByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<AssetLogDto?> GetAssetLogByIdAsync(AssetLogId id, CancellationToken cancellationToken = default)
     {
         var entity = await _executor.FirstOrDefaultAsync(
             _unitOfWork.AssetLogs.GetQueryable([l => l.Brand!])
-                .Where(l => l.Id == (AssetLogId)id),
+                .Where(l => l.Id == id),
             cancellationToken);
 
         return entity?.ToDto();
     }
 
-    public async Task<AssetLogDto> CreateAssetLogAsync(Guid assetId, CreateAssetLogDto dto,
+    public async Task<AssetLogDto> CreateAssetLogAsync(AssetId assetId, CreateAssetLogDto dto,
         CancellationToken cancellationToken = default)
     {
-        var assetExists = await _unitOfWork.Assets.ExistsAsync((AssetId)assetId, cancellationToken);
+        var assetExists = await _unitOfWork.Assets.ExistsAsync(assetId, cancellationToken);
         if (!assetExists)
         {
             throw new KeyNotFoundException($"Asset with ID {assetId} not found.");
@@ -136,7 +136,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         var entity = AssetLog.Create(
             assetId,
             dto.EventType,
-            dto.BrandId.HasValue ? (BrandId?)dto.BrandId.Value : null,
+            dto.BrandId,
             dto.PerformedAt,
             dto.Cost,
             dto.Quantity,
@@ -150,9 +150,9 @@ public sealed class AssetService : BaseApplicationService, IAssetService
         return entity.ToDto();
     }
 
-    public async Task DeleteAssetLogAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAssetLogAsync(AssetLogId id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.AssetLogs.GetByIdAsync((AssetLogId)id, cancellationToken);
+        var entity = await _unitOfWork.AssetLogs.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Asset log with ID {id} not found.");

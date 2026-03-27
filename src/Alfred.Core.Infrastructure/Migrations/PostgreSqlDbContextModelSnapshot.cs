@@ -251,6 +251,11 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<bool>("IsTrial")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<Guid>("MemberId")
                         .HasColumnType("uuid");
 
@@ -261,6 +266,13 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.Property<string>("OrderNote")
                         .HasColumnType("text");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -290,6 +302,11 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.Property<Guid?>("ReferrerMemberId")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("RefundAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(15,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<Guid?>("SoldByUserId")
                         .HasColumnType("uuid");
@@ -327,6 +344,8 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.HasIndex("OrderCode")
                         .IsUnique();
+
+                    b.HasIndex("PaymentStatus");
 
                     b.HasIndex("ProductId");
 
@@ -664,6 +683,106 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.ToTable("categories", (string)null);
                 });
 
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.Commission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("generate_uuid_v7()");
+
+                    b.Property<decimal>("AvailableBalance")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(15,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalEarned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(15,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<decimal>("TotalPaidOut")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(15,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId")
+                        .IsUnique();
+
+                    b.ToTable("commissions", (string)null);
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.CommissionTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("generate_uuid_v7()");
+
+                    b.Property<Guid?>("AccountOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<decimal>("BalanceAfter")
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("EvidenceObjectKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ProcessedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountOrderId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("ProcessedByUserId");
+
+                    b.HasIndex("TransactionType");
+
+                    b.ToTable("commission_transactions", (string)null);
+                });
+
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Commodity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -826,6 +945,98 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.HasIndex("SourceId");
 
                     b.ToTable("members", (string)null);
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.MemberMonthlySalesSummary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("generate_uuid_v7()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid?>("HighestTierReachedId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<Guid>("SoldByMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalBonusEarned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(15,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HighestTierReachedId");
+
+                    b.HasIndex("SoldByMemberId", "Year", "Month")
+                        .IsUnique();
+
+                    b.ToTable("member_monthly_sales_summaries", (string)null);
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.OrderAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("generate_uuid_v7()");
+
+                    b.Property<Guid>("AccountOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("ObjectKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountOrderId");
+
+                    b.ToTable("order_attachments", (string)null);
                 });
 
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Product", b =>
@@ -1007,6 +1218,99 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasDatabaseName("IX_replicated_users_UserName");
 
                     b.ToTable("replicated_users", (string)null);
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.SalesBonusTier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("generate_uuid_v7()");
+
+                    b.Property<decimal>("BonusAmount")
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("OrderThreshold")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderThreshold")
+                        .IsUnique();
+
+                    b.ToTable("sales_bonus_tiers", (string)null);
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.SalesBonusTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("generate_uuid_v7()");
+
+                    b.Property<decimal>("BonusAmountSnapshot")
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<int>("OrderCountAtTrigger")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderThresholdSnapshot")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ProcessedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SalesBonusTierId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SoldByMemberId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedByUserId");
+
+                    b.HasIndex("SalesBonusTierId");
+
+                    b.HasIndex("SoldByMemberId");
+
+                    b.HasIndex("SoldByMemberId", "Year", "Month");
+
+                    b.ToTable("sales_bonus_transactions", (string)null);
                 });
 
             modelBuilder.Entity("Alfred.Core.Domain.Entities.SourceAccount", b =>
@@ -1316,6 +1620,42 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.Commission", b =>
+                {
+                    b.HasOne("Alfred.Core.Domain.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.CommissionTransaction", b =>
+                {
+                    b.HasOne("Alfred.Core.Domain.Entities.AccountOrder", "AccountOrder")
+                        .WithMany()
+                        .HasForeignKey("AccountOrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Alfred.Core.Domain.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Alfred.Core.Domain.Entities.ReplicatedUser", "ProcessedByUser")
+                        .WithMany()
+                        .HasForeignKey("ProcessedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AccountOrder");
+
+                    b.Navigation("Member");
+
+                    b.Navigation("ProcessedByUser");
+                });
+
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Commodity", b =>
                 {
                     b.HasOne("Alfred.Core.Domain.Entities.Unit", "DefaultUnit")
@@ -1356,6 +1696,35 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.Navigation("Commodity");
                 });
 
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.MemberMonthlySalesSummary", b =>
+                {
+                    b.HasOne("Alfred.Core.Domain.Entities.SalesBonusTier", "HighestTierReached")
+                        .WithMany()
+                        .HasForeignKey("HighestTierReachedId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Alfred.Core.Domain.Entities.Member", "SoldByMember")
+                        .WithMany()
+                        .HasForeignKey("SoldByMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HighestTierReached");
+
+                    b.Navigation("SoldByMember");
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.OrderAttachment", b =>
+                {
+                    b.HasOne("Alfred.Core.Domain.Entities.AccountOrder", "AccountOrder")
+                        .WithMany()
+                        .HasForeignKey("AccountOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccountOrder");
+                });
+
             modelBuilder.Entity("Alfred.Core.Domain.Entities.ProductVariant", b =>
                 {
                     b.HasOne("Alfred.Core.Domain.Entities.Product", "Product")
@@ -1383,6 +1752,32 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.Navigation("ChangedByUser");
 
                     b.Navigation("ReferralCommissionSetting");
+                });
+
+            modelBuilder.Entity("Alfred.Core.Domain.Entities.SalesBonusTransaction", b =>
+                {
+                    b.HasOne("Alfred.Core.Domain.Entities.ReplicatedUser", "ProcessedByUser")
+                        .WithMany()
+                        .HasForeignKey("ProcessedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Alfred.Core.Domain.Entities.SalesBonusTier", "SalesBonusTier")
+                        .WithMany()
+                        .HasForeignKey("SalesBonusTierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Alfred.Core.Domain.Entities.Member", "SoldByMember")
+                        .WithMany()
+                        .HasForeignKey("SoldByMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProcessedByUser");
+
+                    b.Navigation("SalesBonusTier");
+
+                    b.Navigation("SoldByMember");
                 });
 
             modelBuilder.Entity("Alfred.Core.Domain.Entities.Unit", b =>

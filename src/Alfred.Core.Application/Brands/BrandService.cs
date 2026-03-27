@@ -22,11 +22,11 @@ public sealed class BrandService : BaseApplicationService, IBrandService
     }
 
     public async Task<PageResult<BrandDto>> GetAllBrandsAsync(QueryRequest query,
-        Guid? categoryId = null,
+        CategoryId? categoryId = null,
         CancellationToken cancellationToken = default)
     {
         Expression<Func<Brand, bool>>? preFilter = categoryId.HasValue
-            ? b => b.BrandCategories.Any(bc => bc.CategoryId == (CategoryId)categoryId.Value)
+            ? b => b.BrandCategories.Any(bc => bc.CategoryId == categoryId.Value)
             : null;
 
         return await GetPagedAsync(
@@ -39,7 +39,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             cancellationToken);
     }
 
-    public async Task<BrandDto?> GetBrandByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<BrandDto?> GetBrandByIdAsync(BrandId id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Brands.GetByIdWithCategoriesAsync(id, cancellationToken);
         return entity?.ToDto();
@@ -57,7 +57,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
         if (dto.CategoryIds is { Count: > 0 })
         {
             var brandCategories = dto.CategoryIds
-                .Select(categoryId => BrandCategory.Create(entity.Id, (CategoryId)categoryId))
+                .Select(categoryId => BrandCategory.Create(entity.Id, categoryId))
                 .ToList();
             entity.UpdateCategories(brandCategories);
         }
@@ -66,10 +66,10 @@ public sealed class BrandService : BaseApplicationService, IBrandService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Reload with navigation properties
-        return (await GetBrandByIdAsync(entity.Id.Value, cancellationToken))!;
+        return (await GetBrandByIdAsync(entity.Id, cancellationToken))!;
     }
 
-    public async Task<BrandDto> UpdateBrandAsync(Guid id, UpdateBrandDto dto,
+    public async Task<BrandDto> UpdateBrandAsync(BrandId id, UpdateBrandDto dto,
         CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Brands.GetByIdWithCategoriesAsync(id, cancellationToken);
@@ -91,7 +91,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
         {
             entity.BrandCategories.Clear();
             var brandCategories = dto.CategoryIds
-                .Select(categoryId => BrandCategory.Create(entity.Id, (CategoryId)categoryId))
+                .Select(categoryId => BrandCategory.Create(entity.Id, categoryId))
                 .ToList();
             entity.UpdateCategories(brandCategories);
         }
@@ -100,10 +100,10 @@ public sealed class BrandService : BaseApplicationService, IBrandService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Reload with navigation properties
-        return (await GetBrandByIdAsync(entity.Id.Value, cancellationToken))!;
+        return (await GetBrandByIdAsync(entity.Id, cancellationToken))!;
     }
 
-    public async Task DeleteBrandAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteBrandAsync(BrandId id, CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Brands.GetByIdAsync(id, cancellationToken);
         if (entity is null)

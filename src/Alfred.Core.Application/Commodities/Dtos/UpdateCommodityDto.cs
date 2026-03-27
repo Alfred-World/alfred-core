@@ -5,6 +5,6 @@ namespace Alfred.Core.Application.Commodities.Dtos;
 public sealed record UpdateCommodityDto(
     string Name,
     CommodityAssetClass AssetClass,
-    Guid? DefaultUnitId,
+    UnitId? DefaultUnitId,
     string? Description
 );

@@ -13,6 +13,7 @@ public sealed record CreateBrandRequest
 
     public CreateBrandDto ToDto()
     {
-        return new CreateBrandDto(Name, Website, SupportPhone, Description, LogoUrl, CategoryIds);
+        return new CreateBrandDto(Name, Website, SupportPhone, Description, LogoUrl,
+            CategoryIds?.Select(x => (CategoryId)x).ToList());
     }
 }

@@ -68,6 +68,21 @@ internal sealed class AccountOrderConfiguration : IEntityTypeConfiguration<Accou
             .HasConversion<string>()
             .HasDefaultValue(AccountOrderStatus.Active);
 
+        builder.Property(x => x.PaymentStatus)
+            .IsRequired()
+            .HasMaxLength(30)
+            .HasConversion<string>()
+            .HasDefaultValue(PaymentStatus.Pending);
+
+        builder.Property(x => x.IsTrial)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(x => x.RefundAmount)
+            .IsRequired()
+            .HasColumnType("numeric(15,2)")
+            .HasDefaultValue(0m);
+
         builder.Property(x => x.CreatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("NOW()");
@@ -113,6 +128,7 @@ internal sealed class AccountOrderConfiguration : IEntityTypeConfiguration<Accou
         builder.HasIndex(x => x.ProductId);
         builder.HasIndex(x => x.ProductVariantId);
         builder.HasIndex(x => x.WarrantyExpiry);
+        builder.HasIndex(x => x.PaymentStatus);
         builder.HasIndex(x => x.OrderCode).IsUnique();
     }
 }

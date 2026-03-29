@@ -1,4 +1,8 @@
+using System.Linq.Expressions;
+
+using Alfred.Core.Application.Brands.Dtos;
 using Alfred.Core.Application.Querying.Fields;
+using Alfred.Core.Application.Querying.Projection;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.Brands.Shared;
@@ -19,6 +23,26 @@ public sealed class BrandFieldMap : BaseFieldMap<Brand>
         .Add("website", b => b.Website!).AllowAll()
         .Add("supportPhone", b => b.SupportPhone!).AllowAll()
         .Add("description", b => b.Description!).AllowAll()
+        .Add("logoUrl", b => b.LogoUrl!).AllowAll()
+        .Add("categories", b => b.BrandCategories.Select(bc => new BrandCategoryDto(
+            bc.CategoryId.Value,
+            bc.Category!.Name,
+            bc.Category!.Code,
+            bc.Category!.Icon))).Selectable()
         .Add("createdAt", b => b.CreatedAt).Sortable().Selectable()
         .Add("updatedAt", b => b.UpdatedAt!).Sortable().Selectable();
+
+    public static ViewRegistry<Brand, BrandDto> Views { get; } =
+        new ViewRegistry<Brand, BrandDto>()
+            .Register("list", cfg => cfg
+                .Select(x => x.Id)
+                .Select(x => x.Name)
+                .Select(x => x.Website)
+                .Select(x => x.SupportPhone)
+                .Select(x => x.Description)
+                .Select(x => x.LogoUrl)
+                .Select(x => x.Categories)
+                .Select(x => x.CreatedAt)
+                .Select(x => x.UpdatedAt))
+            .SetDefault("list");
 }

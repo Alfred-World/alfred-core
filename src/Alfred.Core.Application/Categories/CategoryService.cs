@@ -25,12 +25,11 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
     public async Task<PageResult<CategoryDto>> GetAllCategoriesAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.Categories,
             query,
             CategoryFieldMap.Instance,
-            null,
-            [c => c.Parent!, c => c.SubCategories],
+            CategoryFieldMap.Views,
             c => c.ToDto(),
             cancellationToken);
     }

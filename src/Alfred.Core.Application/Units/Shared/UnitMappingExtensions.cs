@@ -7,22 +7,23 @@ public static class UnitMappingExtensions
 {
     public static UnitDto ToDto(this Unit unit)
     {
-        return new UnitDto(
-            unit.Id,
-            unit.Code,
-            unit.Name,
-            unit.Symbol,
-            unit.Category,
-            unit.BaseUnitId,
-            unit.BaseUnit?.Name,
-            unit.BaseUnit?.Code,
-            unit.ConversionRate,
-            unit.Status,
-            unit.Description,
-            unit.DerivedUnits.Count,
-            unit.CreatedAt,
-            unit.UpdatedAt
-        );
+        return new UnitDto
+        {
+            Id = unit.Id,
+            Code = unit.Code,
+            Name = unit.Name,
+            Symbol = unit.Symbol,
+            Category = unit.Category,
+            BaseUnitId = unit.BaseUnitId,
+            BaseUnitName = unit.BaseUnit?.Name,
+            BaseUnitCode = unit.BaseUnit?.Code,
+            ConversionRate = unit.ConversionRate,
+            Status = unit.Status,
+            Description = unit.Description,
+            DerivedUnitCount = unit.DerivedUnits.Count,
+            CreatedAt = unit.CreatedAt,
+            UpdatedAt = unit.UpdatedAt
+        };
     }
 
     public static UnitTreeNodeDto ToTreeNode(this Unit unit)

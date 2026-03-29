@@ -41,21 +41,19 @@ public sealed partial class AccountSalesService
 
     public async Task<List<SellerRevenueDto>> GetRevenueBySellerAsync(CancellationToken cancellationToken = default)
     {
-        var orders = await _executor.ToListAsync(
-            _unitOfWork.AccountOrders.GetQueryable([o => o.Product!]),
+        // Push aggregation to the database — avoids loading ALL order rows into memory
+        var grouped = await _executor.ToListAsync(
+            _unitOfWork.AccountOrders.GetQueryable()
+                .GroupBy(o => o.SoldByUserId)
+                .Select(g => new
+                {
+                    SellerUserId = g.Key,
+                    SoldOrders = g.Count(),
+                    TotalRevenue = g.Sum(x => x.UnitPriceSnapshot)
+                })
+                .OrderByDescending(x => x.TotalRevenue)
+                .ThenByDescending(x => x.SoldOrders),
             cancellationToken);
-
-        var grouped = orders
-            .GroupBy(o => o.SoldByUserId)
-            .Select(group => new
-            {
-                SellerUserId = group.Key,
-                SoldOrders = group.Count(),
-                TotalRevenue = group.Sum(x => x.UnitPriceSnapshot)
-            })
-            .OrderByDescending(x => x.TotalRevenue)
-            .ThenByDescending(x => x.SoldOrders)
-            .ToList();
 
         var sellerMap =
             await GetReplicatedSellerMapAsync(grouped.Select(x => (Guid?)x.SellerUserId), cancellationToken);

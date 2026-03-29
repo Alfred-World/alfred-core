@@ -22,12 +22,11 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
     public async Task<PageResult<SourceAccountDto>> GetSourceAccountsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.SourceAccounts,
             query,
             SourceAccountFieldMap.Instance,
-            null,
-            [sa => sa.Clones],
+            SourceAccountFieldMap.Views,
             sa => sa.ToDto(),
             cancellationToken);
     }

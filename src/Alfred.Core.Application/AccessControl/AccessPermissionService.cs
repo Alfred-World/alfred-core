@@ -19,11 +19,11 @@ public sealed class AccessPermissionService : BaseApplicationService, IAccessPer
     public async Task<PageResult<AccessPermissionDto>> GetAllPermissionsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.AccessPermissions,
             query,
             AccessPermissionFieldMap.Instance,
-            p => true,
+            AccessPermissionFieldMap.Views,
             p => p.ToDto(),
             cancellationToken);
     }

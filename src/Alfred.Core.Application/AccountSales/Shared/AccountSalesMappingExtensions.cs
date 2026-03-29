@@ -106,19 +106,21 @@ public static class AccountSalesMappingExtensions
 
     public static SourceAccountDto ToDto(this SourceAccount sourceAccount)
     {
-        return new SourceAccountDto(
-            sourceAccount.Id,
-            sourceAccount.AccountType,
-            sourceAccount.Username,
-            sourceAccount.Password,
-            sourceAccount.TwoFaSecret,
-            sourceAccount.RecoveryEmail,
-            sourceAccount.RecoveryPhone,
-            sourceAccount.Notes,
-            sourceAccount.IsActive,
-            sourceAccount.Clones.Count,
-            sourceAccount.CreatedAt,
-            sourceAccount.UpdatedAt);
+        return new SourceAccountDto
+        {
+            Id = sourceAccount.Id,
+            AccountType = sourceAccount.AccountType,
+            Username = sourceAccount.Username,
+            Password = sourceAccount.Password,
+            TwoFaSecret = sourceAccount.TwoFaSecret,
+            RecoveryEmail = sourceAccount.RecoveryEmail,
+            RecoveryPhone = sourceAccount.RecoveryPhone,
+            Notes = sourceAccount.Notes,
+            IsActive = sourceAccount.IsActive,
+            CloneCount = sourceAccount.Clones.Count,
+            CreatedAt = sourceAccount.CreatedAt,
+            UpdatedAt = sourceAccount.UpdatedAt
+        };
     }
 
     public static SalesBonusTierDto ToDto(this SalesBonusTier tier)

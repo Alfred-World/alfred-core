@@ -24,8 +24,8 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     public async Task<PageResult<AssetDto>> GetAllAssetsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(_unitOfWork.Assets, query, AssetFieldMap.Instance,
-            a => a.ToDto(), cancellationToken);
+        return await GetPagedWithViewAsync(_unitOfWork.Assets, query, AssetFieldMap.Instance,
+            AssetFieldMap.Views, a => a.ToDto(), cancellationToken);
     }
 
     public async Task<AssetDto?> GetAssetByIdAsync(AssetId id, CancellationToken cancellationToken = default)
@@ -104,14 +104,15 @@ public sealed class AssetService : BaseApplicationService, IAssetService
     public async Task<PageResult<AssetLogDto>> GetAssetLogsAsync(AssetId assetId, QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        // Pre-filter by assetId; combined with DSL filter inside GetPagedAsync
-        return await GetPagedAsync(
+        // Pre-filter by assetId; combined with DSL filter inside GetPagedWithViewAsync
+        return await GetPagedWithViewAsync(
             _unitOfWork.AssetLogs,
             query,
             AssetLogFieldMap.Instance,
-            l => l.AssetId == assetId,
+            AssetLogFieldMap.Views,
             l => l.ToDto(),
-            cancellationToken);
+            cancellationToken,
+            preFilter: l => l.AssetId == assetId);
     }
 
     public async Task<AssetLogDto?> GetAssetLogByIdAsync(AssetLogId id, CancellationToken cancellationToken = default)

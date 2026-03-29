@@ -1,13 +1,14 @@
 namespace Alfred.Core.Application.AccessControl.Dtos;
 
-public sealed record AccessPermissionDto(
-    Guid Id,
-    string Code,
-    string Name,
-    string Resource,
-    string Action,
-    string? Description,
-    bool IsActive,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt
-);
+public sealed class AccessPermissionDto
+{
+    public Guid Id { get; set; }
+    public string? Code { get; set; }
+    public string? Name { get; set; }
+    public string? Resource { get; set; }
+    public string? Action { get; set; }
+    public string? Description { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+}

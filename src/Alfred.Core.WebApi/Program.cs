@@ -39,6 +39,8 @@ var builder = WebApplication.CreateBuilder(args);
 IList<JsonWebKey>? cachedSigningKeys = null;
 var keysLastFetched = DateTime.MinValue;
 var keysCacheDuration = TimeSpan.FromHours(1);
+// Shared static client avoids socket exhaustion from creating new HttpClient per cache miss
+var jwksHttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -212,8 +214,7 @@ builder.Services.AddAuthentication(options =>
 
                 try
                 {
-                    using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-                    var response = httpClient.GetStringAsync(jwksUrl).GetAwaiter().GetResult();
+                    var response = jwksHttpClient.GetStringAsync(jwksUrl).GetAwaiter().GetResult();
                     var jwks = new JsonWebKeySet(response);
                     cachedSigningKeys = jwks.Keys.ToList();
                     keysLastFetched = DateTime.UtcNow;
@@ -222,6 +223,7 @@ builder.Services.AddAuthentication(options =>
                 }
                 catch
                 {
+                    // On JWKS fetch failure, serve cached keys if available (fail-closed otherwise)
                     return cachedSigningKeys ?? Enumerable.Empty<SecurityKey>();
                 }
             }
@@ -301,6 +303,22 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
 forwardedHeadersOptions.KnownIPNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
+
+// Security headers (defense-in-depth; gateway also applies these at edge)
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    context.Response.Headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
+    if (!app.Environment.IsDevelopment())
+    {
+        context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+    }
+
+    await next();
+});
 
 // Use Scalar API reference in development
 app.UseScalarInDevelopment();

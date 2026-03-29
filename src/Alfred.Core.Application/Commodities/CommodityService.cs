@@ -24,12 +24,11 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<PageResult<CommodityDto>> GetAllCommoditiesAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.Commodities,
             query,
             CommodityFieldMap.Instance,
-            null,
-            [c => c.DefaultUnit!],
+            CommodityFieldMap.Views,
             c => c.ToDto(),
             cancellationToken);
     }
@@ -104,14 +103,14 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.InvestmentTransactions,
             query,
             InvestmentTransactionFieldMap.Instance,
-            t => t.CommodityId == commodityId,
-            [t => t.Commodity!, t => t.Unit!],
+            InvestmentTransactionFieldMap.Views,
             t => t.ToDto(),
-            cancellationToken);
+            cancellationToken,
+            preFilter: t => t.CommodityId == commodityId);
     }
 
     public async Task<InvestmentTransactionDto?> GetTransactionByIdAsync(InvestmentTransactionId id,

@@ -65,15 +65,21 @@ public sealed class AttachmentService : IAttachmentService
     {
         var attachments = await _unitOfWork.Attachments.GetByTargetAsync(targetId, targetType, cancellationToken);
 
-        var result = new List<AttachmentDto>(attachments.Count);
-
-        foreach (var a in attachments)
+        if (attachments.Count == 0)
         {
-            var downloadUrl = await GenerateSignedUrl(a.ObjectKey, cancellationToken);
-            result.Add(ToDto(a, downloadUrl));
+            return [];
         }
 
-        return result;
+        // Batch all signed URL requests in parallel to avoid N+1 HTTP calls to storage
+        var signedUrlTasks = attachments
+            .Select(a => GenerateSignedUrl(a.ObjectKey, cancellationToken))
+            .ToList();
+
+        var signedUrls = await Task.WhenAll(signedUrlTasks);
+
+        return attachments
+            .Zip(signedUrls, (attachment, url) => ToDto(attachment, url))
+            .ToList();
     }
 
     public async Task DeleteAttachmentAsync(AttachmentId attachmentId, CancellationToken cancellationToken = default)

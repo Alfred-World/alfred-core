@@ -7,16 +7,18 @@ public static class AccessControlMappingExtensions
 {
     public static AccessPermissionDto ToDto(this AccessPermission entity)
     {
-        return new AccessPermissionDto(
-            entity.Id,
-            entity.Code,
-            entity.Name,
-            entity.Resource,
-            entity.Action,
-            entity.Description,
-            entity.IsActive,
-            entity.CreatedAt,
-            entity.UpdatedAt);
+        return new AccessPermissionDto
+        {
+            Id = entity.Id,
+            Code = entity.Code,
+            Name = entity.Name,
+            Resource = entity.Resource,
+            Action = entity.Action,
+            Description = entity.Description,
+            IsActive = entity.IsActive,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt
+        };
     }
 
     public static AccessRoleDto ToDto(this AccessRole entity)

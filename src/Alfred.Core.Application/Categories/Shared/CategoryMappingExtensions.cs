@@ -7,18 +7,19 @@ public static class CategoryMappingExtensions
 {
     public static CategoryDto ToDto(this Category category)
     {
-        return new CategoryDto(
-            category.Id,
-            category.Code,
-            category.Name,
-            category.Icon,
-            category.Type,
-            category.ParentId,
-            category.Parent?.Name,
-            category.FormSchema,
-            category.SubCategories.Count,
-            category.CreatedAt
-        );
+        return new CategoryDto
+        {
+            Id = category.Id,
+            Code = category.Code,
+            Name = category.Name,
+            Icon = category.Icon,
+            Type = category.Type,
+            ParentId = category.ParentId,
+            ParentName = category.Parent?.Name,
+            FormSchema = category.FormSchema,
+            SubCategoryCount = category.SubCategories.Count,
+            CreatedAt = category.CreatedAt
+        };
     }
 
     public static CategoryTreeNodeDto ToTreeNode(this Category category)

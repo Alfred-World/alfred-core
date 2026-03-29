@@ -15,10 +15,9 @@ public sealed partial class AccountSalesService
             _unitOfWork.AccountClones,
             query,
             AccountCloneFieldMap.Instance,
-            null,
-            [c => c.Product!, c => c.SourceAccount!],
             c => c.ToDto(),
-            cancellationToken);
+            cancellationToken,
+            includes: [c => c.Product!, c => c.SourceAccount!]);
     }
 
     public async Task<AccountCloneDto> AddAccountCloneAsync(CreateAccountCloneDto dto,

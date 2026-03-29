@@ -1,4 +1,8 @@
+using System.Linq.Expressions;
+
+using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Application.Querying.Fields;
+using Alfred.Core.Application.Querying.Projection;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.Categories.Shared;
@@ -19,5 +23,26 @@ public sealed class CategoryFieldMap : BaseFieldMap<Category>
         .Add("name", c => c.Name).AllowAll()
         .Add("type", c => c.Type).AllowAll()
         .Add("parentId", c => c.ParentId!).AllowAll()
+        .Add("icon", c => c.Icon!).AllowAll()
+        .Add("formSchema", c => c.FormSchema).AllowAll()
+        .Add("parentName", c => c.Parent!.Name).Selectable()
+        .Add("subCategoryCount", c => c.SubCategories.Count()).Selectable()
         .Add("createdAt", c => c.CreatedAt).Sortable().Selectable();
+
+    public static ViewRegistry<Category, CategoryDto> Views { get; } =
+        new ViewRegistry<Category, CategoryDto>()
+            .Register("list", new Expression<Func<CategoryDto, object?>>[]
+            {
+                x => x.Id,
+                x => x.Code,
+                x => x.Name,
+                x => x.Icon,
+                x => x.Type,
+                x => x.ParentId,
+                x => x.ParentName,
+                x => x.FormSchema,
+                x => x.SubCategoryCount,
+                x => x.CreatedAt
+            })
+            .SetDefault("list");
 }

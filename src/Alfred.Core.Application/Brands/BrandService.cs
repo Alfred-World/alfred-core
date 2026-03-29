@@ -29,14 +29,14 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             ? b => b.BrandCategories.Any(bc => bc.CategoryId == categoryId.Value)
             : null;
 
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.Brands,
             query,
             BrandFieldMap.Instance,
-            preFilter,
-            [b => b.BrandCategories],
+            BrandFieldMap.Views,
             b => b.ToDto(),
-            cancellationToken);
+            cancellationToken,
+            preFilter: preFilter);
     }
 
     public async Task<BrandDto?> GetBrandByIdAsync(BrandId id, CancellationToken cancellationToken = default)

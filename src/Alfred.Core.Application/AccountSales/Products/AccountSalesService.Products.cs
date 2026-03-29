@@ -10,9 +10,10 @@ public sealed partial class AccountSalesService
     public async Task<PageResult<ProductDto>> GetProductsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(_unitOfWork.Products, query, ProductFieldMap.Instance, null, [p => p.Variants],
+        return await GetPagedAsync(_unitOfWork.Products, query, ProductFieldMap.Instance,
             p => p.ToDto(),
-            cancellationToken);
+            cancellationToken,
+            includes: [p => p.Variants]);
     }
 
     public async Task<ProductDto?> GetProductByIdAsync(ProductId id, CancellationToken cancellationToken = default)

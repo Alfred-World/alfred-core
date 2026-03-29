@@ -2,17 +2,18 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Application.AccountSales.Dtos;
 
-public sealed record SourceAccountDto(
-    Guid Id,
-    AccountProductType AccountType,
-    string Username,
-    string Password,
-    string? TwoFaSecret,
-    string? RecoveryEmail,
-    string? RecoveryPhone,
-    string? Notes,
-    bool IsActive,
-    int CloneCount,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt
-);
+public sealed class SourceAccountDto
+{
+    public Guid Id { get; set; }
+    public AccountProductType AccountType { get; set; }
+    public string? Username { get; set; }
+    public string? Password { get; set; }
+    public string? TwoFaSecret { get; set; }
+    public string? RecoveryEmail { get; set; }
+    public string? RecoveryPhone { get; set; }
+    public string? Notes { get; set; }
+    public bool IsActive { get; set; }
+    public int CloneCount { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+}

@@ -10,37 +10,39 @@ public static class CommodityMappingExtensions
 {
     public static CommodityDto ToDto(this Commodity commodity)
     {
-        return new CommodityDto(
-            commodity.Id,
-            commodity.Code,
-            commodity.Name,
-            commodity.AssetClass.ToString(),
-            commodity.DefaultUnitId,
-            commodity.DefaultUnit?.Name,
-            commodity.DefaultUnit?.Code,
-            commodity.Description,
-            commodity.CreatedAt
-        );
+        return new CommodityDto
+        {
+            Id = commodity.Id,
+            Code = commodity.Code,
+            Name = commodity.Name,
+            AssetClass = commodity.AssetClass.ToString(),
+            DefaultUnitId = commodity.DefaultUnitId,
+            DefaultUnitName = commodity.DefaultUnit?.Name,
+            DefaultUnitCode = commodity.DefaultUnit?.Code,
+            Description = commodity.Description,
+            CreatedAt = commodity.CreatedAt
+        };
     }
 
     public static InvestmentTransactionDto ToDto(this InvestmentTransaction txn)
     {
-        return new InvestmentTransactionDto(
-            txn.Id,
-            txn.CommodityId,
-            txn.Commodity?.Name,
-            txn.TransactionType.ToString(),
-            txn.TransactionDate,
-            txn.Quantity,
-            txn.UnitId,
-            txn.Unit?.Name,
-            txn.Unit?.Code,
-            txn.PricePerUnit,
-            txn.TotalAmount,
-            txn.FeeAmount,
-            txn.FinanceTxnId,
-            txn.Notes,
-            txn.CreatedAt
-        );
+        return new InvestmentTransactionDto
+        {
+            Id = txn.Id,
+            CommodityId = txn.CommodityId,
+            CommodityName = txn.Commodity?.Name,
+            TransactionType = txn.TransactionType.ToString(),
+            TransactionDate = txn.TransactionDate,
+            Quantity = txn.Quantity,
+            UnitId = txn.UnitId,
+            UnitName = txn.Unit?.Name,
+            UnitCode = txn.Unit?.Code,
+            PricePerUnit = txn.PricePerUnit,
+            TotalAmount = txn.TotalAmount,
+            FeeAmount = txn.FeeAmount,
+            FinanceTxnId = txn.FinanceTxnId,
+            Notes = txn.Notes,
+            CreatedAt = txn.CreatedAt
+        };
     }
 }

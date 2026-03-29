@@ -340,6 +340,8 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.HasIndex("AccountCloneId");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("MemberId");
 
                     b.HasIndex("OrderCode")

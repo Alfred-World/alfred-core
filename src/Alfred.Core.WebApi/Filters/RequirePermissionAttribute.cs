@@ -73,7 +73,7 @@ public sealed class RequirePermissionAttribute : Attribute, IAsyncAuthorizationF
                 .ToListAsync(context.HttpContext.RequestAborted);
 
             await cache.SetAsync(cacheKey, JsonSerializer.Serialize(userPermissions),
-                TimeSpan.FromMinutes(5), context.HttpContext.RequestAborted);
+                TimeSpan.FromMinutes(2), context.HttpContext.RequestAborted);
         }
 
         var hasPermission = HasPermission(userPermissions);

@@ -2,22 +2,23 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Application.Units.Dtos;
 
-public sealed record UnitDto(
-    Guid Id,
-    string Code,
-    string Name,
-    string? Symbol,
-    UnitCategory Category,
-    Guid? BaseUnitId,
-    string? BaseUnitName,
-    string? BaseUnitCode,
-    decimal ConversionRate,
-    UnitStatus Status,
-    string? Description,
-    int DerivedUnitCount,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt
-);
+public sealed class UnitDto
+{
+    public Guid Id { get; set; }
+    public string? Code { get; set; }
+    public string? Name { get; set; }
+    public string? Symbol { get; set; }
+    public UnitCategory Category { get; set; }
+    public Guid? BaseUnitId { get; set; }
+    public string? BaseUnitName { get; set; }
+    public string? BaseUnitCode { get; set; }
+    public decimal ConversionRate { get; set; }
+    public UnitStatus Status { get; set; }
+    public string? Description { get; set; }
+    public int DerivedUnitCount { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+}
 
 public sealed record CreateUnitDto(
     string Code,

@@ -24,12 +24,11 @@ public sealed class UnitService : BaseApplicationService, IUnitService
     public async Task<PageResult<UnitDto>> GetAllUnitsAsync(QueryRequest query,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await GetPagedWithViewAsync(
             _unitOfWork.Units,
             query,
             UnitFieldMap.Instance,
-            null,
-            [u => u.BaseUnit!, u => u.DerivedUnits],
+            UnitFieldMap.Views,
             u => u.ToDto(),
             cancellationToken);
     }

@@ -33,31 +33,30 @@ public class AccessRoleFieldMap : BaseFieldMap<AccessRole>
         .Add("updatedAt", r => r.UpdatedAt!).AllowAll()
 
         // Full permission projection - all fields
-        .Add("permissions", r => r.RolePermissions.Select(rp => new AccessPermissionDto(
-            rp.Permission.Id.Value,
-            rp.Permission.Code,
-            rp.Permission.Name,
-            rp.Permission.Resource,
-            rp.Permission.Action,
-            rp.Permission.Description,
-            rp.Permission.IsActive,
-            rp.Permission.CreatedAt,
-            rp.Permission.UpdatedAt
-        ))).AllowAll()
+        .Add("permissions", r => r.RolePermissions.Select(rp => new AccessPermissionDto
+        {
+            Id = rp.Permission.Id.Value,
+            Code = rp.Permission.Code,
+            Name = rp.Permission.Name,
+            Resource = rp.Permission.Resource,
+            Action = rp.Permission.Action,
+            Description = rp.Permission.Description,
+            IsActive = rp.Permission.IsActive,
+            CreatedAt = rp.Permission.CreatedAt,
+            UpdatedAt = rp.Permission.UpdatedAt
+        })).AllowAll()
 
         // Lightweight permission projection - only id, code, name (for list views)
         // Returns AccessPermissionDto with null for non-essential fields (skipped in JSON)
-        .Add("permissionsSummary", r => r.RolePermissions.Select(rp => new AccessPermissionDto(
-            rp.Permission.Id.Value,
-            rp.Permission.Code,
-            rp.Permission.Name,
-            string.Empty, // Resource - intentionally omitted in summary view
-            string.Empty, // Action - intentionally omitted in summary view
-            null, // Description - intentionally omitted in summary view
-            rp.Permission.IsActive,
-            rp.Permission.CreatedAt,
-            rp.Permission.UpdatedAt
-        ))).Selectable();
+        .Add("permissionsSummary", r => r.RolePermissions.Select(rp => new AccessPermissionDto
+        {
+            Id = rp.Permission.Id.Value,
+            Code = rp.Permission.Code,
+            Name = rp.Permission.Name,
+            IsActive = rp.Permission.IsActive,
+            CreatedAt = rp.Permission.CreatedAt,
+            UpdatedAt = rp.Permission.UpdatedAt
+        })).Selectable();
 
     /// <summary>
     /// Available views for Role entity.

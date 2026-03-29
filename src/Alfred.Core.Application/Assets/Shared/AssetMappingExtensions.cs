@@ -10,39 +10,41 @@ public static class AssetMappingExtensions
 {
     public static AssetDto ToDto(this Asset asset)
     {
-        return new AssetDto(
-            asset.Id,
-            asset.Name,
-            asset.CategoryId,
-            asset.Category?.Name,
-            asset.BrandId,
-            asset.Brand?.Name,
-            asset.PurchaseDate,
-            asset.InitialCost,
-            asset.WarrantyExpiryDate,
-            asset.Specs,
-            asset.Status.ToString(),
-            asset.Location,
-            asset.CreatedAt,
-            asset.UpdatedAt
-        );
+        return new AssetDto
+        {
+            Id = asset.Id,
+            Name = asset.Name,
+            CategoryId = asset.CategoryId,
+            CategoryName = asset.Category?.Name,
+            BrandId = asset.BrandId,
+            BrandName = asset.Brand?.Name,
+            PurchaseDate = asset.PurchaseDate,
+            InitialCost = asset.InitialCost,
+            WarrantyExpiryDate = asset.WarrantyExpiryDate,
+            Specs = asset.Specs,
+            Status = asset.Status.ToString(),
+            Location = asset.Location,
+            CreatedAt = asset.CreatedAt,
+            UpdatedAt = asset.UpdatedAt
+        };
     }
 
     public static AssetLogDto ToDto(this AssetLog log)
     {
-        return new AssetLogDto(
-            log.Id,
-            log.AssetId,
-            log.EventType.ToString(),
-            log.BrandId,
-            log.Brand?.Name,
-            log.PerformedAt,
-            log.Cost,
-            log.Quantity,
-            log.Note,
-            log.FinanceTxnId,
-            log.NextDueDate,
-            log.CreatedAt
-        );
+        return new AssetLogDto
+        {
+            Id = log.Id,
+            AssetId = log.AssetId,
+            EventType = log.EventType.ToString(),
+            BrandId = log.BrandId,
+            BrandName = log.Brand?.Name,
+            PerformedAt = log.PerformedAt,
+            Cost = log.Cost,
+            Quantity = log.Quantity,
+            Note = log.Note,
+            FinanceTxnId = log.FinanceTxnId,
+            NextDueDate = log.NextDueDate,
+            CreatedAt = log.CreatedAt
+        };
     }
 }

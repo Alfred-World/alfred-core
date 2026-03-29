@@ -1,4 +1,8 @@
+using System.Linq.Expressions;
+
+using Alfred.Core.Application.Assets.Dtos;
 using Alfred.Core.Application.Querying.Fields;
+using Alfred.Core.Application.Querying.Projection;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.Assets.Shared;
@@ -21,11 +25,34 @@ public sealed class AssetFieldMap : BaseFieldMap<Asset>
         .Add("name", a => a.Name).AllowAll()
         .Add("categoryId", a => a.CategoryId!).AllowAll()
         .Add("brandId", a => a.BrandId!).AllowAll()
-        .Add("status", a => a.Status).AllowAll()
+        .Add("status", a => a.Status).Filterable().Sortable()
+        .Add("statusText", a => a.Status.ToString()).Selectable()
         .Add("location", a => a.Location!).AllowAll()
         .Add("purchaseDate", a => a.PurchaseDate!).AllowAll()
         .Add("initialCost", a => a.InitialCost).AllowAll()
         .Add("warrantyExpiryDate", a => a.WarrantyExpiryDate!).AllowAll()
+        .Add("specs", a => a.Specs).AllowAll()
+        .Add("categoryName", a => a.Category!.Name).Selectable()
+        .Add("brandName", a => a.Brand!.Name).Selectable()
         .Add("createdAt", a => a.CreatedAt).Sortable().Selectable()
         .Add("updatedAt", a => a.UpdatedAt!).Sortable().Selectable();
+
+    public static ViewRegistry<Asset, AssetDto> Views { get; } =
+        new ViewRegistry<Asset, AssetDto>()
+            .Register("list", cfg => cfg
+                .Select(x => x.Id)
+                .Select(x => x.Name)
+                .Select(x => x.CategoryId)
+                .Select(x => x.CategoryName)
+                .Select(x => x.BrandId)
+                .Select(x => x.BrandName)
+                .Select(x => x.PurchaseDate)
+                .Select(x => x.InitialCost)
+                .Select(x => x.WarrantyExpiryDate)
+                .Select(x => x.Specs)
+                .SelectAs(x => x.Status, "statusText")
+                .Select(x => x.Location)
+                .Select(x => x.CreatedAt)
+                .Select(x => x.UpdatedAt))
+            .SetDefault("list");
 }

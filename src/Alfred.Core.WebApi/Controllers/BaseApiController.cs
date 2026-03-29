@@ -2,9 +2,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-using Alfred.Core.Application.Querying.Core;
-using Alfred.Core.WebApi.Contracts.Common;
-
 using Asp.Versioning;
 
 using Microsoft.AspNetCore.Mvc;

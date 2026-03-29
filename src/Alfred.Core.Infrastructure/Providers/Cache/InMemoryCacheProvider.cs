@@ -1,8 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 
-using Alfred.Core.Domain.Abstractions;
-
 using Microsoft.Extensions.Logging;
 
 namespace Alfred.Core.Infrastructure.Providers.Cache;

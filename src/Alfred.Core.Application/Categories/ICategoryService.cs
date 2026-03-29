@@ -1,5 +1,4 @@
 using Alfred.Core.Application.Categories.Dtos;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Application.Categories;

@@ -1,7 +1,5 @@
 using System.Linq.Expressions;
 
-using Alfred.Core.Application.Querying.Fields;
-
 namespace Alfred.Core.Application.Querying.Projection;
 
 /// <summary>

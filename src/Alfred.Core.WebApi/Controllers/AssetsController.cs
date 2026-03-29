@@ -2,7 +2,6 @@ using Alfred.Core.Application.Assets;
 using Alfred.Core.Application.Assets.Dtos;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.Assets;
-using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Filters;
 
 using Microsoft.AspNetCore.Authorization;

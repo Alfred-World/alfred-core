@@ -4,7 +4,6 @@ using Alfred.Core.Application.Common.Settings;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Enums;
 using Alfred.Core.WebApi.Contracts.Categories;
-using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Filters;
 
 using Microsoft.AspNetCore.Authorization;

@@ -1,5 +1,4 @@
 using Alfred.Core.Application.Assets.Dtos;
-using Alfred.Core.Application.Querying.Core;
 
 namespace Alfred.Core.Application.Assets;
 

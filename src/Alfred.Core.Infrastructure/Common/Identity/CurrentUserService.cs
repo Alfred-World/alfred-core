@@ -1,7 +1,5 @@
 using System.Security.Claims;
 
-using Alfred.Core.Domain.Abstractions;
-
 using Microsoft.AspNetCore.Http;
 
 namespace Alfred.Core.Infrastructure.Common.Identity;

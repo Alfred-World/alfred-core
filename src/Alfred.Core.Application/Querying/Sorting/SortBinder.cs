@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 
 using Alfred.Core.Application.Querying.Common;
-using Alfred.Core.Application.Querying.Fields;
 
 namespace Alfred.Core.Application.Querying.Sorting;
 

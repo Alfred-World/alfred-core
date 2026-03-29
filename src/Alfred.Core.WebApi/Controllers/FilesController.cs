@@ -1,7 +1,6 @@
 using Alfred.Core.Application.Files;
 using Alfred.Core.Application.Files.Dtos;
 using Alfred.Core.Domain.Constants;
-using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Contracts.Files;
 using Alfred.Core.WebApi.Filters;
 

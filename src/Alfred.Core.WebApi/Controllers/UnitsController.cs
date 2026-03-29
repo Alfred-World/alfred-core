@@ -2,7 +2,6 @@ using Alfred.Core.Application.Units;
 using Alfred.Core.Application.Units.Dtos;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Enums;
-using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Contracts.Units;
 using Alfred.Core.WebApi.Filters;
 

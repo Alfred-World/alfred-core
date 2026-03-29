@@ -1,7 +1,5 @@
 using Alfred.Core.Application.Commodities.Dtos;
 using Alfred.Core.Application.Commodities.Shared;
-using Alfred.Core.Application.Common;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
 
@@ -110,7 +108,7 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             InvestmentTransactionFieldMap.Views,
             t => t.ToDto(),
             cancellationToken,
-            preFilter: t => t.CommodityId == commodityId);
+            t => t.CommodityId == commodityId);
     }
 
     public async Task<InvestmentTransactionDto?> GetTransactionByIdAsync(InvestmentTransactionId id,

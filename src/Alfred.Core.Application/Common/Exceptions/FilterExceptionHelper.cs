@@ -1,5 +1,3 @@
-using Alfred.Core.Application.Querying.Fields;
-
 namespace Alfred.Core.Application.Common.Exceptions;
 
 /// <summary>

@@ -1,5 +1,3 @@
-using Alfred.Core.Domain.Common.Base;
-
 namespace Alfred.Core.Domain.Entities;
 
 /// <summary>

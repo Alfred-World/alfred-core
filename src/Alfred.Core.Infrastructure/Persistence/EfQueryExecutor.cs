@@ -1,5 +1,3 @@
-using Alfred.Core.Domain.Abstractions;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace Alfred.Core.Infrastructure.Persistence;

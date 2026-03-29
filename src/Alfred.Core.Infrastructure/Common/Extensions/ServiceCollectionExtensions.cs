@@ -1,4 +1,3 @@
-using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
 using Alfred.Core.Infrastructure.Common.Identity;

@@ -1,8 +1,6 @@
 using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Application.Categories.Shared;
-using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Common.Settings;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Common.Exceptions;
 using Alfred.Core.Domain.Entities;

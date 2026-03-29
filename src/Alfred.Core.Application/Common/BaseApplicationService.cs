@@ -1,12 +1,8 @@
 using System.Linq.Expressions;
 
 using Alfred.Core.Application.Common.Exceptions;
-using Alfred.Core.Application.Querying.Core;
-using Alfred.Core.Application.Querying.Fields;
 using Alfred.Core.Application.Querying.Filtering.Binding;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
-using Alfred.Core.Application.Querying.Projection;
-using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Common.Base;
 
 namespace Alfred.Core.Application.Common;

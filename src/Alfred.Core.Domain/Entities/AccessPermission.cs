@@ -1,6 +1,3 @@
-using Alfred.Core.Domain.Common.Base;
-using Alfred.Core.Domain.Common.Interfaces;
-
 namespace Alfred.Core.Domain.Entities;
 
 public sealed class AccessPermission : BaseEntity<AccessPermissionId>, IHasCreationTime, IHasModificationTime

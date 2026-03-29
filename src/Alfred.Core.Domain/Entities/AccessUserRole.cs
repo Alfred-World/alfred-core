@@ -1,5 +1,3 @@
-using Alfred.Core.Domain.Common.Interfaces;
-
 namespace Alfred.Core.Domain.Entities;
 
 public sealed class AccessUserRole : IHasCreationTime

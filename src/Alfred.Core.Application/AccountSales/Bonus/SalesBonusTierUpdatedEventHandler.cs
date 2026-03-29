@@ -1,7 +1,5 @@
-using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Common.Events;
 using Alfred.Core.Domain.Common.Events;
-using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 
 using MediatR;

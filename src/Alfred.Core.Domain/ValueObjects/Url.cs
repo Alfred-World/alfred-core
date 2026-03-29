@@ -1,4 +1,3 @@
-using Alfred.Core.Domain.Common.Base;
 using Alfred.Core.Domain.Common.Exceptions;
 
 namespace Alfred.Core.Domain.ValueObjects;

@@ -5,7 +5,6 @@ using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Infrastructure.Common.Abstractions;
-using Alfred.Core.WebApi.Contracts.Common;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

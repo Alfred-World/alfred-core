@@ -1,8 +1,6 @@
 using System.Linq.Expressions;
 
 using Alfred.Core.Application.AccessControl.Dtos;
-using Alfred.Core.Application.Querying.Fields;
-using Alfred.Core.Application.Querying.Projection;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.AccessControl.Shared;

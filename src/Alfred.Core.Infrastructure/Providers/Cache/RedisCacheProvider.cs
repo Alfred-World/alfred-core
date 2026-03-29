@@ -1,5 +1,3 @@
-using Alfred.Core.Domain.Abstractions;
-
 using Microsoft.Extensions.Logging;
 
 using StackExchange.Redis;

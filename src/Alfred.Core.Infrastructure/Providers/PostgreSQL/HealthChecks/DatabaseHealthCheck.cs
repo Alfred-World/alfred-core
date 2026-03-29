@@ -1,7 +1,6 @@
 using System.Data;
 using System.Diagnostics;
 
-using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.HealthChecks;
 
 using Microsoft.EntityFrameworkCore;

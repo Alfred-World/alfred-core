@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 
 using Alfred.Core.Application.Common.Exceptions;
 using Alfred.Core.Domain.Common.Exceptions;
-using Alfred.Core.WebApi.Contracts.Common;
 
 using FluentValidation;
 

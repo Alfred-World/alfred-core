@@ -1,7 +1,5 @@
 using Alfred.Core.Application.Assets.Dtos;
 using Alfred.Core.Application.Assets.Shared;
-using Alfred.Core.Application.Common;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
 
@@ -112,7 +110,7 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             AssetLogFieldMap.Views,
             l => l.ToDto(),
             cancellationToken,
-            preFilter: l => l.AssetId == assetId);
+            l => l.AssetId == assetId);
     }
 
     public async Task<AssetLogDto?> GetAssetLogByIdAsync(AssetLogId id, CancellationToken cancellationToken = default)

@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Linq.Expressions;
 
 using Alfred.Core.Application.Querying.Common;
-using Alfred.Core.Application.Querying.Fields;
 using Alfred.Core.Application.Querying.Filtering.Ast;
 
 namespace Alfred.Core.Application.Querying.Filtering.Binding;

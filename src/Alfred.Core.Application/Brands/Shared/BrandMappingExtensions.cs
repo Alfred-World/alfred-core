@@ -17,7 +17,8 @@ public static class BrandMappingExtensions
             LogoUrl = brand.LogoUrl,
             Categories = brand.BrandCategories
                 .Where(bc => bc.Category is not null)
-                .Select(bc => new BrandCategoryDto(bc.Category!.Id, bc.Category.Name, bc.Category.Code, bc.Category.Icon)),
+                .Select(bc =>
+                    new BrandCategoryDto(bc.Category!.Id, bc.Category.Name, bc.Category.Code, bc.Category.Icon)),
             CreatedAt = brand.CreatedAt,
             UpdatedAt = brand.UpdatedAt
         };

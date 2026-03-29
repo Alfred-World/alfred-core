@@ -1,5 +1,3 @@
-using Alfred.Core.Domain.Common.Base;
-using Alfred.Core.Domain.Common.Interfaces;
 using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;

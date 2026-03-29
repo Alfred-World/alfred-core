@@ -1,6 +1,4 @@
-using Alfred.Core.Domain.Common.Base;
 using Alfred.Core.Domain.Common.Events;
-using Alfred.Core.Domain.Common.Interfaces;
 
 namespace Alfred.Core.Domain.Entities;
 

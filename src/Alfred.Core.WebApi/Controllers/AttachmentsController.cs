@@ -1,7 +1,6 @@
 using Alfred.Core.Application.Attachments;
 using Alfred.Core.Application.Attachments.Dtos;
 using Alfred.Core.Domain.Constants;
-using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Filters;
 
 using Microsoft.AspNetCore.Authorization;

@@ -2,8 +2,6 @@ using System.Linq.Expressions;
 
 using Alfred.Core.Application.Brands.Dtos;
 using Alfred.Core.Application.Brands.Shared;
-using Alfred.Core.Application.Common;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
 
@@ -36,7 +34,7 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             BrandFieldMap.Views,
             b => b.ToDto(),
             cancellationToken,
-            preFilter: preFilter);
+            preFilter);
     }
 
     public async Task<BrandDto?> GetBrandByIdAsync(BrandId id, CancellationToken cancellationToken = default)

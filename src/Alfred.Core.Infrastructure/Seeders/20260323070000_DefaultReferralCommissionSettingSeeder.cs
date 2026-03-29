@@ -1,5 +1,4 @@
 using Alfred.Core.Domain.Entities;
-using Alfred.Core.Infrastructure.Common.Abstractions;
 using Alfred.Core.Infrastructure.Common.Seeding;
 
 using Microsoft.EntityFrameworkCore;

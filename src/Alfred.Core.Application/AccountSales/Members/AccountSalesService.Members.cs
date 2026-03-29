@@ -1,6 +1,5 @@
 using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.AccountSales.Shared;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.AccountSales;
@@ -32,7 +31,8 @@ public sealed partial class AccountSalesService
             _unitOfWork.AccountOrders.GetQueryable()
                 .Where(o => o.ReferrerMemberId == id)
                 .GroupBy(o => new { o.PurchaseDate.Year, o.PurchaseDate.Month })
-                .Select(g => new MonthAgg(g.Key.Year, g.Key.Month, g.Count(), g.Sum(o => o.ReferralCommissionAmountSnapshot))),
+                .Select(g =>
+                    new MonthAgg(g.Key.Year, g.Key.Month, g.Count(), g.Sum(o => o.ReferralCommissionAmountSnapshot))),
             cancellationToken);
 
         var allMonths = purchaseAggs.Select(p => (p.Year, p.Month))
@@ -44,7 +44,8 @@ public sealed partial class AccountSalesService
         {
             var p = purchaseAggs.Find(x => x.Year == m.Year && x.Month == m.Month);
             var r = referralAggs.Find(x => x.Year == m.Year && x.Month == m.Month);
-            return new MemberMonthlyStatsDto(m.Year, m.Month, p?.Count ?? 0, p?.Amount ?? 0m, r?.Count ?? 0, r?.Amount ?? 0m);
+            return new MemberMonthlyStatsDto(m.Year, m.Month, p?.Count ?? 0, p?.Amount ?? 0m, r?.Count ?? 0,
+                r?.Amount ?? 0m);
         }).ToList();
 
         var stats = new MemberStatsDto(
@@ -91,7 +92,8 @@ public sealed partial class AccountSalesService
         return entity.ToDto();
     }
 
-    public async Task<MemberDto?> UpdateMemberAsync(MemberId id, UpdateMemberDto dto, CancellationToken cancellationToken = default)
+    public async Task<MemberDto?> UpdateMemberAsync(MemberId id, UpdateMemberDto dto,
+        CancellationToken cancellationToken = default)
     {
         var entity = await _unitOfWork.Members.GetByIdAsync(id, cancellationToken);
         if (entity is null)
@@ -126,7 +128,8 @@ public sealed partial class AccountSalesService
             _unitOfWork.AccountOrders.GetQueryable()
                 .Where(o => o.ReferrerMemberId == id)
                 .GroupBy(o => new { o.PurchaseDate.Year, o.PurchaseDate.Month })
-                .Select(g => new MonthAgg(g.Key.Year, g.Key.Month, g.Count(), g.Sum(o => o.ReferralCommissionAmountSnapshot))),
+                .Select(g =>
+                    new MonthAgg(g.Key.Year, g.Key.Month, g.Count(), g.Sum(o => o.ReferralCommissionAmountSnapshot))),
             cancellationToken);
 
         var allMonths = purchaseAggs.Select(p => (p.Year, p.Month))
@@ -139,7 +142,8 @@ public sealed partial class AccountSalesService
             var p = purchaseAggs.Find(x => x.Year == m.Year && x.Month == m.Month);
             var r = referralAggs.Find(x => x.Year == m.Year && x.Month == m.Month);
 
-            return new MemberMonthlyStatsDto(m.Year, m.Month, p?.Count ?? 0, p?.Amount ?? 0m, r?.Count ?? 0, r?.Amount ?? 0m);
+            return new MemberMonthlyStatsDto(m.Year, m.Month, p?.Count ?? 0, p?.Amount ?? 0m, r?.Count ?? 0,
+                r?.Amount ?? 0m);
         }).ToList();
 
         return new MemberStatsDto(

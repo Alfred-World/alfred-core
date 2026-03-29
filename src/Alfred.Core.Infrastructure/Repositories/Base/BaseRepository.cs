@@ -1,10 +1,8 @@
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 
-using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Common.Base;
 using Alfred.Core.Domain.Common.Interfaces;
-using Alfred.Core.Infrastructure.Common.Abstractions;
 
 using Microsoft.EntityFrameworkCore;
 

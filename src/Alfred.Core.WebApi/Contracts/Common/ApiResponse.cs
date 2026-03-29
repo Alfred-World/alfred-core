@@ -1,5 +1,3 @@
-using Alfred.Core.Application.Querying.Core;
-
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Alfred.Core.WebApi.Contracts.Common;

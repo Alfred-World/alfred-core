@@ -1,5 +1,4 @@
 using Alfred.Core.Application.Brands.Dtos;
-using Alfred.Core.Application.Querying.Core;
 
 namespace Alfred.Core.Application.Brands;
 

@@ -1,7 +1,5 @@
 using System.Linq.Expressions;
 
-using Alfred.Core.Application.Querying.Fields;
-using Alfred.Core.Application.Querying.Projection;
 using Alfred.Core.Application.Units.Dtos;
 using Alfred.Core.Domain.Entities;
 

@@ -2,7 +2,6 @@ using Alfred.Core.Application.Brands;
 using Alfred.Core.Application.Brands.Dtos;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.WebApi.Contracts.Brands;
-using Alfred.Core.WebApi.Contracts.Common;
 using Alfred.Core.WebApi.Filters;
 
 using Microsoft.AspNetCore.Authorization;

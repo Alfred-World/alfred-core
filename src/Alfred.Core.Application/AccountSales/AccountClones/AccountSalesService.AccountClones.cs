@@ -1,6 +1,5 @@
 using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.AccountSales.Shared;
-using Alfred.Core.Application.Querying.Core;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
 

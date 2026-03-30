@@ -119,6 +119,8 @@ public sealed class DefaultOwnerAccessSeeder : BaseDataSeeder
             "Edit source accounts in account-sales module."),
         (PermissionCodes.AccountSales.SourceAccountDelete, "Delete Source Accounts",
             "Delete source accounts in account-sales module."),
+        (PermissionCodes.AccountSales.OrderPaymentConfirm, "Confirm Order Payments",
+            "Confirm payments for account orders to complete sales."),
 
         (PermissionCodes.AiChat.Send, "Use AI Chat", "Send prompts to AI assistant.")
     ];

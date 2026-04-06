@@ -40,7 +40,7 @@ public sealed class AccountSalesAccountCloneController : BaseApiController
         return CreatedResponse(result);
     }
 
-    [HttpPut("{accountCloneId:guid}")]
+    [HttpPatch("{accountCloneId:guid}")]
     [RequirePermission(PermissionCodes.AccountSales.AccountCloneStatusUpdate)]
     [ProducesResponseType(typeof(ApiResponse<AccountCloneDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateAccountClone(Guid accountCloneId,
@@ -64,7 +64,7 @@ public sealed class AccountSalesAccountCloneController : BaseApiController
         return OkResponse(result);
     }
 
-    [HttpPut("{accountCloneId:guid}/status")]
+    [HttpPatch("{accountCloneId:guid}/status")]
     [RequirePermission(PermissionCodes.AccountSales.AccountCloneStatusUpdate)]
     [ProducesResponseType(typeof(ApiResponse<AccountCloneDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateAccountCloneStatus(Guid accountCloneId,

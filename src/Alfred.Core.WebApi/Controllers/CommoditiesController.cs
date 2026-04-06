@@ -76,7 +76,7 @@ public sealed class CommoditiesController : BaseApiController
     /// <summary>
     /// Update an existing commodity.
     /// </summary>
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.Commodity.Update)]
     [ProducesResponseType(typeof(ApiResponse<CommodityDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

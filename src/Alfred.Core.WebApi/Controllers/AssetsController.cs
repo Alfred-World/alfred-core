@@ -76,7 +76,7 @@ public sealed class AssetsController : BaseApiController
     /// <summary>
     /// Update an existing asset.
     /// </summary>
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.Asset.Update)]
     [ProducesResponseType(typeof(ApiResponse<AssetDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

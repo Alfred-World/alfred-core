@@ -65,17 +65,16 @@ public sealed class AssetService : BaseApplicationService, IAssetService
             throw new KeyNotFoundException($"Asset with ID {id} not found.");
         }
 
-        var status = dto.Status;
         entity.Update(
-            dto.Name,
-            dto.CategoryId,
-            dto.BrandId,
-            dto.PurchaseDate,
-            dto.InitialCost,
-            dto.WarrantyExpiryDate,
-            dto.Specs ?? "{}",
-            status,
-            dto.Location);
+            dto.Name.GetValueOrDefault(entity.Name),
+            dto.CategoryId.GetValueOrDefault(entity.CategoryId),
+            dto.BrandId.GetValueOrDefault(entity.BrandId),
+            dto.PurchaseDate.GetValueOrDefault(entity.PurchaseDate),
+            dto.InitialCost.GetValueOrDefault(entity.InitialCost),
+            dto.WarrantyExpiryDate.GetValueOrDefault(entity.WarrantyExpiryDate),
+            dto.Specs.GetValueOrDefault(entity.Specs) ?? "{}",
+            dto.Status.GetValueOrDefault(entity.Status),
+            dto.Location.GetValueOrDefault(entity.Location));
 
         _unitOfWork.Assets.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

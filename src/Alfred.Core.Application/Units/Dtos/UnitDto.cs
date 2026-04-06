@@ -31,15 +31,16 @@ public sealed record CreateUnitDto(
     string? Description
 );
 
-public sealed record UpdateUnitDto(
-    string Name,
-    string? Symbol,
-    UnitCategory Category,
-    UnitId? BaseUnitId,
-    decimal ConversionRate,
-    UnitStatus Status,
-    string? Description
-);
+public sealed record UpdateUnitDto
+{
+    public Optional<string> Name { get; init; }
+    public Optional<string?> Symbol { get; init; }
+    public Optional<UnitCategory> Category { get; init; }
+    public Optional<UnitId?> BaseUnitId { get; init; }
+    public Optional<decimal> ConversionRate { get; init; }
+    public Optional<UnitStatus> Status { get; init; }
+    public Optional<string?> Description { get; init; }
+}
 
 public sealed record UnitTreeNodeDto(
     Guid Id,

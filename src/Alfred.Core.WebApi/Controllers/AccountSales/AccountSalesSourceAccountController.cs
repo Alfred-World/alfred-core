@@ -50,7 +50,7 @@ public sealed class AccountSalesSourceAccountController : BaseApiController
         return CreatedResponse(result);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.AccountSales.SourceAccountUpdate)]
     [ProducesResponseType(typeof(ApiResponse<SourceAccountDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateSourceAccount(Guid id, [FromBody] UpdateSourceAccountRequest request,

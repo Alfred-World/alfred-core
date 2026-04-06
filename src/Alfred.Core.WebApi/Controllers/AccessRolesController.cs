@@ -55,7 +55,7 @@ public sealed class AccessRolesController : BaseApiController
         return CreatedResponse(result);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.AccessControl.RoleUpdate)]
     [ProducesResponseType(typeof(ApiResponse<AccessRoleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRole(Guid id, [FromBody] UpdateAccessRoleRequest request,

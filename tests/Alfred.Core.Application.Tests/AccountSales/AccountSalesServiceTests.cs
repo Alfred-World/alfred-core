@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 
 using Alfred.Core.Application.AccountSales;
 using Alfred.Core.Application.AccountSales.Dtos;
+using Alfred.Core.Application.Common;
 using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Common.Ids;
@@ -305,7 +306,7 @@ public sealed class AccountSalesServiceTests
 
         // Act
         var result = await service.UpdateReferralCommissionSettingAsync(
-            new UpdateReferralCommissionSettingDto(12.5m),
+            new UpdateReferralCommissionSettingDto { CommissionPercent = Optional<decimal>.Of(12.5m) },
             actorUserId,
             CancellationToken.None);
 

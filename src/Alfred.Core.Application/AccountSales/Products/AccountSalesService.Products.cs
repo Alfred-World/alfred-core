@@ -60,24 +60,33 @@ public sealed partial class AccountSalesService
             throw new KeyNotFoundException($"Product with ID {id} not found.");
         }
 
-        var normalizedVariants = NormalizeUpdateVariants(dto.Variants);
+        entity.Update(
+            dto.Name.GetValueOrDefault(entity.Name),
+            dto.ProductType.GetValueOrDefault(entity.ProductType),
+            dto.Description.GetValueOrDefault(entity.Description));
 
-        entity.Update(dto.Name, dto.ProductType, dto.Description);
-
-        var existingVariants = await _executor.ToListAsync(
-            _unitOfWork.ProductVariants.GetQueryable().Where(x => x.ProductId == entity.Id),
-            cancellationToken);
-
-        foreach (var variant in existingVariants)
+        // Update variants only if explicitly provided
+        if (dto.Variants.HasValue)
         {
-            _unitOfWork.ProductVariants.Delete(variant);
-        }
+            var normalizedVariants = dto.Variants.Value is not null
+                ? NormalizeUpdateVariants(dto.Variants.Value)
+                : [];
 
-        foreach (var variant in normalizedVariants)
-        {
-            await _unitOfWork.ProductVariants.AddAsync(
-                ProductVariant.Create(entity.Id, variant.Name, variant.Price, variant.WarrantyDays),
+            var existingVariants = await _executor.ToListAsync(
+                _unitOfWork.ProductVariants.GetQueryable().Where(x => x.ProductId == entity.Id),
                 cancellationToken);
+
+            foreach (var variant in existingVariants)
+            {
+                _unitOfWork.ProductVariants.Delete(variant);
+            }
+
+            foreach (var variant in normalizedVariants)
+            {
+                await _unitOfWork.ProductVariants.AddAsync(
+                    ProductVariant.Create(entity.Id, variant.Name, variant.Price, variant.WarrantyDays),
+                    cancellationToken);
+            }
         }
 
         _unitOfWork.Products.Update(entity);

@@ -60,7 +60,7 @@ public sealed class AccountSalesMemberController : BaseApiController
         return CreatedResponse(result);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.AccountSales.MemberUpdate)]
     [ProducesResponseType(typeof(ApiResponse<MemberDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

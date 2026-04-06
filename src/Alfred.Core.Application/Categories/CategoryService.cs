@@ -133,44 +133,52 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
             throw new KeyNotFoundException($"Category with ID {id} not found.");
         }
 
+        var mergedParentId = dto.ParentId.GetValueOrDefault(entity.ParentId);
+        var mergedType = dto.Type.GetValueOrDefault(entity.Type);
+
         // Cannot set self as parent
-        if (dto.ParentId.HasValue && dto.ParentId.Value == id)
+        if (mergedParentId.HasValue && mergedParentId.Value == id)
         {
             throw new DomainException("A category cannot be its own parent.");
         }
 
         // Validate parent type match
-        if (dto.ParentId.HasValue)
+        if (mergedParentId.HasValue)
         {
-            var parent = await _unitOfWork.Categories.GetByIdAsync(dto.ParentId.Value, cancellationToken);
+            var parent = await _unitOfWork.Categories.GetByIdAsync(mergedParentId.Value, cancellationToken);
 
             if (parent is null)
             {
-                throw new KeyNotFoundException($"Parent category with ID {dto.ParentId.Value} not found.");
+                throw new KeyNotFoundException($"Parent category with ID {mergedParentId.Value} not found.");
             }
 
-            if (parent.Type != dto.Type)
+            if (parent.Type != mergedType)
             {
                 throw new DomainException(
-                    $"Child category type '{dto.Type}' must match parent category type '{parent.Type}'.");
+                    $"Child category type '{mergedType}' must match parent category type '{parent.Type}'.");
             }
 
             // Prevent circular reference: parent must not be a descendant of this category
-            if (await IsDescendantAsync(dto.ParentId.Value, id, cancellationToken))
+            if (await IsDescendantAsync(mergedParentId.Value, id, cancellationToken))
             {
                 throw new DomainException("Cannot set a descendant category as parent (circular reference).");
             }
         }
 
         // Cascade type change to all descendants if type changed
-        var typeChanged = entity.Type != dto.Type;
+        var typeChanged = entity.Type != mergedType;
 
-        entity.Update(dto.Name, dto.ParentId, dto.Type, dto.Icon, dto.FormSchema);
+        entity.Update(
+            dto.Name.GetValueOrDefault(entity.Name),
+            mergedParentId,
+            mergedType,
+            dto.Icon.GetValueOrDefault(entity.Icon),
+            dto.FormSchema.GetValueOrDefault(entity.FormSchema));
         _unitOfWork.Categories.Update(entity);
 
         if (typeChanged)
         {
-            await CascadeTypeToDescendantsAsync(id, dto.Type, cancellationToken);
+            await CascadeTypeToDescendantsAsync(id, mergedType, cancellationToken);
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -25,13 +25,14 @@ public sealed record CreateCategoryDto(
     string FormSchema
 );
 
-public sealed record UpdateCategoryDto(
-    string Name,
-    string? Icon,
-    CategoryType Type,
-    CategoryId? ParentId,
-    string FormSchema
-);
+public sealed record UpdateCategoryDto
+{
+    public Optional<string> Name { get; init; }
+    public Optional<string?> Icon { get; init; }
+    public Optional<CategoryType> Type { get; init; }
+    public Optional<CategoryId?> ParentId { get; init; }
+    public Optional<string> FormSchema { get; init; }
+}
 
 public sealed record CategoryTreeNodeDto(
     Guid Id,

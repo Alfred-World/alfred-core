@@ -1,3 +1,5 @@
+using Alfred.Core.Application.Common;
+
 namespace Alfred.Core.WebApi.Contracts.AccountSales;
 
 public sealed record CreateSalesBonusTierRequest
@@ -8,9 +10,9 @@ public sealed record CreateSalesBonusTierRequest
 
 public sealed record UpdateSalesBonusTierRequest
 {
-    public int OrderThreshold { get; init; }
-    public decimal BonusAmount { get; init; }
-    public bool IsActive { get; init; }
+    public Optional<int> OrderThreshold { get; init; }
+    public Optional<decimal> BonusAmount { get; init; }
+    public Optional<bool> IsActive { get; init; }
 }
 
 public sealed record MarkBonusPaidRequest

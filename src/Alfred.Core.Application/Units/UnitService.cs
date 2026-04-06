@@ -88,37 +88,40 @@ public sealed class UnitService : BaseApplicationService, IUnitService
             throw new KeyNotFoundException($"Unit with ID {id} not found.");
         }
 
+        var mergedBaseUnitId = dto.BaseUnitId.GetValueOrDefault(entity.BaseUnitId);
+        var mergedCategory = dto.Category.GetValueOrDefault(entity.Category);
+
         // Cannot set self as base unit
-        if (dto.BaseUnitId.HasValue && dto.BaseUnitId.Value == id)
+        if (mergedBaseUnitId.HasValue && mergedBaseUnitId.Value == id)
         {
             throw new DomainException("A unit cannot be its own base unit.");
         }
 
         // Validate base unit exists and category matches
-        if (dto.BaseUnitId.HasValue)
+        if (mergedBaseUnitId.HasValue)
         {
-            var baseUnit = await _unitOfWork.Units.GetByIdAsync(dto.BaseUnitId.Value, cancellationToken);
+            var baseUnit = await _unitOfWork.Units.GetByIdAsync(mergedBaseUnitId.Value, cancellationToken);
 
             if (baseUnit is null)
             {
-                throw new KeyNotFoundException($"Base unit with ID {dto.BaseUnitId.Value} not found.");
+                throw new KeyNotFoundException($"Base unit with ID {mergedBaseUnitId.Value} not found.");
             }
 
-            if (baseUnit.Category != dto.Category)
+            if (baseUnit.Category != mergedCategory)
             {
                 throw new DomainException(
-                    $"Unit category '{dto.Category}' must match base unit category '{baseUnit.Category}'.");
+                    $"Unit category '{mergedCategory}' must match base unit category '{baseUnit.Category}'.");
             }
         }
 
         entity.Update(
-            dto.Name,
-            dto.Symbol,
-            dto.Category,
-            dto.BaseUnitId,
-            dto.ConversionRate,
-            dto.Status,
-            dto.Description);
+            dto.Name.GetValueOrDefault(entity.Name),
+            dto.Symbol.GetValueOrDefault(entity.Symbol),
+            mergedCategory,
+            mergedBaseUnitId,
+            dto.ConversionRate.GetValueOrDefault(entity.ConversionRate),
+            dto.Status.GetValueOrDefault(entity.Status),
+            dto.Description.GetValueOrDefault(entity.Description));
 
         _unitOfWork.Units.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

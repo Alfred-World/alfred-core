@@ -68,12 +68,12 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             throw new KeyNotFoundException($"Commodity with ID {id} not found.");
         }
 
-        var assetClass = dto.AssetClass;
+        var assetClass = dto.AssetClass.GetValueOrDefault(entity.AssetClass);
         entity.Update(
-            dto.Name,
+            dto.Name.GetValueOrDefault(entity.Name),
             assetClass,
-            dto.DefaultUnitId,
-            dto.Description);
+            dto.DefaultUnitId.GetValueOrDefault(entity.DefaultUnitId),
+            dto.Description.GetValueOrDefault(entity.Description));
 
         _unitOfWork.Commodities.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

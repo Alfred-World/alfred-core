@@ -11,4 +11,9 @@ public sealed record SalesBonusTierDto(
 
 public sealed record CreateSalesBonusTierDto(int OrderThreshold, decimal BonusAmount);
 
-public sealed record UpdateSalesBonusTierDto(int OrderThreshold, decimal BonusAmount, bool IsActive);
+public sealed record UpdateSalesBonusTierDto
+{
+    public Optional<int> OrderThreshold { get; init; }
+    public Optional<decimal> BonusAmount { get; init; }
+    public Optional<bool> IsActive { get; init; }
+}

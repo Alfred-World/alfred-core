@@ -193,12 +193,12 @@ public sealed partial class AccountSalesService
 
         if (setting is null)
         {
-            setting = ReferralCommissionSetting.Create(dto.CommissionPercent);
+            setting = ReferralCommissionSetting.Create(dto.CommissionPercent.Value);
             await _unitOfWork.ReferralCommissionSettings.AddAsync(setting, cancellationToken);
         }
         else
         {
-            setting.UpdatePercent(dto.CommissionPercent);
+            setting.UpdatePercent(dto.CommissionPercent.GetValueOrDefault(setting.CommissionPercent));
             _unitOfWork.ReferralCommissionSettings.Update(setting);
         }
 

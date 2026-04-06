@@ -72,13 +72,13 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
         }
 
         entity.Update(
-            dto.AccountType,
-            dto.Username,
-            dto.Password,
-            dto.TwoFaSecret,
-            dto.RecoveryEmail,
-            dto.RecoveryPhone,
-            dto.Notes);
+            dto.AccountType.GetValueOrDefault(entity.AccountType),
+            dto.Username.GetValueOrDefault(entity.Username),
+            dto.Password.GetValueOrDefault(entity.Password),
+            dto.TwoFaSecret.GetValueOrDefault(entity.TwoFaSecret),
+            dto.RecoveryEmail.GetValueOrDefault(entity.RecoveryEmail),
+            dto.RecoveryPhone.GetValueOrDefault(entity.RecoveryPhone),
+            dto.Notes.GetValueOrDefault(entity.Notes));
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

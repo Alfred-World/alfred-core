@@ -60,19 +60,23 @@ public sealed partial class AccountSalesService
             throw new KeyNotFoundException($"Account clone with ID {accountCloneId} not found.");
         }
 
-        var normalizedUsername = dto.Username.Trim();
-        await EnsureCloneUsernameUniqueAsync(entity.ProductId, normalizedUsername, entity.Id, cancellationToken);
+        var mergedUsername = dto.Username.GetValueOrDefault(entity.Username).Trim();
+        await EnsureCloneUsernameUniqueAsync(entity.ProductId, mergedUsername, entity.Id, cancellationToken);
 
         entity.UpdateAccountInfo(
-            normalizedUsername,
-            dto.Password,
-            dto.TwoFaSecret,
-            dto.ExtraInfo,
-            dto.ExternalAccountId);
+            mergedUsername,
+            dto.Password.GetValueOrDefault(entity.Password),
+            dto.TwoFaSecret.GetValueOrDefault(entity.TwoFaSecret),
+            dto.ExtraInfo.GetValueOrDefault(entity.ExtraInfo),
+            dto.ExternalAccountId.GetValueOrDefault(entity.ExternalAccountId));
 
         if (dto.SourceAccountId.HasValue)
         {
-            entity.LinkToSourceAccount(dto.SourceAccountId.Value);
+            var sourceAccountId = dto.SourceAccountId.Value;
+            if (sourceAccountId.HasValue)
+            {
+                entity.LinkToSourceAccount(sourceAccountId.Value);
+            }
         }
 
         _unitOfWork.AccountClones.Update(entity);

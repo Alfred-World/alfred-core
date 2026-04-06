@@ -53,14 +53,19 @@ public sealed class AccountSalesBonusController : BaseApiController
     /// <summary>
     /// Update an existing bonus tier.
     /// </summary>
-    [HttpPut("tiers/{tierId:guid}")]
+    [HttpPatch("tiers/{tierId:guid}")]
     [RequirePermission(PermissionCodes.AccountSales.BonusTierUpdate)]
     [ProducesResponseType(typeof(ApiResponse<SalesBonusTierDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateBonusTier(Guid tierId, [FromBody] UpdateSalesBonusTierRequest request,
         CancellationToken cancellationToken)
     {
         var result = await _service.UpdateBonusTierAsync((SalesBonusTierId)tierId,
-            new UpdateSalesBonusTierDto(request.OrderThreshold, request.BonusAmount, request.IsActive),
+            new UpdateSalesBonusTierDto
+            {
+                OrderThreshold = request.OrderThreshold,
+                BonusAmount = request.BonusAmount,
+                IsActive = request.IsActive
+            },
             cancellationToken);
         return OkResponse(result);
     }

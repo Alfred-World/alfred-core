@@ -76,7 +76,7 @@ public sealed class UnitsController : BaseApiController
     /// <summary>
     /// Update an existing unit.
     /// </summary>
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.Unit.Update)]
     [ProducesResponseType(typeof(ApiResponse<UnitDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

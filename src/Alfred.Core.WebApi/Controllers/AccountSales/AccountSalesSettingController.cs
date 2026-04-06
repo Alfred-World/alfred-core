@@ -43,7 +43,7 @@ public sealed class AccountSalesSettingController : BaseApiController
         return OkResponse(result);
     }
 
-    [HttpPut("referral-commission")]
+    [HttpPatch("referral-commission")]
     [RequirePermission(PermissionCodes.AccountSales.CommissionSettingUpdate)]
     [ProducesResponseType(typeof(ApiResponse<ReferralCommissionSettingDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateReferralCommissionSetting(

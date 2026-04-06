@@ -41,13 +41,18 @@ public sealed partial class AccountSalesService
 
         var existing = await _unitOfWork.SalesBonusTiers.GetAllAsync(cancellationToken);
 
-        if (existing.Any(t => t.OrderThreshold == dto.OrderThreshold && t.Id != tierId))
+        var mergedThreshold = dto.OrderThreshold.GetValueOrDefault(tier.OrderThreshold);
+
+        if (existing.Any(t => t.OrderThreshold == mergedThreshold && t.Id != tierId))
         {
             throw new InvalidOperationException(
-                $"A bonus tier with order threshold {dto.OrderThreshold} already exists.");
+                $"A bonus tier with order threshold {mergedThreshold} already exists.");
         }
 
-        tier.Update(dto.OrderThreshold, dto.BonusAmount, dto.IsActive);
+        tier.Update(
+            mergedThreshold,
+            dto.BonusAmount.GetValueOrDefault(tier.BonusAmount),
+            dto.IsActive.GetValueOrDefault(tier.IsActive));
         _unitOfWork.SalesBonusTiers.Update(tier);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return tier.ToDto();

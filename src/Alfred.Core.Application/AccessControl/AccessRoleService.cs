@@ -67,12 +67,24 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
             throw new InvalidOperationException("Cannot modify immutable role.");
         }
 
-        role.Update(dto.Name, dto.Icon, dto.IsImmutable, dto.IsSystem);
+        role.Update(
+            dto.Name.GetValueOrDefault(role.Name),
+            dto.Icon.GetValueOrDefault(role.Icon),
+            dto.IsImmutable.GetValueOrDefault(role.IsImmutable),
+            dto.IsSystem.GetValueOrDefault(role.IsSystem));
 
-        if (dto.Permissions != null)
+        if (dto.Permissions.HasValue)
         {
-            var permissionIds = await ResolvePermissionIdsAsync(dto.Permissions, cancellationToken);
-            role.SyncPermissions(permissionIds);
+            var permissions = dto.Permissions.Value;
+            if (permissions is not null)
+            {
+                var permissionIds = await ResolvePermissionIdsAsync(permissions, cancellationToken);
+                role.SyncPermissions(permissionIds);
+            }
+            else
+            {
+                role.SyncPermissions([]);
+            }
         }
 
         _unitOfWork.AccessRoles.Update(role);

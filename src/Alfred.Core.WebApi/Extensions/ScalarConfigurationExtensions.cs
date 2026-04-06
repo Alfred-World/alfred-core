@@ -1,5 +1,7 @@
 using System.Reflection;
 
+using Alfred.Core.WebApi.Configuration;
+
 using Microsoft.OpenApi.Models;
 
 using Scalar.AspNetCore;
@@ -61,6 +63,10 @@ public static class ScalarConfigurationExtensions
                     new List<string>()
                 }
             });
+
+            // Unwrap Optional<T> to inner type in Swagger schemas
+            c.SchemaFilter<OptionalSchemaFilter>();
+            c.DocumentFilter<OptionalSchemaDocumentFilter>();
 
             // Include XML comments
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

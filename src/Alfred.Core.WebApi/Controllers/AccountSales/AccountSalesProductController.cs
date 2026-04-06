@@ -55,7 +55,7 @@ public sealed class AccountSalesProductController : BaseApiController
         return CreatedResponse(result);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.AccountSales.ProductUpdate)]
     [ProducesResponseType(typeof(ApiResponse<ProductDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] UpdateProductRequest request,

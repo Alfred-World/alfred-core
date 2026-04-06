@@ -77,7 +77,7 @@ public sealed class BrandsController : BaseApiController
     /// <summary>
     /// Update an existing brand.
     /// </summary>
-    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
     [RequirePermission(PermissionCodes.Brand.Update)]
     [ProducesResponseType(typeof(ApiResponse<BrandDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiErrorResponse), StatusCodes.Status400BadRequest)]

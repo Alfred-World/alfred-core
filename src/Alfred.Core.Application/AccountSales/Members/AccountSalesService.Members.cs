@@ -101,7 +101,11 @@ public sealed partial class AccountSalesService
             return null;
         }
 
-        entity.Update(dto.DisplayName, dto.Source, dto.SourceId, dto.CustomerNote);
+        entity.Update(
+            dto.DisplayName.GetValueOrDefault(entity.DisplayName),
+            dto.Source.GetValueOrDefault(entity.Source),
+            dto.SourceId.GetValueOrDefault(entity.SourceId),
+            dto.CustomerNote.GetValueOrDefault(entity.CustomerNote));
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return entity.ToDto();
     }

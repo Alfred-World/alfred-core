@@ -1,19 +1,27 @@
 using Alfred.Core.Application.Brands.Dtos;
+using Alfred.Core.Application.Common;
 
 namespace Alfred.Core.WebApi.Contracts.Brands;
 
 public sealed record UpdateBrandRequest
 {
-    public string Name { get; init; } = null!;
-    public string? Website { get; init; }
-    public string? SupportPhone { get; init; }
-    public string? Description { get; init; }
-    public string? LogoUrl { get; init; }
-    public List<Guid>? CategoryIds { get; init; }
+    public Optional<string> Name { get; init; }
+    public Optional<string?> Website { get; init; }
+    public Optional<string?> SupportPhone { get; init; }
+    public Optional<string?> Description { get; init; }
+    public Optional<string?> LogoUrl { get; init; }
+    public Optional<List<Guid>?> CategoryIds { get; init; }
 
     public UpdateBrandDto ToDto()
     {
-        return new UpdateBrandDto(Name, Website, SupportPhone, Description, LogoUrl,
-            CategoryIds?.Select(x => (CategoryId)x).ToList());
+        return new UpdateBrandDto
+        {
+            Name = Name,
+            Website = Website,
+            SupportPhone = SupportPhone,
+            Description = Description,
+            LogoUrl = LogoUrl,
+            CategoryIds = CategoryIds.Map(ids => ids?.Select(x => (CategoryId)x).ToList())
+        };
     }
 }

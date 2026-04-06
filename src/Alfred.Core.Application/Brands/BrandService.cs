@@ -78,20 +78,24 @@ public sealed class BrandService : BaseApplicationService, IBrandService
         }
 
         entity.Update(
-            dto.Name,
-            dto.Website,
-            dto.SupportPhone,
-            dto.Description,
-            dto.LogoUrl);
+            dto.Name.GetValueOrDefault(entity.Name),
+            dto.Website.GetValueOrDefault(entity.Website.Value),
+            dto.SupportPhone.GetValueOrDefault(entity.SupportPhone),
+            dto.Description.GetValueOrDefault(entity.Description),
+            dto.LogoUrl.GetValueOrDefault(entity.LogoUrl.Value));
 
-        // Update categories: clear and re-add
-        if (dto.CategoryIds is not null)
+        // Update categories only if explicitly provided
+        if (dto.CategoryIds.HasValue)
         {
+            var categoryIds = dto.CategoryIds.Value;
             entity.BrandCategories.Clear();
-            var brandCategories = dto.CategoryIds
-                .Select(categoryId => BrandCategory.Create(entity.Id, categoryId))
-                .ToList();
-            entity.UpdateCategories(brandCategories);
+            if (categoryIds is { Count: > 0 })
+            {
+                var brandCategories = categoryIds
+                    .Select(categoryId => BrandCategory.Create(entity.Id, categoryId))
+                    .ToList();
+                entity.UpdateCategories(brandCategories);
+            }
         }
 
         _unitOfWork.Brands.Update(entity);

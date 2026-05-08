@@ -1,7 +1,9 @@
+using Alfred.Core.Application.Querying.JsonFilter.Inputs;
 using Alfred.Core.Application.Units;
 using Alfred.Core.Application.Units.Dtos;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 using Alfred.Core.WebApi.Contracts.Units;
 using Alfred.Core.WebApi.Filters;
 
@@ -25,7 +27,7 @@ public sealed class UnitsController : BaseApiController
     }
 
     /// <summary>
-    /// Get paginated list of units with optional DSL filtering and sorting.
+    /// Get paginated list of units with optional sorting.
     /// </summary>
     [HttpGet]
     [RequirePermission(PermissionCodes.Unit.Read)]
@@ -35,7 +37,21 @@ public sealed class UnitsController : BaseApiController
         [FromQuery] PaginationQueryParameters queryRequest,
         CancellationToken cancellationToken)
     {
-        var result = await _unitService.GetAllUnitsAsync(queryRequest.ToQueryRequest(), cancellationToken);
+        var result = await _unitService.SearchUnitsAsync(queryRequest.ToSearchRequest(), cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    /// <summary>
+    /// Search units with JSON filter DSL.
+    /// </summary>
+    [HttpPost("search")]
+    [RequirePermission(PermissionCodes.Unit.Read)]
+    [ProducesResponseType(typeof(ApiPagedResponse<UnitDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchUnits(
+        [FromBody] SearchRequest<UnitFilterInput> request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _unitService.SearchUnitsAsync(request.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

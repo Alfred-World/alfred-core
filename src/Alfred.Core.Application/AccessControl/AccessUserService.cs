@@ -1,7 +1,7 @@
 using Alfred.Core.Application.AccessControl.Dtos;
 using Alfred.Core.Application.AccessControl.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccessControl;
 
@@ -9,18 +9,18 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public AccessUserService(IUnitOfWork unitOfWork, IFilterParser filterParser, IAsyncQueryExecutor executor)
-        : base(filterParser, executor)
+    public AccessUserService(IUnitOfWork unitOfWork, IAsyncQueryExecutor executor)
+        : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<AccessUserDto>> GetAllUsersAsync(QueryRequest query,
+    public async Task<PageResult<AccessUserDto>> SearchUsersAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.ReplicatedUsers,
-            query,
+            request,
             AccessUserFieldMap.Instance,
             AccessUserFieldMap.Views,
             ToDto,

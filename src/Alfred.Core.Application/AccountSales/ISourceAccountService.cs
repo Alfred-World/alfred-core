@@ -1,10 +1,11 @@
 using Alfred.Core.Application.AccountSales.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales;
 
 public interface ISourceAccountService
 {
-    Task<PageResult<SourceAccountDto>> GetSourceAccountsAsync(QueryRequest query,
+    Task<PageResult<SourceAccountDto>> SearchSourceAccountsAsync(SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<SourceAccountDto?>

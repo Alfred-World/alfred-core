@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 
 using Alfred.Core.Application.Brands.Dtos;
 using Alfred.Core.Application.Brands.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Brands;
 
@@ -13,13 +13,12 @@ public sealed class BrandService : BaseApplicationService, IBrandService
 
     public BrandService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<BrandDto>> GetAllBrandsAsync(QueryRequest query,
+    public async Task<PageResult<BrandDto>> SearchBrandsAsync(SearchRequest request,
         CategoryId? categoryId = null,
         CancellationToken cancellationToken = default)
     {
@@ -27,9 +26,9 @@ public sealed class BrandService : BaseApplicationService, IBrandService
             ? b => b.BrandCategories.Any(bc => bc.CategoryId == categoryId.Value)
             : null;
 
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.Brands,
-            query,
+            request,
             BrandFieldMap.Instance,
             BrandFieldMap.Views,
             b => b.ToDto(),

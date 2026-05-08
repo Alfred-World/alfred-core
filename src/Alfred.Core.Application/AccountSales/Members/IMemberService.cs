@@ -1,4 +1,5 @@
 using Alfred.Core.Application.AccountSales.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales.Members;
 
@@ -8,7 +9,7 @@ public interface IMemberService
 
     Task<MemberDetailDto?> GetMemberDetailAsync(MemberId id, CancellationToken cancellationToken = default);
 
-    Task<PageResult<MemberDto>> GetMembersAsync(QueryRequest query, CancellationToken cancellationToken = default);
+    Task<PageResult<MemberDto>> SearchMembersPagedAsync(SearchRequest request, CancellationToken cancellationToken = default);
 
     Task<List<MemberDto>> SearchMembersAsync(string keyword, int take = 20,
         CancellationToken cancellationToken = default);

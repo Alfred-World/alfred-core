@@ -1,9 +1,9 @@
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Application.Units.Dtos;
 using Alfred.Core.Application.Units.Shared;
 using Alfred.Core.Domain.Common.Exceptions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Units;
 
@@ -13,18 +13,17 @@ public sealed class UnitService : BaseApplicationService, IUnitService
 
     public UnitService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<UnitDto>> GetAllUnitsAsync(QueryRequest query,
+    public async Task<PageResult<UnitDto>> SearchUnitsAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.Units,
-            query,
+            request,
             UnitFieldMap.Instance,
             UnitFieldMap.Views,
             u => u.ToDto(),

@@ -1,6 +1,8 @@
 using Alfred.Core.Application.AccessControl;
 using Alfred.Core.Application.AccessControl.Dtos;
+using Alfred.Core.Application.Querying.JsonFilter.Inputs;
 using Alfred.Core.Domain.Constants;
+using Alfred.Core.Domain.Querying;
 using Alfred.Core.WebApi.Contracts.AccessControl;
 using Alfred.Core.WebApi.Filters;
 
@@ -26,7 +28,17 @@ public sealed class AccessRolesController : BaseApiController
     public async Task<IActionResult> GetRoles([FromQuery] PaginationQueryParameters query,
         CancellationToken cancellationToken)
     {
-        var result = await _roleService.GetAllRolesAsync(query.ToQueryRequest(), cancellationToken);
+        var result = await _roleService.SearchRolesAsync(query.ToSearchRequest(), cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    [HttpPost("search")]
+    [RequirePermission(PermissionCodes.AccessControl.RoleRead)]
+    [ProducesResponseType(typeof(ApiPagedResponse<AccessRoleDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchRoles([FromBody] SearchRequest<AccessRoleFilterInput> request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _roleService.SearchRolesAsync(request.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

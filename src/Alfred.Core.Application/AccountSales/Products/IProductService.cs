@@ -1,10 +1,11 @@
 using Alfred.Core.Application.AccountSales.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales.Products;
 
 public interface IProductService
 {
-    Task<PageResult<ProductDto>> GetProductsAsync(QueryRequest query, CancellationToken cancellationToken = default);
+    Task<PageResult<ProductDto>> SearchProductsAsync(SearchRequest request, CancellationToken cancellationToken = default);
 
     Task<ProductDto?> GetProductByIdAsync(ProductId id, CancellationToken cancellationToken = default);
 

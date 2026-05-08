@@ -1,4 +1,5 @@
 using Alfred.Core.Application.Commodities.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Commodities;
 
@@ -6,7 +7,7 @@ public interface ICommodityService
 {
     #region Commodities
 
-    Task<PageResult<CommodityDto>> GetAllCommoditiesAsync(QueryRequest query,
+    Task<PageResult<CommodityDto>> SearchCommoditiesAsync(SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<CommodityDto?> GetCommodityByIdAsync(CommodityId id, CancellationToken cancellationToken = default);
@@ -22,7 +23,7 @@ public interface ICommodityService
 
     #region Investment Transactions
 
-    Task<PageResult<InvestmentTransactionDto>> GetTransactionsAsync(CommodityId commodityId, QueryRequest query,
+    Task<PageResult<InvestmentTransactionDto>> SearchTransactionsAsync(CommodityId commodityId, SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<InvestmentTransactionDto?> GetTransactionByIdAsync(InvestmentTransactionId id,

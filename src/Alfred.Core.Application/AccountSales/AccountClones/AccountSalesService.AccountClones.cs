@@ -2,17 +2,18 @@ using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.AccountSales.Shared;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales;
 
 public sealed partial class AccountSalesService
 {
-    public async Task<PageResult<AccountCloneDto>> GetAccountClonesAsync(QueryRequest query,
+    public async Task<PageResult<AccountCloneDto>> SearchAccountClonesAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(
+        return await SearchAsync(
             _unitOfWork.AccountClones,
-            query,
+            request,
             AccountCloneFieldMap.Instance,
             c => c.ToDto(),
             cancellationToken,

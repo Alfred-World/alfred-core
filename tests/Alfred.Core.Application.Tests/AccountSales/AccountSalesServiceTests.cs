@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using Alfred.Core.Application.AccountSales;
 using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.Common;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Abstractions;
 using Alfred.Core.Domain.Common.Ids;
 using Alfred.Core.Domain.Entities;
@@ -324,8 +323,6 @@ public sealed class AccountSalesServiceTests
 
     private static AccountSalesService CreateService(Mock<IUnitOfWork> uow, Mock<IAsyncQueryExecutor> executor)
     {
-        var parser = new Mock<IFilterParser>();
-
-        return new AccountSalesService(uow.Object, parser.Object, executor.Object);
+        return new AccountSalesService(uow.Object, executor.Object);
     }
 }

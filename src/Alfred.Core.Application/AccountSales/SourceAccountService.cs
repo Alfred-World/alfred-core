@@ -1,7 +1,7 @@
 using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.AccountSales.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales;
 
@@ -11,18 +11,17 @@ public sealed class SourceAccountService : BaseApplicationService, ISourceAccoun
 
     public SourceAccountService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<SourceAccountDto>> GetSourceAccountsAsync(QueryRequest query,
+    public async Task<PageResult<SourceAccountDto>> SearchSourceAccountsAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.SourceAccounts,
-            query,
+            request,
             SourceAccountFieldMap.Instance,
             SourceAccountFieldMap.Views,
             sa => sa.ToDto(),

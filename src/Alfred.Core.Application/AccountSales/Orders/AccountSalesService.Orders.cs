@@ -2,6 +2,7 @@ using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.AccountSales.Shared;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 
 using CommissionEntity = Alfred.Core.Domain.Entities.Commission;
 
@@ -9,12 +10,12 @@ namespace Alfred.Core.Application.AccountSales;
 
 public sealed partial class AccountSalesService
 {
-    public async Task<PageResult<AccountOrderDto>> GetOrdersAsync(QueryRequest query,
+    public async Task<PageResult<AccountOrderDto>> SearchOrdersAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        var page = await GetPagedWithViewAsync(
+        var page = await SearchWithViewAsync(
             _unitOfWork.AccountOrders,
-            query,
+            request,
             AccountOrderFieldMap.Instance,
             AccountOrderFieldMap.Views,
             o => o.ToDto(),

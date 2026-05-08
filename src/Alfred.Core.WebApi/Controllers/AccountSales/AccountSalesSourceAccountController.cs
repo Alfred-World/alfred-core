@@ -26,7 +26,7 @@ public sealed class AccountSalesSourceAccountController : BaseApiController
     public async Task<IActionResult> GetSourceAccounts([FromQuery] PaginationQueryParameters query,
         CancellationToken cancellationToken)
     {
-        var result = await _service.GetSourceAccountsAsync(query.ToQueryRequest(), cancellationToken);
+        var result = await _service.SearchSourceAccountsAsync(query.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

@@ -1,7 +1,7 @@
 using Alfred.Core.Application.AccessControl.Dtos;
 using Alfred.Core.Application.AccessControl.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccessControl;
 
@@ -9,18 +9,18 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public AccessRoleService(IUnitOfWork unitOfWork, IFilterParser filterParser, IAsyncQueryExecutor executor)
-        : base(filterParser, executor)
+    public AccessRoleService(IUnitOfWork unitOfWork, IAsyncQueryExecutor executor)
+        : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<AccessRoleDto>> GetAllRolesAsync(QueryRequest query,
+    public async Task<PageResult<AccessRoleDto>> SearchRolesAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.AccessRoles,
-            query,
+            request,
             AccessRoleFieldMap.Instance,
             AccessRoleFieldMap.Views,
             r => r.ToDto(),

@@ -31,7 +31,7 @@ public sealed class AccountSalesOrderController : BaseApiController
     public async Task<IActionResult> GetOrders([FromQuery] PaginationQueryParameters query,
         CancellationToken cancellationToken)
     {
-        var result = await _service.GetOrdersAsync(query.ToQueryRequest(), cancellationToken);
+        var result = await _service.SearchOrdersAsync(query.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

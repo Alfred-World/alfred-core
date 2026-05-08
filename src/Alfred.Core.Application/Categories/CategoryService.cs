@@ -1,10 +1,10 @@
 using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Application.Categories.Shared;
 using Alfred.Core.Application.Common.Settings;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Common.Exceptions;
 using Alfred.Core.Domain.Entities;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Categories;
 
@@ -14,18 +14,17 @@ public sealed class CategoryService : BaseApplicationService, ICategoryService
 
     public CategoryService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<CategoryDto>> GetAllCategoriesAsync(QueryRequest query,
+    public async Task<PageResult<CategoryDto>> SearchCategoriesAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.Categories,
-            query,
+            request,
             CategoryFieldMap.Instance,
             CategoryFieldMap.Views,
             c => c.ToDto(),

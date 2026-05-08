@@ -1,8 +1,10 @@
 using Alfred.Core.Application.Categories;
 using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Application.Common.Settings;
+using Alfred.Core.Application.Querying.JsonFilter.Inputs;
 using Alfred.Core.Domain.Constants;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 using Alfred.Core.WebApi.Contracts.Categories;
 using Alfred.Core.WebApi.Filters;
 
@@ -26,7 +28,7 @@ public sealed class CategoriesController : BaseApiController
     }
 
     /// <summary>
-    /// Get paginated list of categories with optional DSL filtering and sorting.
+    /// Get paginated list of categories with optional sorting.
     /// </summary>
     [HttpGet]
     [RequirePermission(PermissionCodes.Category.Read)]
@@ -36,7 +38,21 @@ public sealed class CategoriesController : BaseApiController
         [FromQuery] PaginationQueryParameters queryRequest,
         CancellationToken cancellationToken)
     {
-        var result = await _categoryService.GetAllCategoriesAsync(queryRequest.ToQueryRequest(), cancellationToken);
+        var result = await _categoryService.SearchCategoriesAsync(queryRequest.ToSearchRequest(), cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    /// <summary>
+    /// Search categories with JSON filter DSL.
+    /// </summary>
+    [HttpPost("search")]
+    [RequirePermission(PermissionCodes.Category.Read)]
+    [ProducesResponseType(typeof(ApiPagedResponse<CategoryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchCategories(
+        [FromBody] SearchRequest<CategoryFilterInput> request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _categoryService.SearchCategoriesAsync(request.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

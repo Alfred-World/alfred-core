@@ -1,39 +1,27 @@
 using System.ComponentModel;
 
+using Alfred.Core.Domain.Querying;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Contracts.Common;
 
 /// <summary>
-/// Standard pagination query parameters for list endpoints
-/// Supports filtering, sorting, pagination, field projection, and includes
-/// Follows auth-service pattern for consistent API interface
+/// Standard pagination query parameters for GET list endpoints.
+/// For advanced filtering, use POST search endpoints with <see cref="SearchRequest{TFilter}"/>.
 /// </summary>
 public sealed record PaginationQueryParameters
 {
-    /// <summary>
-    /// Page number (1-based)
-    /// </summary>
     [FromQuery(Name = "page")]
     [DefaultValue(1)]
     public int Page { get; init; } = 1;
 
-    /// <summary>
-    /// Number of items per page
-    /// </summary>
     [FromQuery(Name = "pageSize")]
     [DefaultValue(20)]
     public int PageSize { get; init; } = 20;
 
     /// <summary>
-    /// Filter expression using DSL syntax
-    /// Examples: "name @contains('abc')", "phone == '123' or phone == '321'"
-    /// </summary>
-    [FromQuery(Name = "filter")]
-    public string? Filter { get; init; }
-
-    /// <summary>
-    /// Sort expression (comma-separated)
+    /// Sort expression (comma-separated).
     /// Example: "name,-createdAt" (ascending by name, descending by createdAt)
     /// </summary>
     [FromQuery(Name = "sort")]
@@ -41,29 +29,58 @@ public sealed record PaginationQueryParameters
 
     /// <summary>
     /// View name to determine which fields to return.
-    /// Available views depend on the endpoint (e.g., "list", "detail", "minimal").
     /// </summary>
     [FromQuery(Name = "view")]
     public string? View { get; init; }
 }
 
 /// <summary>
-///     Extension methods for building QueryRequest from query parameters
+/// Extension methods for converting query parameters to SearchRequest.
 /// </summary>
-public static class QueryRequestExtensions
+public static class QueryParameterExtensions
 {
     /// <summary>
-    ///     Convert PaginationQueryParameters to QueryRequest
+    /// Convert PaginationQueryParameters to SearchRequest (no filter — use POST search for filtering).
     /// </summary>
-    public static QueryRequest ToQueryRequest(this PaginationQueryParameters parameters)
+    public static SearchRequest ToSearchRequest(this PaginationQueryParameters parameters)
     {
-        return new QueryRequest
+        return new SearchRequest
         {
-            Filter = parameters.Filter ?? string.Empty,
-            Sort = parameters.Sort ?? string.Empty,
             Page = parameters.Page,
             PageSize = parameters.PageSize,
-            View = parameters.View ?? string.Empty
+            Order = ParseSortString(parameters.Sort),
+            View = parameters.View
         };
+    }
+
+    private static List<SortField>? ParseSortString(string? sort)
+    {
+        if (string.IsNullOrWhiteSpace(sort))
+        {
+            return null;
+        }
+
+        var parts = sort.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var fields = new List<SortField>(parts.Length);
+
+        foreach (var part in parts)
+        {
+            var trimmed = part.Trim();
+            if (string.IsNullOrEmpty(trimmed))
+            {
+                continue;
+            }
+
+            if (trimmed.StartsWith('-'))
+            {
+                fields.Add(new SortField { Field = trimmed[1..], Direction = SortDirection.Desc });
+            }
+            else
+            {
+                fields.Add(new SortField { Field = trimmed, Direction = SortDirection.Asc });
+            }
+        }
+
+        return fields.Count > 0 ? fields : null;
     }
 }

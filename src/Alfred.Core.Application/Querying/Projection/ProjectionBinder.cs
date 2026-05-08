@@ -40,6 +40,7 @@ public static class ProjectionBinder
         IQueryable<TSource> query,
         string[]? fields,
         FieldMap<TSource> fieldMap)
+        where TSource : class
         where TDto : class, new()
     {
         return ApplyProjectionInternal<TSource, TDto>(
@@ -56,6 +57,7 @@ public static class ProjectionBinder
         IReadOnlySet<string>? computedFields,
         FieldMap<TSource> fieldMap,
         Func<string, string> getFieldMapKey)
+        where TSource : class
         where TDto : class, new()
     {
         // If no fields specified, return all (will need manual mapping later)
@@ -161,6 +163,7 @@ public static class ProjectionBinder
     public static Expression<Func<TSource, Dictionary<string, object?>>> BuildDictionaryProjection<TSource>(
         string[]? fields,
         FieldMap<TSource> fieldMap)
+        where TSource : class
     {
         var parameter = Expression.Parameter(typeof(TSource), "x");
         var dictType = typeof(Dictionary<string, object?>);
@@ -214,6 +217,7 @@ public static class ProjectionBinder
     public static (bool IsValid, string[] InvalidFields) ValidateFields<TSource>(
         string[]? fields,
         FieldMap<TSource> fieldMap)
+        where TSource : class
     {
         if (fields == null || fields.Length == 0)
         {

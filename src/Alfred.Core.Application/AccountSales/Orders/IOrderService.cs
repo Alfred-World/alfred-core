@@ -1,10 +1,11 @@
 using Alfred.Core.Application.AccountSales.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales.Orders;
 
 public interface IOrderService
 {
-    Task<PageResult<AccountOrderDto>> GetOrdersAsync(QueryRequest query, CancellationToken cancellationToken = default);
+    Task<PageResult<AccountOrderDto>> SearchOrdersAsync(SearchRequest request, CancellationToken cancellationToken = default);
 
     Task<List<SellerRevenueDto>> GetRevenueBySellerAsync(CancellationToken cancellationToken = default);
 

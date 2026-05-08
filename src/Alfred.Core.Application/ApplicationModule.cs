@@ -10,7 +10,6 @@ using Alfred.Core.Application.Commodities;
 using Alfred.Core.Application.Common.Behaviors;
 using Alfred.Core.Application.Common.Events;
 using Alfred.Core.Application.Files;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Application.Units;
 using Alfred.Core.Domain.Abstractions.Services;
 using Alfred.Core.Domain.Common.Events;
@@ -37,9 +36,6 @@ public static class ApplicationModule
 
         // Register Validators
         services.AddValidatorsFromAssembly(typeof(ApplicationModule).Assembly);
-
-        // Register querying services
-        services.AddScoped<IFilterParser, PrattFilterParser>();
 
         // Register application services
         services.AddScoped<IAccessRoleService, AccessRoleService>();

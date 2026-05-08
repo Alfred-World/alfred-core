@@ -1,6 +1,8 @@
 using Alfred.Core.Application.Brands;
 using Alfred.Core.Application.Brands.Dtos;
+using Alfred.Core.Application.Querying.JsonFilter.Inputs;
 using Alfred.Core.Domain.Constants;
+using Alfred.Core.Domain.Querying;
 using Alfred.Core.WebApi.Contracts.Brands;
 using Alfred.Core.WebApi.Filters;
 
@@ -24,7 +26,7 @@ public sealed class BrandsController : BaseApiController
     }
 
     /// <summary>
-    /// Get paginated list of brands with optional DSL filtering and sorting.
+    /// Get paginated list of brands with optional sorting.
     /// </summary>
     [HttpGet]
     [RequirePermission(PermissionCodes.Brand.Read)]
@@ -36,8 +38,24 @@ public sealed class BrandsController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _brandService.GetAllBrandsAsync(queryRequest.ToQueryRequest(), (CategoryId?)categoryId,
+            await _brandService.SearchBrandsAsync(queryRequest.ToSearchRequest(), (CategoryId?)categoryId,
                 cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    /// <summary>
+    /// Search brands with JSON filter DSL.
+    /// </summary>
+    [HttpPost("search")]
+    [RequirePermission(PermissionCodes.Brand.Read)]
+    [ProducesResponseType(typeof(ApiPagedResponse<BrandDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchBrands(
+        [FromBody] SearchRequest<BrandFilterInput> request,
+        [FromQuery] Guid? categoryId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _brandService.SearchBrandsAsync(request.ToSearchRequest(), (CategoryId?)categoryId,
+            cancellationToken);
         return OkPaginatedResponse(result);
     }
 

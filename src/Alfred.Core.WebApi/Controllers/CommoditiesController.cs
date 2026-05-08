@@ -1,6 +1,8 @@
 using Alfred.Core.Application.Commodities;
 using Alfred.Core.Application.Commodities.Dtos;
+using Alfred.Core.Application.Querying.JsonFilter.Inputs;
 using Alfred.Core.Domain.Constants;
+using Alfred.Core.Domain.Querying;
 using Alfred.Core.WebApi.Contracts.Commodities;
 using Alfred.Core.WebApi.Filters;
 
@@ -26,7 +28,7 @@ public sealed class CommoditiesController : BaseApiController
     #region Commodities
 
     /// <summary>
-    /// Get paginated list of commodities with optional DSL filtering and sorting.
+    /// Get paginated list of commodities with optional sorting.
     /// </summary>
     [HttpGet]
     [RequirePermission(PermissionCodes.Commodity.Read)]
@@ -36,7 +38,21 @@ public sealed class CommoditiesController : BaseApiController
         [FromQuery] PaginationQueryParameters queryRequest,
         CancellationToken cancellationToken)
     {
-        var result = await _commodityService.GetAllCommoditiesAsync(queryRequest.ToQueryRequest(), cancellationToken);
+        var result = await _commodityService.SearchCommoditiesAsync(queryRequest.ToSearchRequest(), cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    /// <summary>
+    /// Search commodities with JSON filter DSL.
+    /// </summary>
+    [HttpPost("search")]
+    [RequirePermission(PermissionCodes.Commodity.Read)]
+    [ProducesResponseType(typeof(ApiPagedResponse<CommodityDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchCommodities(
+        [FromBody] SearchRequest<CommodityFilterInput> request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _commodityService.SearchCommoditiesAsync(request.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 
@@ -120,7 +136,7 @@ public sealed class CommoditiesController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _commodityService.GetTransactionsAsync((CommodityId)commodityId, queryRequest.ToQueryRequest(),
+            await _commodityService.SearchTransactionsAsync((CommodityId)commodityId, queryRequest.ToSearchRequest(),
                 cancellationToken);
         return OkPaginatedResponse(result);
     }

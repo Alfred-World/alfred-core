@@ -1,7 +1,7 @@
 using Alfred.Core.Application.Commodities.Dtos;
 using Alfred.Core.Application.Commodities.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Commodities;
 
@@ -11,20 +11,19 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
 
     public CommodityService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
     #region Commodities
 
-    public async Task<PageResult<CommodityDto>> GetAllCommoditiesAsync(QueryRequest query,
+    public async Task<PageResult<CommodityDto>> SearchCommoditiesAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.Commodities,
-            query,
+            request,
             CommodityFieldMap.Instance,
             CommodityFieldMap.Views,
             c => c.ToDto(),
@@ -97,13 +96,13 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
 
     #region Investment Transactions
 
-    public async Task<PageResult<InvestmentTransactionDto>> GetTransactionsAsync(CommodityId commodityId,
-        QueryRequest query,
+    public async Task<PageResult<InvestmentTransactionDto>> SearchTransactionsAsync(CommodityId commodityId,
+        SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.InvestmentTransactions,
-            query,
+            request,
             InvestmentTransactionFieldMap.Instance,
             InvestmentTransactionFieldMap.Views,
             t => t.ToDto(),

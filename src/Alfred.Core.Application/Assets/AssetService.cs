@@ -1,7 +1,7 @@
 using Alfred.Core.Application.Assets.Dtos;
 using Alfred.Core.Application.Assets.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Assets;
 
@@ -11,18 +11,17 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     public AssetService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
     #region Assets
 
-    public async Task<PageResult<AssetDto>> GetAllAssetsAsync(QueryRequest query,
+    public async Task<PageResult<AssetDto>> SearchAssetsAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(_unitOfWork.Assets, query, AssetFieldMap.Instance,
+        return await SearchWithViewAsync(_unitOfWork.Assets, request, AssetFieldMap.Instance,
             AssetFieldMap.Views, a => a.ToDto(), cancellationToken);
     }
 
@@ -98,13 +97,12 @@ public sealed class AssetService : BaseApplicationService, IAssetService
 
     #region Asset Logs
 
-    public async Task<PageResult<AssetLogDto>> GetAssetLogsAsync(AssetId assetId, QueryRequest query,
+    public async Task<PageResult<AssetLogDto>> SearchAssetLogsAsync(AssetId assetId, SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        // Pre-filter by assetId; combined with DSL filter inside GetPagedWithViewAsync
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.AssetLogs,
-            query,
+            request,
             AssetLogFieldMap.Instance,
             AssetLogFieldMap.Views,
             l => l.ToDto(),

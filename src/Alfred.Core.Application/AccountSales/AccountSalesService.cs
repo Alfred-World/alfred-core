@@ -1,5 +1,4 @@
 using Alfred.Core.Application.AccountSales.Dtos;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Entities;
 
 namespace Alfred.Core.Application.AccountSales;
@@ -10,8 +9,7 @@ public sealed partial class AccountSalesService : BaseApplicationService, IAccou
 
     public AccountSalesService(
         IUnitOfWork unitOfWork,
-        IFilterParser filterParser,
-        IAsyncQueryExecutor executor) : base(filterParser, executor)
+        IAsyncQueryExecutor executor) : base(executor)
     {
         _unitOfWork = unitOfWork;
     }

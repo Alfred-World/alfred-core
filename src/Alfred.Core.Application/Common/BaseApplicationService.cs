@@ -1,33 +1,29 @@
 using System.Linq.Expressions;
 
-using Alfred.Core.Application.Common.Exceptions;
-using Alfred.Core.Application.Querying.Filtering.Binding;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
 using Alfred.Core.Domain.Common.Base;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Common;
 
 /// <summary>
 /// Base service providing common pagination and filtering helpers for all application services.
-/// Eliminates boilerplate filter/sort/page logic across service implementations.
+/// Uses JSON DSL filter system (SearchRequest + FilterExpressionBinder).
 /// </summary>
 public abstract class BaseApplicationService
 {
-    private readonly IFilterParser _filterParser;
     protected readonly IAsyncQueryExecutor _executor;
 
-    protected BaseApplicationService(IFilterParser filterParser, IAsyncQueryExecutor executor)
+    protected BaseApplicationService(IAsyncQueryExecutor executor)
     {
-        _filterParser = filterParser;
         _executor = executor;
     }
 
     /// <summary>
-    /// Execute a paginated query with DSL filtering, dynamic sorting, and optional pre-filter / includes.
+    /// Execute a search query using JSON DSL with structured filter/sort.
     /// </summary>
-    protected async Task<PageResult<TDto>> GetPagedAsync<TEntity, TId, TDto>(
+    protected async Task<PageResult<TDto>> SearchAsync<TEntity, TId, TDto>(
         IRepository<TEntity, TId> repository,
-        QueryRequest query,
+        SearchRequest request,
         BaseFieldMap<TEntity> fieldMap,
         Func<TEntity, TDto> mapper,
         CancellationToken cancellationToken = default,
@@ -36,29 +32,18 @@ public abstract class BaseApplicationService
         where TEntity : BaseEntity<TId>
         where TId : IEquatable<TId>
     {
-        var page = query.GetEffectivePage();
-        var pageSize = query.GetEffectivePageSize();
+        var page = request.Page < 1 ? 1 : request.Page;
+        var pageSize = request.PageSize < 1 ? 20 : request.PageSize;
         var fields = fieldMap.Fields;
 
-        Expression<Func<TEntity, bool>>? dslFilter = null;
-        if (!string.IsNullOrWhiteSpace(query.Filter))
+        Expression<Func<TEntity, bool>>? jsonFilter = null;
+        if (request.Filter is not null)
         {
-            try
-            {
-                var ast = _filterParser.Parse(query.Filter);
-                dslFilter = EfFilterBinder<TEntity>.Bind(ast, fields);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw FilterExceptionHelper.CreateFilterException(ex, query.Filter, fields);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Invalid filter syntax: {ex.Message}", ex);
-            }
+            jsonFilter = FilterExpressionBinder<TEntity>.Bind(request.Filter, fields);
         }
 
-        var combinedFilter = CombineFilters(preFilter, dslFilter);
+        var combinedFilter = CombineFilters(preFilter, jsonFilter);
+        var sortString = ConvertSortFieldsToString(request.Order);
 
         Func<string, (Expression<Func<TEntity, object>>? Expression, bool CanSort)> fieldSelector = fieldName =>
         {
@@ -74,7 +59,7 @@ public abstract class BaseApplicationService
 
         var (dbQuery, total) = await repository.BuildPagedQueryAsync(
             combinedFilter,
-            query.Sort,
+            sortString,
             page,
             pageSize,
             includes,
@@ -87,16 +72,12 @@ public abstract class BaseApplicationService
         return new PageResult<TDto>(items, page, pageSize, total);
     }
 
-    #region View/Projection overloads
-
     /// <summary>
-    /// Execute a paginated query with View/Projection support and optional pre-filter.
-    /// Resolves query.View from the ViewRegistry and applies DB-level projection via ProjectionBinder.
-    /// Falls back to in-memory mapper when no view is matched.
+    /// Execute a search query with View/Projection support using JSON DSL.
     /// </summary>
-    protected async Task<PageResult<TDto>> GetPagedWithViewAsync<TEntity, TId, TDto>(
+    protected async Task<PageResult<TDto>> SearchWithViewAsync<TEntity, TId, TDto>(
         IRepository<TEntity, TId> repository,
-        QueryRequest query,
+        SearchRequest request,
         BaseFieldMap<TEntity> fieldMap,
         ViewRegistry<TEntity, TDto>? viewRegistry,
         Func<TEntity, TDto> fallbackMapper,
@@ -106,50 +87,35 @@ public abstract class BaseApplicationService
         where TId : IEquatable<TId>
         where TDto : class, new()
     {
-        var page = query.GetEffectivePage();
-        var pageSize = query.GetEffectivePageSize();
+        var page = request.Page < 1 ? 1 : request.Page;
+        var pageSize = request.PageSize < 1 ? 20 : request.PageSize;
         var fields = fieldMap.Fields;
 
-        // 1. Parse DSL filter
-        Expression<Func<TEntity, bool>>? dslFilter = null;
-        if (!string.IsNullOrWhiteSpace(query.Filter))
+        Expression<Func<TEntity, bool>>? jsonFilter = null;
+        if (request.Filter is not null)
         {
-            try
-            {
-                var ast = _filterParser.Parse(query.Filter);
-                dslFilter = EfFilterBinder<TEntity>.Bind(ast, fields);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw FilterExceptionHelper.CreateFilterException(ex, query.Filter, fields);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Invalid filter syntax: {ex.Message}", ex);
-            }
+            jsonFilter = FilterExpressionBinder<TEntity>.Bind(request.Filter, fields);
         }
 
-        var combinedFilter = CombineFilters(preFilter, dslFilter);
+        var combinedFilter = CombineFilters(preFilter, jsonFilter);
+        var sortString = ConvertSortFieldsToString(request.Order);
 
-        // 2. Resolve view (if any)
+        // Resolve view
         ViewDefinition<TEntity, TDto>? view = null;
         if (viewRegistry != null)
         {
             try
             {
-                view = viewRegistry.GetView(query.View);
+                view = viewRegistry.GetView(request.View);
             }
             catch (InvalidOperationException)
             {
-                // No default view set and no view requested — fall back to full entity load
                 view = null;
             }
         }
 
-        // 3. Merge includes from view definition
         var includes = view?.Includes;
 
-        // 4. Build field selector for sorting
         Func<string, (Expression<Func<TEntity, object>>? Expression, bool CanSort)> fieldSelector = fieldName =>
         {
             if (fields.TryGet(fieldName, out var expression, out _))
@@ -162,60 +128,42 @@ public abstract class BaseApplicationService
             return (null, false);
         };
 
-        // 5. Build paged query (filter + sort + page)
         var (dbQuery, total) = await repository.BuildPagedQueryAsync(
             combinedFilter,
-            query.Sort,
+            sortString,
             page,
             pageSize,
             includes,
             fieldSelector,
             cancellationToken);
 
-        // 6. Apply projection or fallback mapper
         if (view != null)
         {
-            // DB-level projection — only SELECT the fields defined in the view
             var projected = ProjectionBinder.ApplyProjection(_executor.AsNoTracking(dbQuery), view, fields);
             var items = await _executor.ToListAsync(projected, cancellationToken);
             return new PageResult<TDto>(items, page, pageSize, total);
         }
         else
         {
-            // In-memory mapping — full entity load
             var entities = await _executor.ToListAsync(_executor.AsNoTracking(dbQuery), cancellationToken);
             var items = entities.Select(fallbackMapper).ToList();
             return new PageResult<TDto>(items, page, pageSize, total);
         }
     }
 
-    #endregion
-
     /// <summary>
-    /// Parse a DSL filter string into an expression for a given entity type.
-    /// Returns null if the filter string is empty.
+    /// Convert structured SortField list to the "field:direction,field:direction" string format
+    /// used by the existing repository sorting infrastructure.
     /// </summary>
-    protected Expression<Func<TEntity, bool>>? ParseFilter<TEntity>(string? filter, FieldMap<TEntity> fieldMap)
-        where TEntity : class
+    private static string? ConvertSortFieldsToString(IReadOnlyList<SortField>? order)
     {
-        if (string.IsNullOrWhiteSpace(filter))
+        if (order is null or { Count: 0 })
         {
             return null;
         }
 
-        try
-        {
-            var ast = _filterParser.Parse(filter);
-            return EfFilterBinder<TEntity>.Bind(ast, fieldMap);
-        }
-        catch (InvalidOperationException ex)
-        {
-            throw FilterExceptionHelper.CreateFilterException(ex, filter, fieldMap);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Invalid filter syntax: {ex.Message}", ex);
-        }
+        return string.Join(",", order.Select(s =>
+            $"{s.Field} {(s.Direction == SortDirection.Desc ? "desc" : "asc")}"));
     }
 
     private static Expression<Func<TEntity, bool>>? CombineFilters<TEntity>(

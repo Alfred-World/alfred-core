@@ -1,11 +1,12 @@
 using Alfred.Core.Application.Categories.Dtos;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Categories;
 
 public interface ICategoryService
 {
-    Task<PageResult<CategoryDto>> GetAllCategoriesAsync(QueryRequest query,
+    Task<PageResult<CategoryDto>> SearchCategoriesAsync(SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<PageResult<CategoryTreeNodeDto>> GetCategoryTreeAsync(CategoryType? type = null, int page = 1,

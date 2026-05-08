@@ -1,10 +1,11 @@
 using Alfred.Core.Application.AccessControl.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccessControl;
 
 public interface IAccessRoleService
 {
-    Task<PageResult<AccessRoleDto>> GetAllRolesAsync(QueryRequest query,
+    Task<PageResult<AccessRoleDto>> SearchRolesAsync(SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<AccessRoleDto?> GetRoleByIdAsync(AccessRoleId id, CancellationToken cancellationToken = default);

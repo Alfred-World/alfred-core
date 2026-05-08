@@ -26,7 +26,7 @@ public sealed class AccountSalesMemberController : BaseApiController
     public async Task<IActionResult> GetMembers([FromQuery] PaginationQueryParameters query,
         CancellationToken cancellationToken)
     {
-        var result = await _service.GetMembersAsync(query.ToQueryRequest(), cancellationToken);
+        var result = await _service.SearchMembersPagedAsync(query.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

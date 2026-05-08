@@ -1,10 +1,11 @@
 using Alfred.Core.Application.AccountSales.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales.AccountClones;
 
 public interface IAccountCloneService
 {
-    Task<PageResult<AccountCloneDto>> GetAccountClonesAsync(QueryRequest query,
+    Task<PageResult<AccountCloneDto>> SearchAccountClonesAsync(SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<AccountCloneDto> AddAccountCloneAsync(CreateAccountCloneDto dto,

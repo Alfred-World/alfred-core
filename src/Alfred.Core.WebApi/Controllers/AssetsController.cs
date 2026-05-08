@@ -1,6 +1,8 @@
 using Alfred.Core.Application.Assets;
 using Alfred.Core.Application.Assets.Dtos;
+using Alfred.Core.Application.Querying.JsonFilter.Inputs;
 using Alfred.Core.Domain.Constants;
+using Alfred.Core.Domain.Querying;
 using Alfred.Core.WebApi.Contracts.Assets;
 using Alfred.Core.WebApi.Filters;
 
@@ -26,7 +28,7 @@ public sealed class AssetsController : BaseApiController
     #region Assets
 
     /// <summary>
-    /// Get paginated list of assets with optional DSL filtering and sorting.
+    /// Get paginated list of assets with optional sorting.
     /// </summary>
     [HttpGet]
     [RequirePermission(PermissionCodes.Asset.Read)]
@@ -36,7 +38,21 @@ public sealed class AssetsController : BaseApiController
         [FromQuery] PaginationQueryParameters queryRequest,
         CancellationToken cancellationToken)
     {
-        var result = await _assetService.GetAllAssetsAsync(queryRequest.ToQueryRequest(), cancellationToken);
+        var result = await _assetService.SearchAssetsAsync(queryRequest.ToSearchRequest(), cancellationToken);
+        return OkPaginatedResponse(result);
+    }
+
+    /// <summary>
+    /// Search assets with JSON filter DSL.
+    /// </summary>
+    [HttpPost("search")]
+    [RequirePermission(PermissionCodes.Asset.Read)]
+    [ProducesResponseType(typeof(ApiPagedResponse<AssetDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SearchAssets(
+        [FromBody] SearchRequest<AssetFilterInput> request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _assetService.SearchAssetsAsync(request.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 
@@ -120,7 +136,7 @@ public sealed class AssetsController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _assetService.GetAssetLogsAsync((AssetId)assetId, queryRequest.ToQueryRequest(), cancellationToken);
+            await _assetService.SearchAssetLogsAsync((AssetId)assetId, queryRequest.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

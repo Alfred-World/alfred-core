@@ -35,7 +35,9 @@ public sealed class AccessUserFieldMap : BaseFieldMap<ReplicatedUser>
             CreatedAt = ur.Role.CreatedAt,
             UpdatedAt = ur.Role.UpdatedAt,
             Permissions = null
-        })).Selectable()
+        })).AllowInnerFields("id", "name", "normalizedName", "icon", "isImmutable", "isSystem", "isDeleted")
+            .WithFilterExpression(u => u.UserRoles.Select(ur => ur.Role))
+            .Selectable()
         .Add("rolesSummary", x => x.UserRoles.Select(ur => new AccessRoleDto
         {
             Id = ur.Role.Id.Value,

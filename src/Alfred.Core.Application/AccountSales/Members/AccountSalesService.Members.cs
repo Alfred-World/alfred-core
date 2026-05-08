@@ -1,6 +1,7 @@
 using Alfred.Core.Application.AccountSales.Dtos;
 using Alfred.Core.Application.AccountSales.Shared;
 using Alfred.Core.Domain.Entities;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccountSales;
 
@@ -58,10 +59,10 @@ public sealed partial class AccountSalesService
         return new MemberDetailDto(entity.ToDto(), stats);
     }
 
-    public async Task<PageResult<MemberDto>> GetMembersAsync(QueryRequest query,
+    public async Task<PageResult<MemberDto>> SearchMembersPagedAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(_unitOfWork.Members, query, MemberFieldMap.Instance, m => m.ToDto(),
+        return await SearchAsync(_unitOfWork.Members, request, MemberFieldMap.Instance, m => m.ToDto(),
             cancellationToken);
     }
 

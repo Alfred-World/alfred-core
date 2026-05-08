@@ -1,4 +1,5 @@
 using Alfred.Core.Application.Assets.Dtos;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Assets;
 
@@ -6,7 +7,7 @@ public interface IAssetService
 {
     #region Assets
 
-    Task<PageResult<AssetDto>> GetAllAssetsAsync(QueryRequest query,
+    Task<PageResult<AssetDto>> SearchAssetsAsync(SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<AssetDto?> GetAssetByIdAsync(AssetId id, CancellationToken cancellationToken = default);
@@ -21,7 +22,7 @@ public interface IAssetService
 
     #region Asset Logs
 
-    Task<PageResult<AssetLogDto>> GetAssetLogsAsync(AssetId assetId, QueryRequest query,
+    Task<PageResult<AssetLogDto>> SearchAssetLogsAsync(AssetId assetId, SearchRequest request,
         CancellationToken cancellationToken = default);
 
     Task<AssetLogDto?> GetAssetLogByIdAsync(AssetLogId id, CancellationToken cancellationToken = default);

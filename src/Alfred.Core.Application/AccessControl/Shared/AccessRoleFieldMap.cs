@@ -42,7 +42,9 @@ public class AccessRoleFieldMap : BaseFieldMap<AccessRole>
             IsActive = rp.Permission.IsActive,
             CreatedAt = rp.Permission.CreatedAt,
             UpdatedAt = rp.Permission.UpdatedAt
-        })).AllowAll()
+        })).AllowInnerFields("id", "code", "name", "resource", "action", "isActive")
+            .WithFilterExpression(r => r.RolePermissions.Select(rp => rp.Permission))
+            .AllowAll()
 
         // Lightweight permission projection - only id, code, name (for list views)
         // Returns AccessPermissionDto with null for non-essential fields (skipped in JSON)

@@ -1,6 +1,6 @@
 using Alfred.Core.Application.AccessControl.Dtos;
 using Alfred.Core.Application.AccessControl.Shared;
-using Alfred.Core.Application.Querying.Filtering.Parsing;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.AccessControl;
 
@@ -8,18 +8,18 @@ public sealed class AccessPermissionService : BaseApplicationService, IAccessPer
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public AccessPermissionService(IUnitOfWork unitOfWork, IFilterParser filterParser, IAsyncQueryExecutor executor)
-        : base(filterParser, executor)
+    public AccessPermissionService(IUnitOfWork unitOfWork, IAsyncQueryExecutor executor)
+        : base(executor)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PageResult<AccessPermissionDto>> GetAllPermissionsAsync(QueryRequest query,
+    public async Task<PageResult<AccessPermissionDto>> SearchPermissionsAsync(SearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedWithViewAsync(
+        return await SearchWithViewAsync(
             _unitOfWork.AccessPermissions,
-            query,
+            request,
             AccessPermissionFieldMap.Instance,
             AccessPermissionFieldMap.Views,
             p => p.ToDto(),

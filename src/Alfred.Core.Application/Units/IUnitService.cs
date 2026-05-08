@@ -1,11 +1,12 @@
 using Alfred.Core.Application.Units.Dtos;
 using Alfred.Core.Domain.Enums;
+using Alfred.Core.Domain.Querying;
 
 namespace Alfred.Core.Application.Units;
 
 public interface IUnitService
 {
-    Task<PageResult<UnitDto>> GetAllUnitsAsync(QueryRequest query, CancellationToken cancellationToken = default);
+    Task<PageResult<UnitDto>> SearchUnitsAsync(SearchRequest request, CancellationToken cancellationToken = default);
     Task<UnitDto?> GetUnitByIdAsync(UnitId id, CancellationToken cancellationToken = default);
     Task<UnitDto> CreateUnitAsync(CreateUnitDto dto, CancellationToken cancellationToken = default);
     Task<UnitDto> UpdateUnitAsync(UnitId id, UpdateUnitDto dto, CancellationToken cancellationToken = default);

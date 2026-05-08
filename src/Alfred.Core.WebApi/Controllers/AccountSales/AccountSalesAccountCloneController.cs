@@ -26,7 +26,7 @@ public sealed class AccountSalesAccountCloneController : BaseApiController
     public async Task<IActionResult> GetAccountClones([FromQuery] PaginationQueryParameters query,
         CancellationToken cancellationToken)
     {
-        var result = await _service.GetAccountClonesAsync(query.ToQueryRequest(), cancellationToken);
+        var result = await _service.SearchAccountClonesAsync(query.ToSearchRequest(), cancellationToken);
         return OkPaginatedResponse(result);
     }
 

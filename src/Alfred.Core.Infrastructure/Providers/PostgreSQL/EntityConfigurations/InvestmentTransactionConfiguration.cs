@@ -49,6 +49,12 @@ internal sealed class InvestmentTransactionConfiguration : IEntityTypeConfigurat
 
         builder.HasIndex(x => x.CommodityId);
 
+        builder.Property(x => x.CreatedById);
+
+        builder.HasIndex(x => x.CreatedById);
+
+        builder.HasIndex(x => new { x.CommodityId, x.CreatedById });
+
         builder.HasOne(x => x.Unit)
             .WithMany()
             .HasForeignKey(x => x.UnitId)

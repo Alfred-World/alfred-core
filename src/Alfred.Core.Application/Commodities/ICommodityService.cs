@@ -26,13 +26,14 @@ public interface ICommodityService
     Task<PageResult<InvestmentTransactionDto>> SearchTransactionsAsync(CommodityId commodityId, SearchRequest request,
         CancellationToken cancellationToken = default);
 
-    Task<InvestmentTransactionDto?> GetTransactionByIdAsync(InvestmentTransactionId id,
+    Task<InvestmentTransactionDto?> GetTransactionByIdAsync(CommodityId commodityId, InvestmentTransactionId id,
         CancellationToken cancellationToken = default);
 
     Task<InvestmentTransactionDto> CreateTransactionAsync(CommodityId commodityId, CreateInvestmentTransactionDto dto,
         CancellationToken cancellationToken = default);
 
-    Task DeleteTransactionAsync(InvestmentTransactionId id, CancellationToken cancellationToken = default);
+    Task DeleteTransactionAsync(CommodityId commodityId, InvestmentTransactionId id,
+        CancellationToken cancellationToken = default);
 
     #endregion
 }

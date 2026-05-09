@@ -2,7 +2,7 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class InvestmentTransaction : BaseEntity<InvestmentTransactionId>, IHasCreationTime
+public sealed class InvestmentTransaction : BaseEntity<InvestmentTransactionId>, IHasCreationTime, IHasCreator
 {
     public CommodityId CommodityId { get; private set; }
     public InvestmentTransactionType TransactionType { get; private set; }
@@ -16,6 +16,7 @@ public sealed class InvestmentTransaction : BaseEntity<InvestmentTransactionId>,
     public string? Notes { get; private set; }
 
     public DateTime CreatedAt { get; set; }
+    public Guid? CreatedById { get; set; }
 
     // Navigation
     public Commodity? Commodity { get; private set; }

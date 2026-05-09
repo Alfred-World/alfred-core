@@ -13,7 +13,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// AI chat endpoint — the frontend sends a message (+ optional image + conversation context)
 /// and receives either a text reply or a list of executed function results.
 /// </summary>
-[Route("api/v{version:apiVersion}/ai/chat")]
+[Route("core/v{version:apiVersion}/ai/chat")]
 [Authorize]
 public sealed class AiChatController : BaseApiController
 {

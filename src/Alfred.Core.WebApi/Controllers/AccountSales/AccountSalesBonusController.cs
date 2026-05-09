@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers.AccountSales;
 
-[Route("api/v{version:apiVersion}/account-sales/bonus")]
+[Route("core/v{version:apiVersion}/account-sales/bonus")]
 [Authorize]
 public sealed class AccountSalesBonusController : BaseApiController
 {

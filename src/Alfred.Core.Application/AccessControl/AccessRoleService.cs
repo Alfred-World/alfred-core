@@ -41,7 +41,7 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
             throw new InvalidOperationException($"Role '{dto.Name}' already exists.");
         }
 
-        var role = AccessRole.Create(dto.Name, dto.Icon, dto.IsImmutable, dto.IsSystem);
+        var role = AccessRole.Create(dto.Name, dto.Icon, isImmutable: false, isSystem: dto.IsSystem);
 
         if (dto.Permissions is { Count: > 0 })
         {
@@ -70,7 +70,7 @@ public sealed class AccessRoleService : BaseApplicationService, IAccessRoleServi
         role.Update(
             dto.Name.GetValueOrDefault(role.Name),
             dto.Icon.GetValueOrDefault(role.Icon),
-            dto.IsImmutable.GetValueOrDefault(role.IsImmutable),
+            role.IsImmutable,
             dto.IsSystem.GetValueOrDefault(role.IsSystem));
 
         if (dto.Permissions.HasValue)

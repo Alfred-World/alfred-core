@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Alfred.Core.Infrastructure.Migrations
 {
     [DbContext(typeof(PostgreSqlDbContext))]
-    [Migration("20260326170634_Initial")]
+    [Migration("20260509052428_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -383,6 +383,9 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("InitialCost")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(18, 2)")
@@ -426,6 +429,8 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.HasIndex("BrandId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("Specs");
 
@@ -844,6 +849,9 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("FeeAmount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(18, 2)")
@@ -881,7 +889,11 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.HasIndex("CommodityId");
 
+                    b.HasIndex("CreatedById");
+
                     b.HasIndex("UnitId");
+
+                    b.HasIndex("CommodityId", "CreatedById");
 
                     b.ToTable("investment_transactions", (string)null);
                 });

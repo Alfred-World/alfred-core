@@ -14,7 +14,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// <summary>
 /// Manages brands / suppliers and their category associations.
 /// </summary>
-[Route("api/v{version:apiVersion}/brands")]
+[Route("core/v{version:apiVersion}/brands")]
 [Authorize]
 public sealed class BrandsController : BaseApiController
 {

@@ -13,7 +13,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// Handles file upload operations via Cloudflare R2 presigned URLs.
 /// Files are uploaded directly from client to R2 — the server only generates signed URLs.
 /// </summary>
-[Route("api/v{version:apiVersion}/files")]
+[Route("core/v{version:apiVersion}/files")]
 [Authorize]
 public sealed class FilesController : BaseApiController
 {

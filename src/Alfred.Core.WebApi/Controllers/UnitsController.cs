@@ -15,7 +15,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// <summary>
 /// Manages measurement units with conversion support and base unit hierarchies.
 /// </summary>
-[Route("api/v{version:apiVersion}/units")]
+[Route("core/v{version:apiVersion}/units")]
 [Authorize]
 public sealed class UnitsController : BaseApiController
 {

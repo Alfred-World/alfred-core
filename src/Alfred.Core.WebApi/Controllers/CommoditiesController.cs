@@ -14,7 +14,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// <summary>
 /// Manages commodities (investment assets) and their transactions.
 /// </summary>
-[Route("api/v{version:apiVersion}/commodities")]
+[Route("core/v{version:apiVersion}/commodities")]
 [Authorize]
 public sealed class CommoditiesController : BaseApiController
 {
@@ -152,7 +152,7 @@ public sealed class CommoditiesController : BaseApiController
         CancellationToken cancellationToken)
     {
         var result =
-            await _commodityService.GetTransactionByIdAsync((InvestmentTransactionId)transactionId, cancellationToken);
+            await _commodityService.GetTransactionByIdAsync((CommodityId)commodityId, (InvestmentTransactionId)transactionId, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Transaction not found");
@@ -189,7 +189,7 @@ public sealed class CommoditiesController : BaseApiController
     public async Task<IActionResult> DeleteTransaction(Guid commodityId, Guid transactionId,
         CancellationToken cancellationToken)
     {
-        await _commodityService.DeleteTransactionAsync((InvestmentTransactionId)transactionId, cancellationToken);
+        await _commodityService.DeleteTransactionAsync((CommodityId)commodityId, (InvestmentTransactionId)transactionId, cancellationToken);
         return OkResponse("Transaction deleted successfully");
     }
 

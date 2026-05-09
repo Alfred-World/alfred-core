@@ -25,12 +25,12 @@ public interface IAssetService
     Task<PageResult<AssetLogDto>> SearchAssetLogsAsync(AssetId assetId, SearchRequest request,
         CancellationToken cancellationToken = default);
 
-    Task<AssetLogDto?> GetAssetLogByIdAsync(AssetLogId id, CancellationToken cancellationToken = default);
+    Task<AssetLogDto?> GetAssetLogByIdAsync(AssetId assetId, AssetLogId id, CancellationToken cancellationToken = default);
 
     Task<AssetLogDto> CreateAssetLogAsync(AssetId assetId, CreateAssetLogDto dto,
         CancellationToken cancellationToken = default);
 
-    Task DeleteAssetLogAsync(AssetLogId id, CancellationToken cancellationToken = default);
+    Task DeleteAssetLogAsync(AssetId assetId, AssetLogId id, CancellationToken cancellationToken = default);
 
     #endregion
 }

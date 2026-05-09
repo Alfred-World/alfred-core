@@ -16,7 +16,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// <summary>
 /// Manages categories with hierarchical tree support and dynamic form schemas.
 /// </summary>
-[Route("api/v{version:apiVersion}/categories")]
+[Route("core/v{version:apiVersion}/categories")]
 [Authorize]
 public sealed class CategoriesController : BaseApiController
 {

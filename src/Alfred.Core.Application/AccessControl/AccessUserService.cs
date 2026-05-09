@@ -35,7 +35,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
                 .Where(x => x.Id == userId),
             cancellationToken) ?? throw new KeyNotFoundException($"User with ID {userId} not found.");
 
-        var resolvedRoleIds = await ResolveRoleIdsAsync(roleIds, cancellationToken);
+        var resolvedRoleIds = await ResolveRoleIdsAsync(roleIds, "assign", cancellationToken);
         var currentRoleIds = user.UserRoles.Select(x => x.RoleId).ToHashSet();
 
         foreach (var roleId in resolvedRoleIds.Where(x => !currentRoleIds.Contains(x)))
@@ -59,7 +59,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
                 .Where(x => x.Id == userId),
             cancellationToken) ?? throw new KeyNotFoundException($"User with ID {userId} not found.");
 
-        var removeRoleIds = roleIds.Distinct().ToHashSet();
+        var removeRoleIds = (await ResolveRoleIdsAsync(roleIds, "remove", cancellationToken)).ToHashSet();
         if (removeRoleIds.Count > 0)
         {
             var linksToRemove = user.UserRoles.Where(x => removeRoleIds.Contains(x.RoleId)).ToList();
@@ -137,7 +137,7 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
         return await _executor.FirstOrDefaultAsync(_executor.AsNoTracking(userQuery), cancellationToken);
     }
 
-    private async Task<List<AccessRoleId>> ResolveRoleIdsAsync(IEnumerable<AccessRoleId> roleIds,
+    private async Task<List<AccessRoleId>> ResolveRoleIdsAsync(IEnumerable<AccessRoleId> roleIds, string action,
         CancellationToken cancellationToken)
     {
         var typedIds = roleIds.Distinct().ToList();
@@ -157,6 +157,17 @@ public sealed class AccessUserService : BaseApplicationService, IAccessUserServi
         if (missingIds.Count > 0)
         {
             throw new InvalidOperationException($"Roles not found: {string.Join(", ", missingIds)}");
+        }
+
+        var immutableRoleNames = roles
+            .Where(x => x.IsImmutable)
+            .Select(x => x.Name)
+            .ToList();
+
+        if (immutableRoleNames.Count > 0)
+        {
+            throw new InvalidOperationException(
+                $"Cannot {action} immutable roles: {string.Join(", ", immutableRoleNames)}.");
         }
 
         return resolvedIds;

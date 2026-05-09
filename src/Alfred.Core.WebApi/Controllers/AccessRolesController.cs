@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
 
-[Route("api/v{version:apiVersion}/access-control/roles")]
+[Route("core/v{version:apiVersion}/access-control/roles")]
 [Authorize]
 public sealed class AccessRolesController : BaseApiController
 {

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
 
-[Route("api/v{version:apiVersion}/access-control/permissions")]
+[Route("core/v{version:apiVersion}/access-control/permissions")]
 [Authorize]
 public sealed class AccessPermissionsController : BaseApiController
 {

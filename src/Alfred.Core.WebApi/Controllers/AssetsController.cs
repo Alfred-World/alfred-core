@@ -14,7 +14,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// <summary>
 /// Manages physical assets and their operational logs.
 /// </summary>
-[Route("api/v{version:apiVersion}/assets")]
+[Route("core/v{version:apiVersion}/assets")]
 [Authorize]
 public sealed class AssetsController : BaseApiController
 {
@@ -152,7 +152,7 @@ public sealed class AssetsController : BaseApiController
         Guid logId,
         CancellationToken cancellationToken)
     {
-        var result = await _assetService.GetAssetLogByIdAsync((AssetLogId)logId, cancellationToken);
+        var result = await _assetService.GetAssetLogByIdAsync((AssetId)assetId, (AssetLogId)logId, cancellationToken);
         if (result is null)
         {
             return NotFoundResponse("Asset log not found");
@@ -190,7 +190,7 @@ public sealed class AssetsController : BaseApiController
         Guid logId,
         CancellationToken cancellationToken)
     {
-        await _assetService.DeleteAssetLogAsync((AssetLogId)logId, cancellationToken);
+        await _assetService.DeleteAssetLogAsync((AssetId)assetId, (AssetLogId)logId, cancellationToken);
         return OkResponse("Asset log deleted successfully");
     }
 

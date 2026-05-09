@@ -60,6 +60,10 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("NOW()");
 
+        builder.Property(x => x.CreatedById);
+
+        builder.HasIndex(x => x.CreatedById);
+
         builder.Property(x => x.UpdatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("NOW()");

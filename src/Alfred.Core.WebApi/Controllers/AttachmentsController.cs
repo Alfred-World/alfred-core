@@ -12,7 +12,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// Polymorphic attachment API — upload, list, and delete files for any entity.
 /// All download URLs returned are time-limited presigned URLs (never raw R2 paths).
 /// </summary>
-[Route("api/v{version:apiVersion}/attachments")]
+[Route("core/v{version:apiVersion}/attachments")]
 [Authorize]
 public sealed class AttachmentsController : BaseApiController
 {

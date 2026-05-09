@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 using Microsoft.AspNetCore.Http;
 
@@ -23,7 +25,7 @@ public class CurrentUserService : ICurrentUser
             var userIdClaim = GetClaimValue(ClaimTypes.NameIdentifier)
                               ?? GetClaimValue("sub");
 
-            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+            return TryParseUserId(userIdClaim);
         }
     }
 
@@ -38,5 +40,32 @@ public class CurrentUserService : ICurrentUser
     private string? GetClaimValue(string claimType)
     {
         return _httpContextAccessor.HttpContext?.User?.FindFirst(claimType)?.Value;
+    }
+
+    private static Guid? TryParseUserId(string? rawUserId)
+    {
+        if (string.IsNullOrWhiteSpace(rawUserId))
+        {
+            return null;
+        }
+
+        if (Guid.TryParse(rawUserId, out var guidUserId) && guidUserId != Guid.Empty)
+        {
+            return guidUserId;
+        }
+
+        if (!long.TryParse(rawUserId, out var legacyUserId) || legacyUserId <= 0)
+        {
+            return null;
+        }
+
+        return MapLegacyInt64ToGuid(legacyUserId);
+    }
+
+    private static Guid MapLegacyInt64ToGuid(long userId)
+    {
+        var raw = Encoding.UTF8.GetBytes($"legacy-user:{userId}");
+        var hash = MD5.HashData(raw);
+        return new Guid(hash);
     }
 }

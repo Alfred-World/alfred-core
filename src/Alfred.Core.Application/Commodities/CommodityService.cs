@@ -8,12 +8,15 @@ namespace Alfred.Core.Application.Commodities;
 public sealed class CommodityService : BaseApplicationService, ICommodityService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUser _currentUser;
 
     public CommodityService(
         IUnitOfWork unitOfWork,
-        IAsyncQueryExecutor executor) : base(executor)
+        IAsyncQueryExecutor executor,
+        ICurrentUser currentUser) : base(executor)
     {
         _unitOfWork = unitOfWork;
+        _currentUser = currentUser;
     }
 
     #region Commodities
@@ -100,6 +103,8 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         SearchRequest request,
         CancellationToken cancellationToken = default)
     {
+        var userId = GetCurrentUserId();
+
         return await SearchWithViewAsync(
             _unitOfWork.InvestmentTransactions,
             request,
@@ -107,16 +112,14 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
             InvestmentTransactionFieldMap.Views,
             t => t.ToDto(),
             cancellationToken,
-            t => t.CommodityId == commodityId);
+            t => t.CommodityId == commodityId && t.CreatedById == userId);
     }
 
-    public async Task<InvestmentTransactionDto?> GetTransactionByIdAsync(InvestmentTransactionId id,
+    public async Task<InvestmentTransactionDto?> GetTransactionByIdAsync(CommodityId commodityId,
+        InvestmentTransactionId id,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _executor.FirstOrDefaultAsync(
-            _unitOfWork.InvestmentTransactions.GetQueryable([t => t.Commodity!, t => t.Unit!])
-                .Where(t => t.Id == id),
-            cancellationToken);
+        var entity = await GetOwnedTransactionEntityAsync(commodityId, id, cancellationToken, includeDetails: true);
 
         return entity?.ToDto();
     }
@@ -124,6 +127,8 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     public async Task<InvestmentTransactionDto> CreateTransactionAsync(CommodityId commodityId,
         CreateInvestmentTransactionDto dto, CancellationToken cancellationToken = default)
     {
+        _ = GetCurrentUserId();
+
         var commodityExists = await _unitOfWork.Commodities.ExistsAsync(commodityId, cancellationToken);
         if (!commodityExists)
         {
@@ -145,12 +150,13 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
         await _unitOfWork.InvestmentTransactions.AddAsync(entity, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (await GetTransactionByIdAsync(entity.Id, cancellationToken))!;
+        return (await GetTransactionByIdAsync(commodityId, entity.Id, cancellationToken))!;
     }
 
-    public async Task DeleteTransactionAsync(InvestmentTransactionId id, CancellationToken cancellationToken = default)
+    public async Task DeleteTransactionAsync(CommodityId commodityId, InvestmentTransactionId id,
+        CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.InvestmentTransactions.GetByIdAsync(id, cancellationToken);
+        var entity = await GetOwnedTransactionEntityAsync(commodityId, id, cancellationToken, includeDetails: false);
         if (entity is null)
         {
             throw new KeyNotFoundException($"Investment transaction with ID {id} not found.");
@@ -161,4 +167,24 @@ public sealed class CommodityService : BaseApplicationService, ICommodityService
     }
 
     #endregion
+
+    private Guid GetCurrentUserId()
+    {
+        return _currentUser.UserId ?? throw new UnauthorizedAccessException("Current user id is missing.");
+    }
+
+    private async Task<InvestmentTransaction?> GetOwnedTransactionEntityAsync(CommodityId commodityId,
+        InvestmentTransactionId id,
+        CancellationToken cancellationToken,
+        bool includeDetails)
+    {
+        var userId = GetCurrentUserId();
+        var query = includeDetails
+            ? _unitOfWork.InvestmentTransactions.GetQueryable([t => t.Commodity!, t => t.Unit!])
+            : _unitOfWork.InvestmentTransactions.GetQueryable();
+
+        return await _executor.FirstOrDefaultAsync(
+            query.Where(t => t.CommodityId == commodityId && t.Id == id && t.CreatedById == userId),
+            cancellationToken);
+    }
 }

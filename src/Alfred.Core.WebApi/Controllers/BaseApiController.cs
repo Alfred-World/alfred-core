@@ -13,7 +13,7 @@ namespace Alfred.Core.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")] // Fallback, but specific controllers should override
+[Route("core/v{version:apiVersion}/[controller]")] // Fallback, but specific controllers should override
 public abstract class BaseApiController : ControllerBase
 {
     /// <summary>

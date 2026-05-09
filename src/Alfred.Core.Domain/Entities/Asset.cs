@@ -3,7 +3,7 @@ using Alfred.Core.Domain.Enums;
 
 namespace Alfred.Core.Domain.Entities;
 
-public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificationTime
+public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificationTime, IHasCreator
 {
     public string Name { get; private set; } = null!;
     public CategoryId? CategoryId { get; private set; }
@@ -17,6 +17,7 @@ public sealed class Asset : BaseEntity<AssetId>, IHasCreationTime, IHasModificat
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public Guid? CreatedById { get; set; }
 
     // Navigation
     public Category? Category { get; private set; }

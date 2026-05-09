@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -12,30 +11,6 @@ namespace Alfred.Core.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-                CREATE OR REPLACE FUNCTION generate_uuid_v7()
-                RETURNS uuid
-                LANGUAGE plpgsql
-                AS $$
-                DECLARE
-                    v_millis BIGINT;
-                    v_bytes BYTEA;
-                BEGIN
-                    v_millis := (extract(epoch from clock_timestamp()) * 1000)::BIGINT;
-                    v_bytes := uuid_send(gen_random_uuid());
-                    v_bytes := set_byte(v_bytes, 0, ((v_millis >> 40) & 255)::int);
-                    v_bytes := set_byte(v_bytes, 1, ((v_millis >> 32) & 255)::int);
-                    v_bytes := set_byte(v_bytes, 2, ((v_millis >> 24) & 255)::int);
-                    v_bytes := set_byte(v_bytes, 3, ((v_millis >> 16) & 255)::int);
-                    v_bytes := set_byte(v_bytes, 4, ((v_millis >> 8) & 255)::int);
-                    v_bytes := set_byte(v_bytes, 5, (v_millis & 255)::int);
-                    v_bytes := set_byte(v_bytes, 6, ((get_byte(v_bytes, 6) & 15) | 112)::int);
-                    v_bytes := set_byte(v_bytes, 8, ((get_byte(v_bytes, 8) & 63) | 128)::int);
-                    RETURN encode(v_bytes, 'hex')::uuid;
-                END;
-                $$;
-                ");
-
             migrationBuilder.CreateTable(
                 name: "access_permissions",
                 columns: table => new
@@ -319,7 +294,8 @@ namespace Alfred.Core.Infrastructure.Migrations
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "Active"),
                     Location = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "NOW()")
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "NOW()"),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -707,7 +683,8 @@ namespace Alfred.Core.Infrastructure.Migrations
                     FeeAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false, defaultValue: 0m),
                     FinanceTxnId = table.Column<Guid>(type: "uuid", nullable: true),
                     Notes = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -884,6 +861,11 @@ namespace Alfred.Core.Infrastructure.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_assets_CreatedById",
+                table: "assets",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_assets_Specs",
                 table: "assets",
                 column: "Specs")
@@ -952,6 +934,16 @@ namespace Alfred.Core.Infrastructure.Migrations
                 name: "IX_investment_transactions_CommodityId",
                 table: "investment_transactions",
                 column: "CommodityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_investment_transactions_CommodityId_CreatedById",
+                table: "investment_transactions",
+                columns: new[] { "CommodityId", "CreatedById" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_investment_transactions_CreatedById",
+                table: "investment_transactions",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_investment_transactions_UnitId",
@@ -1219,8 +1211,6 @@ namespace Alfred.Core.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "products");
-
-            migrationBuilder.Sql("DROP FUNCTION IF EXISTS generate_uuid_v7();");
         }
     }
 }

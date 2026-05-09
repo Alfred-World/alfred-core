@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers;
 
-[Route("api/v{version:apiVersion}/access-control/users")]
+[Route("core/v{version:apiVersion}/access-control/users")]
 [Authorize]
 public sealed class AccessUsersController : BaseApiController
 {

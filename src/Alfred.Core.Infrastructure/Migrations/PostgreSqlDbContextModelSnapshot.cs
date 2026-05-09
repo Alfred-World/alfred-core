@@ -340,8 +340,6 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.HasIndex("AccountCloneId");
 
-                    b.HasIndex("CreatedAt");
-
                     b.HasIndex("MemberId");
 
                     b.HasIndex("OrderCode")
@@ -381,6 +379,9 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("InitialCost")
                         .ValueGeneratedOnAdd()
@@ -425,6 +426,8 @@ namespace Alfred.Core.Infrastructure.Migrations
                     b.HasIndex("BrandId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("Specs");
 
@@ -843,6 +846,9 @@ namespace Alfred.Core.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("FeeAmount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(18, 2)")
@@ -880,7 +886,11 @@ namespace Alfred.Core.Infrastructure.Migrations
 
                     b.HasIndex("CommodityId");
 
+                    b.HasIndex("CreatedById");
+
                     b.HasIndex("UnitId");
+
+                    b.HasIndex("CommodityId", "CreatedById");
 
                     b.ToTable("investment_transactions", (string)null);
                 });

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers.AccountSales;
 
-[Route("api/v{version:apiVersion}/account-sales/warranty")]
+[Route("core/v{version:apiVersion}/account-sales/warranty")]
 [Authorize]
 public sealed class AccountSalesWarrantyController : BaseApiController
 {

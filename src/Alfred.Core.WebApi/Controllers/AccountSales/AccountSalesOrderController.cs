@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Alfred.Core.WebApi.Controllers.AccountSales;
 
-[Route("api/v{version:apiVersion}/account-sales/orders")]
+[Route("core/v{version:apiVersion}/account-sales/orders")]
 [Authorize]
 public sealed class AccountSalesOrderController : BaseApiController
 {
